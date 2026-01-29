@@ -1,0 +1,39 @@
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  firstName String
+  lastName  String
+  createdAt DateTime   @default(now())
+  treeNodes TreeNode[]
+}
+
+model TreeNode {
+  id          String     @id @default(uuid())
+  name        String
+  status      ClientStatus
+  description String?
+  active      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  parent   TreeNode?  @relation("TreeHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId String?
+  children TreeNode[] @relation("TreeHierarchy")
+}
+
+enum ClientStatus {
+  CLIENT_VIP
+  DISTRIBUTOR
+  SUPERVISOR
+  CLIENT
+}
