@@ -35,39 +35,74 @@ The project is organized into two main parts: a `client` directory for the front
 └── README.md               # This file
 ```
 
+## Running the Application
+
+To run the server, you can use one of the following commands from the `server` directory:
+
+-   **Development Mode:**
+    This command starts the server in development mode, connecting to the local database defined in `.env.development`. It uses `nodemon` to automatically restart the server on file changes.
+
+    ```bash
+    cd server
+    npm run dev
+    ```
+
+-   **Production Mode:**
+    This command starts the server in production mode, connecting to the production database defined in `.env.production`.
+
+    ```bash
+    cd server
+    npm start
+    ```
+
 ## Development
+
+### Working with Prisma
+
+This project uses Prisma for database management. The following scripts are available in the `server` directory to help you work with Prisma in different environments.
+
+-   **Development Environment:**
+    To run Prisma commands against the development database, use the `npm run prisma` command. The `--` is important to pass arguments to the Prisma CLI.
+
+    ```bash
+    cd server
+    # Example: Create a new migration
+    npm run prisma -- migrate dev --name "your-migration-name"
+
+    # Example: Generate the Prisma Client
+    npm run prisma -- generate
+    ```
+
+-   **Production Environment:**
+    To run Prisma commands against the production database, use the `npm run prisma:prod` command.
+
+    ```bash
+    cd server
+    # Example: Apply migrations in production
+    npm run prisma:prod -- migrate deploy
+    ```
 
 ### Adding a New Field to the Database
 
-The project uses Prisma as its ORM. To add a new field to an existing model in the database, follow these steps:
+To add a new field to an existing model in the database, follow these steps:
 
 1.  **Modify the Prisma Schema:**
-    Open the `server/prisma/schema.prisma` file and add the desired field to the relevant model. For example, to add an `email` field to the `User` model:
-
-    ```prisma
-    model User {
-      id        Int      @id @default(autoincrement())
-      username  String   @unique
-      password  String
-      email     String   @unique // Add your new field here
-      nodes     Node[]
-    }
-    ```
+    Open the `server/prisma/schema.prisma` file and add the desired field to the relevant model.
 
 2.  **Create a New Database Migration:**
     Run the following command from the `server` directory to generate a new migration file and apply the changes to your development database.
 
     ```bash
     cd server
-    npx prisma migrate dev --name "add_email_to_user"
+    npm run prisma -- migrate dev --name "add_my_new_field"
     ```
-    Replace `"add_email_to_user"` with a descriptive name for your migration.
+    Replace `"add_my_new_field"` with a descriptive name for your migration.
 
 3.  **Regenerate the Prisma Client:**
-    The Prisma Client is automatically updated after the migration, but you can also run this command manually if needed to ensure your client has the latest schema changes.
+    The Prisma Client is automatically updated after the migration, but you can also run this command manually if needed.
 
     ```bash
-    npx prisma generate
+    cd server
+    npm run prisma -- generate
     ```
-
-After these steps, your database schema and Prisma Client will be updated to include the new field. You can then update your back-end controllers, services, and front-end components to utilize it.
+After these steps, your database schema and Prisma Client will be updated.

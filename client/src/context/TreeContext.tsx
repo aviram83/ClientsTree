@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { TreeNode } from '../api/types';
 import * as api from '../api';
 import { useAuth } from './AuthContext';
@@ -18,6 +18,7 @@ export const TreeProvider = ({ children }: { children: ReactNode }) => {
   const { token } = useAuth();
   const [tree, setTree] = useState<TreeNode[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const effectRan = useRef(false);
 
   const fetchTree = useCallback(async () => {
     if (!token) return;
@@ -33,7 +34,13 @@ export const TreeProvider = ({ children }: { children: ReactNode }) => {
   }, [token]);
 
   useEffect(() => {
-    fetchTree();
+    if (effectRan.current === false) {
+      fetchTree();
+
+      return () => {
+        effectRan.current = true;
+      };
+    }
   }, [fetchTree]);
 
   const addNode = async (data: any) => {

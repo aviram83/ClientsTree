@@ -1,4 +1,4 @@
-import api from './axios';
+import api from './api';
 import { User, TreeNode } from './types';
 import { ClientStatus } from '../config/statusConfig';
 

@@ -53,6 +53,13 @@ export const register = async (req: Request, res: Response) => {
           },
         });
         console.log(`DEV_INFO: Root node created for existing user ${email}.`);
+      } else {
+        await prisma.treeNode.update({
+          where: { id: rootNode.id },
+          data: {
+            name: `${updatedUser.firstName} ${updatedUser.lastName}`,
+          },
+        });
       }
 
       console.log(`DEV_INFO: User ${email} already existed. Password has been updated.`);

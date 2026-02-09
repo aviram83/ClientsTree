@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../api/types';
 import * as api from '../api';
+import { injectShowErrorModal, injectLogout } from '../api/api';
 
 interface AuthContextType {
   user: User | null;
@@ -9,6 +10,9 @@ interface AuthContextType {
   register: (data: any) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  errorMessage: string | null;
+  showErrorModal: (message: string) => void;
+  closeErrorModal: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,6 +21,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const showErrorModal = (message: string) => {
+    setErrorMessage(message);
+  };
+
+  const closeErrorModal = () => {
+    setErrorMessage(null);
+  };
+
+  const logout = () => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  };
+
+  useEffect(() => {
+    injectShowErrorModal(showErrorModal);
+    injectLogout(logout);
+  }, []);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -50,15 +75,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-  };
-
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, isLoading, errorMessage, showErrorModal, closeErrorModal }}>
       {children}
     </AuthContext.Provider>
   );
