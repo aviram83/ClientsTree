@@ -14,9 +14,8 @@ const getShapeStyles = (status: ClientStatus | string) => {
       // Rhombus (Diamond) - Requires clip-path
       return '[clip-path:polygon(50%_0%,_100%_50%,_50%_100%,_0%_50%)]';
     case ClientStatus.DISTRIBUTOR:
-      // Triangle - Pointing Up
-      // Add padding-top to push text away from the tip
-      return '[clip-path:polygon(50%_0%,_0%_100%,_100%_100%)] pt-6';
+      // Hexagon
+      return '[clip-path:polygon(50%_0%,_100%_25%,_100%_75%,_50%_100%,_0%_75%,_0%_25%)]';
     case ClientStatus.SUPERVISOR:
       // Square
       return 'rounded-none border-2';
