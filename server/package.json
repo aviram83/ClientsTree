@@ -5,13 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prisma": "npm run prisma:dev",
-    "prisma:dev": "dotenv -e .env.development -- prisma",
-    "prisma:prod": "dotenv -e .env.production -- prisma",
+    "build": "tsc",
     "start": "npm run start:prod",
+    "start:prod": "dotenv -e .env.production -- node dist/index.js",
+    "postinstall": "prisma generate",
+    "prisma:push": "npm run prisma:prod -- db push",
     "dev": "npm run start:dev",
     "start:dev": "dotenv -e .env.development -- nodemon src/index.ts",
-    "start:prod": "dotenv -e .env.production -- ts-node src/index.ts"
+    "prisma": "npm run prisma:dev",
+    "prisma:dev": "dotenv -e .env.development -- prisma",
+    "prisma:prod": "dotenv -e .env.production -- prisma"
   },
   "keywords": [],
   "author": "",
