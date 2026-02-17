@@ -15,6 +15,19 @@ const DashboardContent = () => {
   const [modalAction, setModalAction] = useState<'add' | 'edit' | null>(null);
   const [currentNode, setCurrentNode] = useState<TreeNode | null>(null);
 
+  const countActiveNodes = (nodes: TreeNode[]): number => {
+    let count = 0;
+    for (const node of nodes) {
+      if (node.active) {
+        count++;
+      }
+      if (node.children) {
+        count += countActiveNodes(node.children);
+      }
+    }
+    return count;
+  };
+
   const handleOpenAddModal = useCallback((parentId: string) => {
     setModalAction('add');
     setCurrentNode({ parentId } as TreeNode);
@@ -69,23 +82,35 @@ const DashboardContent = () => {
 
   return (
     <div className="h-screen w-screen bg-gray-100">
-      <header className="bg-white shadow-md absolute top-0 left-0 right-0 z-20">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold">Welcome, {user?.firstName}</h1>
+      <div className="relative bg-white shadow-md z-20 overflow-hidden">
+        <header className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-xl font-bold ml-10">Welcome, {user?.firstName}</h1>
+          <div className="flex items-center space-x-4">
+            <div className="text-xl">
+              Active Clients: <span className="font-bold">{countActiveNodes(tree)}</span>
+            </div>
+          </div>
           <button onClick={logout} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Logout</button>
+        </header>
+        <div className="absolute top-[17px] left-[-20px] z-30">
+          <div className="transform -rotate-45 bg-red-600 text-center text-white font-semibold py-1 w-[170px]">
+            BETA
+          </div>
         </div>
-      </header>
+      </div>
       <main className="h-full w-full relative z-10">
         <StatusLegend />
         {isLoading && <p className="p-4">Loading tree...</p>}
         {!isLoading && tree.length === 0 && <p className="p-4">No nodes in your tree yet.</p>}
         {!isLoading && tree.length > 0 && (
-            <TreeVisualizer 
-                treeData={tree}
-                onAddNode={handleOpenAddModal}
-                onEditNode={handleOpenEditModal}
-                onDeleteNode={handleDeleteNode}
-            />
+            <div className="pt-20">
+                <TreeVisualizer 
+                    treeData={tree}
+                    onAddNode={handleOpenAddModal}
+                    onEditNode={handleOpenEditModal}
+                    onDeleteNode={handleDeleteNode}
+                />
+            </div>
         )}
       </main>
       <Modal 
