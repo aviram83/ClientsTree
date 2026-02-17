@@ -10,7 +10,9 @@ export const RegisterPage = () => {
   const password = watch('password');
 
   const onSubmit = handleSubmit(async (data) => {
-    await registerUser(data);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { confirmPassword, ...registerData } = data;
+    await registerUser(registerData);
     navigate('/login');
   });
 

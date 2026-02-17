@@ -69,7 +69,7 @@ const CustomNode = memo(({ data }: any) => {
           <div className="text-lg font-bold">{data.label}</div>
         </div>
         <div className="absolute right-[-35px] top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-gray-100 rounded-full hover:bg-gray-200" disabled={!data.active}>
+          <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-gray-100 rounded-full hover:bg-gray-200">
             <Plus size={16} />
           </button>
           <button onClick={() => data.onEdit(data.id)} className="p-1.5 bg-gray-100 rounded-full hover:bg-gray-200">
@@ -110,7 +110,7 @@ const CustomNode = memo(({ data }: any) => {
 
         {/* Action Buttons */}
         <div className="absolute -right-8 top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
-          <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-white shadow-sm rounded-full hover:bg-gray-100" disabled={!data.active}>
+          <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-white shadow-sm rounded-full hover:bg-gray-100">
             <Plus size={14} />
           </button>
           <button onClick={() => data.onEdit(data.id)} className="p-1.5 bg-white shadow-sm rounded-full hover:bg-gray-100">
@@ -143,7 +143,7 @@ const CustomNode = memo(({ data }: any) => {
         <div className="text-[10px] uppercase opacity-80 mt-1">{statusLabel}</div>
       </div>
       <div className="absolute -right-8 top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
-        <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-white shadow-sm rounded-full hover:bg-gray-100" disabled={!data.active}>
+        <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-white shadow-sm rounded-full hover:bg-gray-100">
           <Plus size={14} />
         </button>
         <button onClick={() => data.onEdit(data.id)} className="p-1.5 bg-white shadow-sm rounded-full hover:bg-gray-100">
