@@ -6,7 +6,7 @@ const StatusLegend: React.FC = () => {
   const allStatuses = { ...STATUS_CONFIG };
 
   return (
-    <div className="absolute top-20 right-10 bg-white shadow-lg rounded-md p-4 z-20 w-48">
+    <div className="absolute top-5 right-5 bg-white shadow-lg rounded-md p-4 z-20 w-40">
       <h3 className="text-right font-bold mb-2">מקרא</h3>
       <ul className="space-y-2 text-right">
         {Object.entries(allStatuses).map(([key, { label, colorClass }]) => (

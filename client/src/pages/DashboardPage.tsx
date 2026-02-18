@@ -81,7 +81,7 @@ const DashboardContent = () => {
 
 
   return (
-    <div className="h-screen w-screen bg-gray-100">
+    <div className="h-screen w-screen bg-gray-100 flex flex-col">
       <div className="relative bg-white shadow-md z-20 overflow-hidden">
         <header className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-xl font-bold ml-10">Welcome, {user?.firstName}</h1>
@@ -92,18 +92,18 @@ const DashboardContent = () => {
           </div>
           <button onClick={logout} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Logout</button>
         </header>
-        <div className="absolute top-[17px] left-[-20px] z-30">
+        <div className="absolute top-[3px] left-[-68px] z-30">
           <div className="transform -rotate-45 bg-red-600 text-center text-white font-semibold py-1 w-[170px]">
             BETA
           </div>
         </div>
       </div>
-      <main className="h-full w-full relative z-10">
+      <main className="flex-grow relative z-10">
         <StatusLegend />
         {isLoading && <p className="p-4">Loading tree...</p>}
         {!isLoading && tree.length === 0 && <p className="p-4">No nodes in your tree yet.</p>}
         {!isLoading && tree.length > 0 && (
-            <div className="pt-20">
+            <div className="h-full">
                 <TreeVisualizer 
                     treeData={tree}
                     onAddNode={handleOpenAddModal}
