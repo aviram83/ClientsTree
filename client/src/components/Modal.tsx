@@ -13,20 +13,18 @@ export const Modal = ({ isOpen, onClose, title, children, textColor }: ModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
-        <div className="p-4 border-b">
+      <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md">
+        <div className="p-4 border-b flex justify-between items-center">
           <h2 className="text-xl font-bold">{title}</h2>
+          <button
+            onClick={onClose}
+            className="text-black text-2xl font-bold"
+          >
+            &times;
+          </button>
         </div>
         <div className={`p-4 ${textColor}`}>
           {children}
-        </div>
-        <div className="p-4 border-t flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            Close
-          </button>
         </div>
       </div>
     </div>

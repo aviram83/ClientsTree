@@ -87,7 +87,7 @@ const DashboardContent = () => {
           <h1 className="text-xl font-bold ml-10">Welcome, {user?.firstName}</h1>
           <div className="flex items-center space-x-4">
             <div className="text-xl">
-              Active Clients: <span className="font-bold">{countActiveNodes(tree)}</span>
+              Active Clients: <span className="font-bold">{countActiveNodes(tree) - 1}</span>
             </div>
           </div>
           <button onClick={logout} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Logout</button>
@@ -116,7 +116,8 @@ const DashboardContent = () => {
       <Modal 
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 
-        title={modalAction === 'add' ? 'Add New Node' : 'Edit Node'}
+        title={modalAction === 'add' ? 'Add New Client' : 'Edit Client'}
+        textColor="text-black"
       >
         <NodeForm 
           onSubmit={handleSaveNode} 
