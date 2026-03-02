@@ -11,6 +11,7 @@ import dagre from 'dagre';
 import CustomNode from './CustomNode';
 import '@xyflow/react/dist/style.css';
 import SearchBar from './SearchBar';
+import StatusLegend from './StatusLegend';
 import { TreeNode } from '../api/types';
 import type { Node, Edge } from '@xyflow/react';
 
@@ -164,6 +165,10 @@ const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ treeData, onAddNode, on
         isSearchOpen={isSearchOpen}
         setIsSearchOpen={setIsSearchOpen}
       />
+
+      {/* Status Legend */}
+      <StatusLegend />
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
