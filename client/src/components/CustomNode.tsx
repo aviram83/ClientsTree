@@ -63,7 +63,7 @@ const CustomNode = memo(({ data }: any) => {
   // ROOT NODE
   if (isRootNode) {
     return (
-      <div className={`shadow-md rounded-lg p-4 w-64 bg-white border-4 border-pink-400 text-black flex items-center justify-center text-center relative group`}>
+      <div className={`shadow-md rounded-lg p-4 w-64 bg-white border-4 border-pink-400 text-black flex items-center justify-center text-center relative group transition-opacity duration-300 ${data.isDimmed ? 'opacity-30' : 'opacity-100'}`}>
         <Handle type="target" position={Position.Top} className="!bg-transparent !border-0" />
         <div>
           <div className="text-lg font-bold">{data.label}</div>
@@ -85,7 +85,7 @@ const CustomNode = memo(({ data }: any) => {
   if (!data.active && isClipped) {
     const shapeClass = getShapeStyles(data.status);
     return (
-      <div className={`relative w-[120px] h-[120px] group`}>
+      <div className={`relative w-[120px] h-[120px] group transition-opacity duration-300 ${data.isDimmed ? 'opacity-30' : 'opacity-100'}`}>
         <Handle type="target" position={Position.Top} className="!bg-transparent !border-0 -mt-1" />
 
         {/* Border Element (colored background) */}
@@ -128,7 +128,7 @@ const CustomNode = memo(({ data }: any) => {
 
   // ALL OTHER CHILD NODES (Active, or Inactive Non-Clipped)
   return (
-    <div className={`relative w-[120px] h-[120px] group ${wrapperClasses}`}>
+    <div className={`relative w-[120px] h-[120px] group transition-opacity duration-300 ${data.isDimmed ? 'opacity-30' : 'opacity-100'} ${wrapperClasses}`}>
       <Handle type="target" position={Position.Top} className="!bg-transparent !border-0 -mt-1" />
       <div
         className={`

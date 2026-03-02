@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ReactFlow,
   useNodesState,
@@ -10,6 +10,7 @@ import {
 import dagre from 'dagre';
 import CustomNode from './CustomNode';
 import '@xyflow/react/dist/style.css';
+import SearchBar from './SearchBar';
 import { TreeNode } from '../api/types';
 import type { Node, Edge } from '@xyflow/react';
 
@@ -28,6 +29,7 @@ interface CustomNodeData extends Record<string, unknown> {
   onAdd: (nodeId: string) => void;
   onEdit: (nodeId: string) => void;
   onDelete: (nodeId: string) => void;
+  isDimmed: boolean;
 }
 
 // Props for the TreeVisualizer component
@@ -87,6 +89,8 @@ const getLayoutedElements = (
 const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ treeData, onAddNode, onEditNode, onDeleteNode }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<CustomNodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const nodeTypes = useMemo(() => ({ custom: CustomNode }), []) as any;
 
@@ -109,6 +113,7 @@ const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ treeData, onAddNode, on
             onAdd: onAddNode,
             onEdit: onEditNode,
             onDelete: onDeleteNode,
+            isDimmed: searchQuery !== '' && !node.name.toLowerCase().includes(searchQuery.toLowerCase()),
           },
           position: { x: 0, y: 0 }, // Position will be set by Dagre
         });
@@ -148,10 +153,17 @@ const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ treeData, onAddNode, on
       setNodes(layouted.nodes);
       setEdges(layouted.edges);
     }
-  }, [treeData, onAddNode, onEditNode, onDeleteNode, setNodes, setEdges]);
+  }, [treeData, onAddNode, onEditNode, onDeleteNode, setNodes, setEdges, searchQuery]);
 
   return (
     <div style={{ height: '100%', width: '100%' }}>
+      {/* Search Bar */}
+      <SearchBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        isSearchOpen={isSearchOpen}
+        setIsSearchOpen={setIsSearchOpen}
+      />
       <ReactFlow
         nodes={nodes}
         edges={edges}
