@@ -175,7 +175,10 @@ const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ treeData, onAddNode, on
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
-        fitView
+        onInit={(instance) => instance.fitView({ padding: 0.2, includeHiddenNodes: false })}
+        minZoom={0.2}
+        maxZoom={1.5}
+        fitView={true}
         nodesDraggable={false}
         nodesConnectable={false}
       >
