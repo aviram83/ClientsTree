@@ -105,6 +105,58 @@ npm run prisma -- generate
 
 ---
 
+## Design System
+
+The client uses **Tailwind CSS v4** + **shadcn/ui** as its design system.
+
+### Changing the color scheme
+
+All colors are defined as CSS custom properties in [`client/src/index.css`](client/src/index.css).  
+Edit the HSL values under `:root` — every component updates automatically:
+
+```css
+/* Status colors */
+--status-client:      48 96% 53%;   /* yellow */
+--status-client-vip:  213 94% 68%;  /* blue   */
+--status-distributor: 0 91% 71%;    /* red    */
+--status-supervisor:  142 69% 58%;  /* green  */
+
+/* Brand colors (shadcn palette) */
+--primary: 221.2 83.2% 53.3%;
+```
+
+### Adding a new shadcn component
+
+```bash
+cd client
+npx shadcn@latest add <component-name>
+# e.g. npx shadcn@latest add dialog tooltip badge
+```
+
+Components are installed into `src/components/ui/`.
+
+### Using status colors in new components
+
+```tsx
+/* Tailwind utility class (preferred for most cases) */
+<div className="bg-status-client text-white" />
+
+/* Inline style (needed for clip-path nodes in the tree) */
+<div style={{ backgroundColor: `hsl(var(--status-client))` }} />
+```
+
+### Utility: `cn()`
+
+Use `cn()` from `@/lib/utils` for all conditional class merging:
+
+```tsx
+import { cn } from '@/lib/utils'
+
+<div className={cn('base-class', isActive && 'active-class', className)} />
+```
+
+---
+
 ## Other commands
 
 ```bash

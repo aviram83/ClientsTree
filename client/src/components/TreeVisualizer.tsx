@@ -41,7 +41,7 @@ interface TreeVisualizerProps {
   onDeleteNode: (nodeId: string) => void;
 }
 
-const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+const _g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
 const getLayoutedElements = (
   nodes: Node<CustomNodeData>[],

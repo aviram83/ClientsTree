@@ -56,6 +56,7 @@ const DashboardContent = () => {
       setCurrentNode(nodeToEdit);
       setIsModalOpen(true);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tree]);
 
   const handleCloseModal = useCallback(() => {

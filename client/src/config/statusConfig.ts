@@ -1,5 +1,3 @@
-// client/src/config/statusConfig.ts
-
 export enum ClientStatus {
   CLIENT = "CLIENT",
   CLIENT_VIP = "CLIENT_VIP",
@@ -8,8 +6,28 @@ export enum ClientStatus {
 }
 
 export const STATUS_CONFIG = {
-  [ClientStatus.CLIENT]: { label: "לקוח", colorClass: "bg-yellow-400", inactiveColorClass: "bg-gray-300" },
-  [ClientStatus.CLIENT_VIP]: { label: "לקוח VIP", colorClass: "bg-blue-400", inactiveColorClass: "bg-gray-300" },
-  [ClientStatus.DISTRIBUTOR]: { label: "מפיץ", colorClass: "bg-red-400", inactiveColorClass: "bg-gray-300" },
-  [ClientStatus.SUPERVISOR]: { label: "מפקח", colorClass: "bg-green-400", inactiveColorClass: "bg-gray-300" },
+  [ClientStatus.CLIENT]: {
+    label: "לקוח",
+    colorClass: "bg-status-client",
+    inactiveColorClass: "bg-status-inactive",
+    cssVar: "--status-client",
+  },
+  [ClientStatus.CLIENT_VIP]: {
+    label: "לקוח VIP",
+    colorClass: "bg-status-client-vip",
+    inactiveColorClass: "bg-status-inactive",
+    cssVar: "--status-client-vip",
+  },
+  [ClientStatus.DISTRIBUTOR]: {
+    label: "מפיץ",
+    colorClass: "bg-status-distributor",
+    inactiveColorClass: "bg-status-inactive",
+    cssVar: "--status-distributor",
+  },
+  [ClientStatus.SUPERVISOR]: {
+    label: "מפקח",
+    colorClass: "bg-status-supervisor",
+    inactiveColorClass: "bg-status-inactive",
+    cssVar: "--status-supervisor",
+  },
 };
