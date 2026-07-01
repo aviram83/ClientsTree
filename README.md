@@ -4,36 +4,9 @@ This project is a full-stack web application designed to visualize and manage hi
 
 ## Project Structure
 
-The project is organized into two main parts: a `client` directory for the front-end application and a `server` directory for the back-end services.
-
-```
-.
-├── client/                 # React Frontend
-│   ├── src/
-│   │   ├── api/            # API communication layer
-│   │   ├── components/     # Reusable React components
-│   │   ├── context/        # React context providers
-│   │   ├── pages/          # Application pages (Login, Dashboard, etc.)
-│   │   ├── App.tsx         # Main application component
-│   │   └── main.tsx        # Application entry point
-│   ├── vite.config.ts      # Vite configuration
-│   └── package.json        # Frontend dependencies
-│
-├── server/                 # Node.js/Express Backend
-│   ├── prisma/
-│   │   └── schema.prisma   # Prisma schema for database models
-│   ├── src/
-│   │   ├── controllers/    # Request handlers
-│   │   ├── middleware/     # Express middleware
-│   │   ├── routes/         # API routes
-│   │   ├── db.ts           # Database connection setup
-│   │   └── index.ts        # Server entry point
-│   ├── package.json        # Backend dependencies
-│   └── tsconfig.json       # TypeScript configuration
-│
-├── docker-compose.yml      # Docker Compose configuration
-└── README.md               # This file
-```
+The project is organized into two main parts:
+- `client` directory for the front-end application
+- `server` directory for the back-end services and the DB structure.
 
 ## Running the Application
 
