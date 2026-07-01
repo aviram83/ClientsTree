@@ -1,81 +1,120 @@
-# ClientsTree Project
+# ClientsTree
 
-This project is a full-stack web application designed to visualize and manage hierarchical data in a tree-like structure. It features a React-based front-end for interactive tree visualization and a Node.js/Express back-end with Prisma for data persistence and user authentication.
+A full-stack client hierarchy management app — React + Express + PostgreSQL.
 
-## Project Structure
+## Prerequisites
 
-The project is organized into two main parts:
-- `client` directory for the front-end application
-- `server` directory for the back-end services and the DB structure.
+- [Node.js](https://nodejs.org/) v18+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for the local database)
+- npm (bundled with Node)
 
-## Running the Application
+---
 
-To run the server, you can use one of the following commands from the `server` directory:
+## First-time setup
 
--   **Development Mode:**
-    This command starts the server in development mode, connecting to the local database defined in `.env.development`. It uses `nodemon` to automatically restart the server on file changes.
+### 1. Clone and install dependencies
 
-    ```bash
-    cd server
-    npm run dev
-    ```
+```bash
+git clone <repo-url>
+cd ClientsTree
 
--   **Production Mode:**
-    This command starts the server in production mode, connecting to the production database defined in `.env.production`.
+cd server && npm install && cd ..
+cd client && npm install && cd ..
+```
 
-    ```bash
-    cd server
-    npm start
-    ```
+### 2. Create the root `.env` file
 
-## Development
+Create a `.env` file in the project root (next to `docker-compose.yml`). This file is gitignored and supplies credentials to the local Postgres container:
 
-### Working with Prisma
+```
+DB_USER=admin
+DB_PASSWORD=password
+DB_NAME=clientstree
+```
 
-This project uses Prisma for database management. The following scripts are available in the `server` directory to help you work with Prisma in different environments.
+> `server/.env.development` is already configured to match these credentials.
 
--   **Development Environment:**
-    To run Prisma commands against the development database, use the `npm run prisma` command. The `--` is important to pass arguments to the Prisma CLI.
+---
 
-    ```bash
-    cd server
-    # Example: Create a new migration
-    npm run prisma -- migrate dev --name "your-migration-name"
+## Running locally
 
-    # Example: Generate the Prisma Client
-    npm run prisma -- generate
-    ```
+You need **two terminals** running simultaneously.
 
--   **Production Environment:**
-    To run Prisma commands against the production database, use the `npm run prisma:prod` command.
+### Terminal 1 — Database + Server
 
-    ```bash
-    cd server
-    # Example: Apply migrations in production
-    npm run prisma:prod -- migrate deploy
-    ```
+```bash
+# Start Postgres (Docker)
+docker-compose up -d
 
-### Adding a New Field to the Database
+# Start the Express server (port 3000)
+cd server && npm run dev
+```
 
-To add a new field to an existing model in the database, follow these steps:
+### Terminal 2 — Client
 
-1.  **Modify the Prisma Schema:**
-    Open the `server/prisma/schema.prisma` file and add the desired field to the relevant model.
+```bash
+# Start the Vite dev server (port 5173)
+cd client && npm run dev
+```
 
-2.  **Create a New Database Migration:**
-    Run the following command from the `server` directory to generate a new migration file and apply the changes to your development database.
+Open http://localhost:5173 in your browser.
 
-    ```bash
-    cd server
-    npm run prisma -- migrate dev --name "add_my_new_field"
-    ```
-    Replace `"add_my_new_field"` with a descriptive name for your migration.
+---
 
-3.  **Regenerate the Prisma Client:**
-    The Prisma Client is automatically updated after the migration, but you can also run this command manually if needed.
+## Environment variables
 
-    ```bash
-    cd server
-    npm run prisma -- generate
-    ```
-After these steps, your database schema and Prisma Client will be updated.
+### Root `.env` — Docker Compose credentials
+
+| Variable | Description |
+|---|---|
+| `DB_USER` | Postgres username |
+| `DB_PASSWORD` | Postgres password |
+| `DB_NAME` | Postgres database name |
+
+### `server/.env.development` — Server config
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | Full Postgres connection string |
+| `JWT_SECRET` | Secret for signing JWT tokens (any string locally) |
+| `PORT` | Server port (default: `3000`) |
+| `CLIENT_URL` | CORS origin (default: `http://localhost:5173`) |
+
+### `client/.env` — Client config (optional)
+
+| Variable | Description |
+|---|---|
+| `VITE_API_URL` | API base URL (default: `http://localhost:3000`) |
+
+---
+
+## Database migrations
+
+Migrations are **not** part of normal startup. Run them only when you change `server/prisma/schema.prisma`:
+
+```bash
+cd server
+npm run prisma -- migrate dev --name <describe-your-change>
+```
+
+To regenerate the Prisma client after schema changes:
+
+```bash
+npm run prisma -- generate
+```
+
+---
+
+## Other commands
+
+```bash
+# Lint (client only)
+cd client && npm run lint
+
+# Production build
+cd server && npm run build
+cd client && npm run build
+
+# Stop the database container
+docker-compose down
+```
