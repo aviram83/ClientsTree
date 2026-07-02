@@ -5,6 +5,7 @@ import { ClientStatus } from '../config/statusConfig';
 // Auth
 export const register = (data: any) => api.post('/auth/register', data);
 export const login = (data: any) => api.post<{ token: string; user: User }>('/auth/login', data);
+export const getProfile = () => api.get<User>('/auth/me');
 
 // Tree
 export const fetchTree = () => api.get<TreeNode[]>('/tree');

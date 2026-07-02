@@ -13,6 +13,7 @@ model User {
   password  String
   firstName String
   lastName  String
+  language  String     @default("he")
   createdAt DateTime   @default(now())
   treeNodes TreeNode[]
 }

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTree, TreeProvider } from '../context/TreeContext';
+import { useProfileStore } from '../store/profileStore';
 import TreeVisualizer from '../components/TreeVisualizer';
 import { Modal } from '../components/Modal';
 import { NodeForm } from '../components/NodeForm';
@@ -8,7 +9,8 @@ import { TreeNode } from '../api/types';
 import StatusLegend from '../components/StatusLegend';
 
 const DashboardContent = () => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const { profile } = useProfileStore();
   const { tree, isLoading, addNode, updateNode, deleteNode } = useTree();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,7 +87,7 @@ const DashboardContent = () => {
     <div className="h-screen w-screen bg-gray-100 flex flex-col">
       <div className="relative bg-white shadow-md z-20 overflow-hidden">
         <header className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold ml-10">Welcome, {user?.firstName}</h1>
+          <h1 className="text-xl font-bold ml-10">Welcome, {profile?.firstName}</h1>
           <div className="flex items-center space-x-4">
             <div className="text-xl">
               Active Clients: <span className="font-bold">{countActiveNodes(tree) - 1}</span>

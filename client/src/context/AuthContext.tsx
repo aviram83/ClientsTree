@@ -1,10 +1,9 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '../api/types';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import * as api from '../api';
 import { injectShowErrorModal, injectLogout } from '../api/api';
+import { useProfileStore } from '../store/profileStore';
 
 interface AuthContextType {
-  user: User | null;
   token: string | null;
   login: (data: any) => Promise<void>;
   register: (data: any) => Promise<void>;
@@ -18,10 +17,10 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const effectRan = useRef(false);
 
   const showErrorModal = (message: string) => {
     setErrorMessage(message);
@@ -33,9 +32,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     setToken(null);
-    setUser(null);
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    useProfileStore.getState().clearProfile();
   };
 
   useEffect(() => {
@@ -44,11 +42,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+    if (effectRan.current === false) {
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
+        setToken(storedToken);
+        useProfileStore.getState().fetchProfile();
+      }
+      return () => {
+        effectRan.current = true;
+      };
     }
   }, []);
 
@@ -56,16 +58,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     try {
       const response = await api.login(data);
-      const { token, user } = response.data;
+      const { token } = response.data;
       setToken(token);
-      setUser(user);
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      await useProfileStore.getState().fetchProfile();
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const register = async (data: any) => {
     setIsLoading(true);
     try {
@@ -76,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, isLoading, errorMessage, showErrorModal, closeErrorModal }}>
+    <AuthContext.Provider value={{ token, login, register, logout, isLoading, errorMessage, showErrorModal, closeErrorModal }}>
       {children}
     </AuthContext.Provider>
   );
