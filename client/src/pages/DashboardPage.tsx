@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTree, TreeProvider } from '../context/TreeContext';
 import { useProfileStore } from '../store/profileStore';
@@ -7,6 +8,8 @@ import { Modal } from '../components/Modal';
 import { NodeForm } from '../components/NodeForm';
 import { TreeNode } from '../api/types';
 import StatusLegend from '../components/StatusLegend';
+import { Avatar, AvatarFallback } from '../components/ui/avatar';
+import { UserSideMenu } from '../components/UserSideMenu';
 
 const DashboardContent = () => {
   const { logout } = useAuth();
@@ -16,6 +19,7 @@ const DashboardContent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalAction, setModalAction] = useState<'add' | 'edit' | null>(null);
   const [currentNode, setCurrentNode] = useState<TreeNode | null>(null);
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
 
   const countActiveNodes = (nodes: TreeNode[]): number => {
     let count = 0;
@@ -85,21 +89,27 @@ const DashboardContent = () => {
 
   return (
     <div className="h-screen w-screen bg-gray-100 flex flex-col">
-      <div className="relative bg-white shadow-md z-20 overflow-hidden">
+      <div className="bg-white shadow-md z-30">
         <header className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold ml-10">Welcome, {profile?.firstName}</h1>
+          <button
+            type="button"
+            onClick={() => setIsSideMenuOpen((prev) => !prev)}
+            className="flex items-center gap-3 ml-10"
+            aria-label="Open user menu"
+          >
+            <Avatar>
+              <AvatarFallback>
+                {profile?.firstName ? profile.firstName.charAt(0).toUpperCase() : <User className="h-5 w-5" />}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-xl font-bold">{profile?.firstName}</span>
+          </button>
           <div className="flex items-center space-x-4">
             <div className="text-xl">
               Active Clients: <span className="font-bold">{countActiveNodes(tree) - 1}</span>
             </div>
           </div>
-          <button onClick={logout} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Logout</button>
         </header>
-        <div className="absolute top-[3px] left-[-68px] z-30">
-          <div className="transform -rotate-45 bg-red-600 text-center text-white font-semibold py-1 w-[170px]">
-            BETA
-          </div>
-        </div>
       </div>
       <main className="flex-grow relative z-10">
         <StatusLegend />
@@ -129,6 +139,11 @@ const DashboardContent = () => {
           isLoading={isLoading} 
         />
       </Modal>
+      <UserSideMenu
+        isOpen={isSideMenuOpen}
+        onClose={() => setIsSideMenuOpen(false)}
+        onLogout={logout}
+      />
     </div>
   );
 };
