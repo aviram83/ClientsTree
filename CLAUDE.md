@@ -60,6 +60,14 @@ docker-compose up   # starts Postgres using .env DB_USER/DB_PASSWORD/DB_NAME
 - **Status config:** `client/src/config/statusConfig.ts` — single source of truth for `ClientStatus` enum, labels (Hebrew), and Tailwind color classes.
 - **UI language:** Partially Hebrew (RTL search bar placeholder, status legend labels).
 
+## Responsive Design (Mobile + Desktop)
+
+The app must work on both mobile and desktop web browsers. Every new component should be built mobile-first and adapted for larger screens, not built at a fixed size:
+
+- Use Tailwind's default responsive breakpoints (`sm:` 640px, `md:` 768px, `lg:` 1024px, `xl:` 1280px — no custom breakpoints are configured) to change sizing/layout per viewport, rather than hardcoding one fixed size.
+- Full-screen overlays (side menus, modals) should size relative to the viewport on mobile (e.g. `w-3/4`) but be capped with a `max-w-*` utility on larger screens (e.g. `md:max-w-sm`) so they don't stretch edge-to-edge on desktop.
+- Prefer flexbox/grid + relative units (`%`, `w-full`, `max-w-*`) over fixed pixel widths/heights for containers; fixed pixel sizing is acceptable for small atomic elements (icons, avatars, tree nodes) but not for page-level layout regions.
+
 ## Backend Structure
 
 - **Routes:** `server/src/routes/` → `auth.routes.ts` (`/api/auth`) and `tree.routes.ts` (`/api/tree`, JWT-protected).
