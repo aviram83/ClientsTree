@@ -10,6 +10,7 @@ import { TreeNode } from '../api/types';
 import StatusLegend from '../components/StatusLegend';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { UserSideMenu } from '../components/UserSideMenu';
+import { Logo } from '../components/Logo';
 
 const DashboardContent = () => {
   const { logout } = useAuth();
@@ -94,7 +95,7 @@ const DashboardContent = () => {
           <button
             type="button"
             onClick={() => setIsSideMenuOpen((prev) => !prev)}
-            className="flex items-center gap-3 ml-10"
+            className="flex items-center gap-3 justify-self-start"
             aria-label="Open user menu"
           >
             <Avatar>
@@ -102,9 +103,10 @@ const DashboardContent = () => {
                 {profile?.firstName ? profile.firstName.charAt(0).toUpperCase() : <User className="h-5 w-5" />}
               </AvatarFallback>
             </Avatar>
-            <span className="text-xl font-bold">{profile?.firstName}</span>
+            <span className="text-xl font-bold hidden sm:inline">{profile?.firstName}</span>
           </button>
-          <div className="flex items-center space-x-4">
+          <Logo className="justify-self-center" />
+          <div className="flex items-center space-x-4 justify-self-end">
             <div className="text-xl">
               Active Clients: <span className="font-bold">{countActiveNodes(tree) - 1}</span>
             </div>
