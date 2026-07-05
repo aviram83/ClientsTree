@@ -33,11 +33,11 @@ export const TreeNode = ({ node }: TreeNodeProps) => {
   return (
     <li className="list-none">
       <div className="flex items-center space-x-2 group my-1">
-        <span>{node.name} - <span className="text-gray-500 text-sm">{node.status}</span></span>
+        <span>{node.name} - <span className="text-muted-foreground text-sm">{node.status}</span></span>
         <div className="hidden group-hover:flex items-center space-x-1">
           <button onClick={() => setAddModalOpen(true)} className="btn btn-xs btn-ghost"><Plus size={16} /></button>
           <button onClick={() => setEditModalOpen(true)} className="btn btn-xs btn-ghost"><Edit size={16} /></button>
-          <button onClick={handleDeleteNode} className="btn btn-xs btn-ghost text-red-500"><Trash size={16} /></button>
+          <button onClick={handleDeleteNode} className="btn btn-xs btn-ghost text-destructive"><Trash size={16} /></button>
         </div>
       </div>
 

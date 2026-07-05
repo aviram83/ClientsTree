@@ -12,18 +12,18 @@ export const Modal = ({ isOpen, onClose, title, children, textColor }: ModalProp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="relative bg-card rounded-lg shadow-lg w-full max-w-md">
         <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="text-xl font-bold">{title}</h2>
+          <h2 className="text-xl font-bold text-foreground">{title}</h2>
           <button
             onClick={onClose}
-            className="text-black text-2xl font-bold"
+            className="text-foreground text-2xl font-bold"
           >
             &times;
           </button>
         </div>
-        <div className={`p-4 ${textColor}`}>
+        <div className={`p-4 ${textColor ?? 'text-foreground'}`}>
           {children}
         </div>
       </div>

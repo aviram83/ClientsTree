@@ -88,8 +88,8 @@ const DashboardContent = () => {
 
 
   return (
-    <div className="h-screen w-screen bg-gray-100 flex flex-col">
-      <div className="bg-white shadow-md z-30">
+    <div className="h-screen w-screen bg-muted flex flex-col">
+      <div className="bg-card shadow-md z-30">
         <header className="container mx-auto px-4 py-4 flex justify-between items-center">
           <button
             type="button"
@@ -130,7 +130,7 @@ const DashboardContent = () => {
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 
         title={modalAction === 'add' ? 'Add New Client' : 'Edit Client'}
-        textColor="text-black"
+        textColor="text-foreground"
       >
         <NodeForm 
           onSubmit={handleSaveNode} 

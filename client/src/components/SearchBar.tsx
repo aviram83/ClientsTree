@@ -16,11 +16,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   return (
     <div className="absolute top-4 left-4 z-50">
-      <div className="flex items-center bg-white rounded-full shadow-lg border border-gray-200 p-1">
+      <div className="flex items-center bg-card rounded-full shadow-lg border border-border p-1">
         <button
           onClick={() => setIsSearchOpen(!isSearchOpen)}
           className={`rounded-full p-2 transition-colors duration-300 ${
-            isSearchOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-500 hover:bg-gray-50'
+            isSearchOpen ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:bg-accent'
           }`}
           aria-label="Toggle Search"
         >
