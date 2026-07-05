@@ -12,7 +12,7 @@ function App() {
         isOpen={!!auth.errorMessage}
         onClose={auth.closeErrorModal}
         title="Error"
-        textColor="text-red-500"
+        textColor="text-destructive"
       >
         <p>{auth.errorMessage}</p>
       </Modal>

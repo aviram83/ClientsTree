@@ -24,7 +24,7 @@ const CustomNode = memo(({ data }: any) => {
   const statusInfo = STATUS_CONFIG[data.status as ClientStatus];
   const statusLabel = statusInfo ? statusInfo.label : 'Unknown';
 
-  let nodeClasses = 'bg-gray-400 rounded-lg border-2';
+  let nodeClasses = 'bg-muted rounded-lg border-2';
   let wrapperClasses = 'filter drop-shadow-md';
   let nodeStyle: React.CSSProperties = {};
   let isClipped = false;
@@ -48,16 +48,16 @@ const CustomNode = memo(({ data }: any) => {
 
   if (isRootNode) {
     return (
-      <div className={`shadow-md rounded-lg p-4 w-64 bg-white border-4 border-pink-400 text-black flex items-center justify-center text-center relative group transition-opacity duration-300 ${data.isDimmed ? 'opacity-30' : 'opacity-100'}`}>
+      <div className={`shadow-md rounded-lg p-4 w-64 bg-card border-4 border-primary text-card-foreground flex items-center justify-center text-center relative group transition-opacity duration-300 ${data.isDimmed ? 'opacity-30' : 'opacity-100'}`}>
         <Handle type="target" position={Position.Top} className="!bg-transparent !border-0" />
         <div>
           <div className="text-lg font-bold">{data.label}</div>
         </div>
         <div className="absolute right-[-35px] top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-gray-100 rounded-full hover:bg-gray-200">
+          <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-secondary rounded-full hover:bg-secondary/80">
             <Plus size={16} />
           </button>
-          <button onClick={() => data.onEdit(data.id)} className="p-1.5 bg-gray-100 rounded-full hover:bg-gray-200">
+          <button onClick={() => data.onEdit(data.id)} className="p-1.5 bg-secondary rounded-full hover:bg-secondary/80">
             <Edit size={16} />
           </button>
         </div>
@@ -83,7 +83,7 @@ const CustomNode = memo(({ data }: any) => {
             ${shapeClass}
             bg-status-inactive
             flex flex-col items-center justify-center text-center p-1
-            text-black
+            text-foreground
           `}
         >
           <div className="text-sm font-bold leading-tight">{data.label}</div>
@@ -91,13 +91,13 @@ const CustomNode = memo(({ data }: any) => {
         </div>
 
         <div className="absolute -right-8 top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
-          <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-white shadow-sm rounded-full hover:bg-gray-100">
+          <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
             <Plus size={14} />
           </button>
-          <button onClick={() => data.onEdit(data.id)} className="p-1.5 bg-white shadow-sm rounded-full hover:bg-gray-100">
+          <button onClick={() => data.onEdit(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
             <Edit size={14} />
           </button>
-          <button onClick={() => data.onDelete(data.id)} className="p-1.5 bg-white shadow-sm rounded-full hover:bg-gray-100">
+          <button onClick={() => data.onDelete(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
             <Trash size={14} />
           </button>
         </div>
@@ -115,7 +115,7 @@ const CustomNode = memo(({ data }: any) => {
           w-full h-full
           flex flex-col items-center justify-center text-center p-1
           ${nodeClasses}
-          text-black
+          text-foreground
         `}
         style={nodeStyle}
       >
@@ -123,13 +123,13 @@ const CustomNode = memo(({ data }: any) => {
         <div className="text-[10px] uppercase opacity-80 mt-1">{statusLabel}</div>
       </div>
       <div className="absolute -right-8 top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
-        <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-white shadow-sm rounded-full hover:bg-gray-100">
+        <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
           <Plus size={14} />
         </button>
-        <button onClick={() => data.onEdit(data.id)} className="p-1.5 bg-white shadow-sm rounded-full hover:bg-gray-100">
+        <button onClick={() => data.onEdit(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
           <Edit size={14} />
         </button>
-        <button onClick={() => data.onDelete(data.id)} className="p-1.5 bg-white shadow-sm rounded-full hover:bg-gray-100">
+        <button onClick={() => data.onDelete(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
           <Trash size={14} />
         </button>
       </div>

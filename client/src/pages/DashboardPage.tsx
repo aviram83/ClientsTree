@@ -89,9 +89,9 @@ const DashboardContent = () => {
 
 
   return (
-    <div className="h-screen w-screen bg-gray-100 flex flex-col">
-      <div className="bg-white shadow-md z-30">
-        <header className="w-full px-4 py-4 grid grid-cols-[1fr_auto_1fr] items-center">
+    <div className="h-screen w-screen bg-muted flex flex-col">
+      <div className="bg-card shadow-md z-30">
+        <header className="container mx-auto px-4 py-4 flex justify-between items-center">
           <button
             type="button"
             onClick={() => setIsSideMenuOpen((prev) => !prev)}
@@ -132,7 +132,7 @@ const DashboardContent = () => {
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 
         title={modalAction === 'add' ? 'Add New Client' : 'Edit Client'}
-        textColor="text-black"
+        textColor="text-foreground"
       >
         <NodeForm 
           onSubmit={handleSaveNode} 
