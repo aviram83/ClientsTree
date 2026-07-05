@@ -136,8 +136,8 @@ const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ treeData, onAddNode, on
               source: node.id,
               target: child.id,
               type: 'smoothstep',
-              style: { stroke: '#464c53', strokeWidth: 3 },
-              markerEnd: { type: MarkerType.ArrowClosed, color: '#464c53' },
+              style: { stroke: 'hsl(var(--muted-foreground))', strokeWidth: 3 },
+              markerEnd: { type: MarkerType.ArrowClosed, color: 'hsl(var(--muted-foreground))' },
             });
 
             // Recurse down this branch immediately

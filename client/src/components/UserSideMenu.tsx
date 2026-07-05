@@ -26,7 +26,7 @@ export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) =
 
       <div
         className={cn(
-          'absolute inset-y-0 left-0 flex h-full w-3/4 max-w-xs md:max-w-sm flex-col bg-white shadow-xl transition-transform duration-300 ease-in-out',
+          'absolute inset-y-0 left-0 flex h-full w-3/4 max-w-xs md:max-w-sm flex-col bg-card shadow-xl transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
         role="dialog"
