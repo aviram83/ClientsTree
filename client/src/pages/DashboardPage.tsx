@@ -91,7 +91,7 @@ const DashboardContent = () => {
   return (
     <div className="h-screen w-screen bg-muted flex flex-col">
       <div className="bg-card shadow-md z-30">
-        <header className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <header className="w-full px-4 py-4 grid grid-cols-[1fr_auto_1fr] items-center">
           <button
             type="button"
             onClick={() => setIsSideMenuOpen((prev) => !prev)}
