@@ -7,7 +7,6 @@ import TreeVisualizer from '../components/TreeVisualizer';
 import { Modal } from '../components/Modal';
 import { NodeForm } from '../components/NodeForm';
 import { TreeNode } from '../api/types';
-import StatusLegend from '../components/StatusLegend';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { UserSideMenu } from '../components/UserSideMenu';
 import { Logo } from '../components/Logo';
@@ -106,24 +105,20 @@ const DashboardContent = () => {
             <span className="text-xl font-bold hidden sm:inline">{profile?.firstName}</span>
           </button>
           <Logo className="justify-self-center" />
-          <div className="flex items-center space-x-4 justify-self-end">
-            <div className="text-xl">
-              Active Clients: <span className="font-bold">{countActiveNodes(tree) - 1}</span>
-            </div>
-          </div>
+          <div className="justify-self-end" />
         </header>
       </div>
       <main className="flex-grow relative z-10">
-        <StatusLegend />
         {isLoading && <p className="p-4">Loading tree...</p>}
         {!isLoading && tree.length === 0 && <p className="p-4">No nodes in your tree yet.</p>}
         {!isLoading && tree.length > 0 && (
             <div className="h-full">
-                <TreeVisualizer 
+                <TreeVisualizer
                     treeData={tree}
                     onAddNode={handleOpenAddModal}
                     onEditNode={handleOpenEditModal}
                     onDeleteNode={handleDeleteNode}
+                    activeCount={countActiveNodes(tree) - 1}
                 />
             </div>
         )}
