@@ -3,7 +3,9 @@
 
 .DS_Store
 .idea
-.claude
+.claude/*
+!.claude/skills/
+!.claude/skills/**
 
 node_modules
 dist
