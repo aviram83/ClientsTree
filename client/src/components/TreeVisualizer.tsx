@@ -10,8 +10,7 @@ import {
 import dagre from 'dagre';
 import CustomNode from './CustomNode';
 import '@xyflow/react/dist/style.css';
-import SearchBar from './SearchBar';
-import StatusLegend from './StatusLegend';
+import FloatingToolbar from './FloatingToolbar';
 import { TreeNode } from '../api/types';
 import type { Node, Edge } from '@xyflow/react';
 
@@ -39,6 +38,7 @@ interface TreeVisualizerProps {
   onAddNode: (nodeId: string) => void;
   onEditNode: (nodeId: string) => void;
   onDeleteNode: (nodeId: string) => void;
+  activeCount: number;
 }
 
 const _g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -87,11 +87,10 @@ const getLayoutedElements = (
   return { nodes: layoutedNodes, edges };
 };
 
-const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ treeData, onAddNode, onEditNode, onDeleteNode }) => {
+const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ treeData, onAddNode, onEditNode, onDeleteNode, activeCount }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<CustomNodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const nodeTypes = useMemo(() => ({ custom: CustomNode }), []) as any;
 
@@ -158,16 +157,12 @@ const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ treeData, onAddNode, on
 
   return (
     <div style={{ height: '100%', width: '100%' }}>
-      {/* Search Bar */}
-      <SearchBar
+      {/* Floating Toolbar: Search + Active Count + Legend */}
+      <FloatingToolbar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        isSearchOpen={isSearchOpen}
-        setIsSearchOpen={setIsSearchOpen}
+        activeCount={activeCount}
       />
-
-      {/* Status Legend */}
-      <StatusLegend />
 
       <ReactFlow
         nodes={nodes}
