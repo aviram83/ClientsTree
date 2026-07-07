@@ -29,15 +29,26 @@ cd client && npm run build  # Vite → dist/
 cd client && npm run lint   # ESLint, max-warnings 0
 
 # Database (run from server/)
-npm run prisma -- migrate dev --name <name>   # Dev migration
-npm run prisma -- generate                    # Regenerate Prisma client
-npm run prisma:prod -- migrate deploy         # Production deploy
+npm run prisma -- db push     # Dev: sync local Postgres schema from schema.prisma
+npm run prisma -- generate    # Regenerate Prisma client
+npm run prisma:push           # Prod: sync Neon schema from schema.prisma (uses .env.production)
 ```
 
 Start the PostgreSQL container before running the server:
 ```bash
 docker-compose up   # starts Postgres using .env DB_USER/DB_PASSWORD/DB_NAME
 ```
+
+## Updating the Production Database (Neon)
+
+This project uses `prisma db push`, not versioned migrations — there is no `prisma/migrations/` folder. To apply schema changes to production after editing `server/prisma/schema.prisma`, use the `/db-push prod` skill (`.claude/skills/db-push/SKILL.md`), or manually:
+
+1. Confirm `server/.env.production`'s `DATABASE_URL` points to the correct Neon project.
+2. (Optional but recommended) Create a Neon branch/snapshot as a rollback point before pushing — `db push` has no down-migration.
+3. From `server/`, run: `npm run prisma:push`
+4. Verify the change synced correctly (check command output, or inspect via `npm run prisma:prod -- studio`).
+
+Destructive changes (dropped/renamed columns) can lose data — back up first; Prisma will warn if a change looks destructive.
 
 ## Environment Variables
 
