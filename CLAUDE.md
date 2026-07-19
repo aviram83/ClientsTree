@@ -25,7 +25,11 @@ cd client && npm run dev    # Vite on :5173
 cd server && npm run build  # tsc → dist/
 cd client && npm run build  # Vite → dist/
 
-# Lint (client only — no test scripts configured)
+# Test
+cd server && npm run test   # Vitest (node environment)
+cd client && npm run test   # Vitest (jsdom + Testing Library)
+
+# Lint (client only)
 cd client && npm run lint   # ESLint, max-warnings 0
 
 # Database (run from server/)
@@ -85,6 +89,29 @@ The app must work on both mobile and desktop web browsers. Every new component s
 - **Auth middleware:** `server/src/middleware/auth.ts` — validates JWT and attaches user to request.
 - **Database:** `server/prisma/schema.prisma` — `User` and `TreeNode` models. `TreeNode` is self-referential (parentId) for hierarchy. Cascading deletes are configured.
 - **XSS:** Server uses the `xss` library for sanitization.
+
+## Code Organization
+
+- **Client** (`client/src/`):
+  - `hooks/` — extracted stateful/business logic (e.g. `useAuthLogic`, `useTreeLogic`), testable via `renderHook` without deep component rendering.
+  - `lib/` — pure functions/data transforms with no React dependency (e.g. `treeLayout.ts`).
+  - `context/` — thin Provider wrappers that call a hook and expose its return value via `Provider value={...}`; no logic lives here directly.
+  - `components/` — presentational/JSX components.
+  - `api/` — HTTP layer (axios instance + endpoint functions).
+  - `config/` — static config/enums (e.g. `statusConfig.ts`).
+- **Server** (`server/src/`):
+  - `controllers/` — route handler business logic (no service layer in this codebase — controllers call Prisma directly).
+  - `utils/` — pure helpers with no Express dependency (e.g. `validation.ts`), extracted out of controllers so they're unit-testable in isolation.
+  - `middleware/` — Express middleware (e.g. `auth.ts`).
+  - `routes/` — path-to-controller wiring only, no logic.
+- **Rule of thumb:** if code touches `req`/`res` or JSX, it stays in `controllers/`/`components/`; if it's a pure function/transform, it belongs in `utils/`/`lib/` so it can be unit-tested without mocking a framework boundary.
+
+## Testing
+
+- Test files are colocated as `*.test.ts` next to the source they test (not a separate `tests/`/`__tests__/` folder).
+- Client: logic tests target `hooks/` (via `renderHook`) and `lib/` (pure function tests). No component-render (JSX) tests currently.
+- Server: `utils/` helpers get direct unit tests; controllers are tested by calling them directly with hand-built mock `req`/`res` objects and a mocked Prisma client (`vi.mock('../db')`) — no real Postgres, no `supertest`/HTTP layer.
+- Both sides: no integration tests against a real database — that's a deliberate scope boundary, not an oversight.
 
 ## Key Patterns
 
