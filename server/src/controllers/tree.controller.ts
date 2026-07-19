@@ -1,16 +1,10 @@
 import { Request, Response } from 'express';
 import prisma from '../db';
-import { ClientStatus } from '@prisma/client';
-import xss from 'xss';
+import { isValidClientStatus, sanitizeDescription } from '../utils/validation';
 
 interface AuthRequest extends Request {
   user?: { userId: string };
 }
-
-// Type guard to validate the status string against the ClientStatus enum
-const isValidClientStatus = (status: any): status is ClientStatus => {
-  return Object.values(ClientStatus).includes(status);
-};
 
 export const getTree = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
@@ -58,7 +52,7 @@ export const addNode = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ message: 'Description too long' });
   }
 
-  const cleanDescription = description ? xss(description) : null;
+  const cleanDescription = sanitizeDescription(description);
 
   try {
     const newNode = await prisma.treeNode.create({
@@ -90,7 +84,7 @@ export const updateNode = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'Description too long' });
   }
 
-  const cleanDescription = description ? xss(description) : undefined;
+  const cleanDescription = description ? sanitizeDescription(description) : undefined;
 
   try {
     const updatedNode = await prisma.treeNode.update({

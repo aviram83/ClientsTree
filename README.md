@@ -61,6 +61,22 @@ Open http://localhost:5173 in your browser.
 
 ---
 
+## Running tests
+
+Both `client/` and `server/` use [Vitest](https://vitest.dev/). Test files are colocated as `*.test.ts` next to the file they test — there's no separate `tests/`/`__tests__/` folder.
+
+```bash
+# Client (jsdom environment + Testing Library)
+cd client && npm run test         # run once
+cd client && npm run test:watch   # watch mode
+
+# Server (node environment)
+cd server && npm run test         # run once
+cd server && npm run test:watch   # watch mode
+```
+
+---
+
 ## Environment variables
 
 ### Root `.env` — Docker Compose credentials
@@ -162,6 +178,10 @@ import { cn } from '@/lib/utils'
 ```bash
 # Lint (client only)
 cd client && npm run lint
+
+# Test (both — see "Running tests" above)
+cd client && npm run test
+cd server && npm run test
 
 # Production build
 cd server && npm run build
