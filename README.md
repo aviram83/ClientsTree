@@ -2,6 +2,31 @@
 
 A full-stack client hierarchy management app — React + Express + PostgreSQL.
 
+## Tech Stack
+
+**Frontend**
+- React 18 + TypeScript, built with Vite
+- React Router v6
+- Zustand + React Context
+- React Hook Form
+- `@xyflow/react` + Dagre (tree graph visualization)
+- Tailwind CSS v4 + Radix UI / shadcn/ui (see [Design System](#design-system))
+- Vitest + Testing Library (tests)
+
+**Backend**
+- Node.js + Express 4 + TypeScript
+- JWT
+- Vitest (tests)
+
+**Database / ORM**
+- PostgreSQL
+- Prisma ORM
+- Neon (production hosting)
+
+**Infrastructure / Tooling**
+- Docker Compose (local Postgres)
+- dotenv
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) v18+
