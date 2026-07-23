@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { User } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useTree, TreeProvider } from '../context/TreeContext';
+import { useAuthStore } from '../store/authStore';
+import { useTreeStore } from '../store/treeStore';
 import { useProfileStore } from '../store/profileStore';
 import TreeVisualizer from '../components/TreeVisualizer';
 import { Modal } from '../components/Modal';
@@ -11,11 +11,40 @@ import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { UserSideMenu } from '../components/UserSideMenu';
 import { Logo } from '../components/Logo';
 
-const DashboardContent = () => {
-  const { logout } = useAuth();
-  const { profile } = useProfileStore();
-  const { tree, isLoading, addNode, updateNode, deleteNode } = useTree();
-  
+const findNodeInTree = (nodes: TreeNode[], nodeId: string): TreeNode | null => {
+  for (const node of nodes) {
+    if (node.id === nodeId) {
+      return node;
+    }
+    if (node.children) {
+      const found = findNodeInTree(node.children, nodeId);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return null;
+};
+
+export const DashboardPage = () => {
+  const logout = useAuthStore((s) => s.logout);
+  const profile = useProfileStore((s) => s.profile);
+  const tree = useTreeStore((s) => s.tree);
+  const isLoading = useTreeStore((s) => s.isLoading);
+  const addNode = useTreeStore((s) => s.addNode);
+  const updateNode = useTreeStore((s) => s.updateNode);
+  const fetchTree = useTreeStore((s) => s.fetchTree);
+  const effectRan = useRef(false);
+
+  useEffect(() => {
+    if (effectRan.current === false) {
+      fetchTree();
+      return () => {
+        effectRan.current = true;
+      };
+    }
+  }, [fetchTree]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalAction, setModalAction] = useState<'add' | 'edit' | null>(null);
   const [currentNode, setCurrentNode] = useState<TreeNode | null>(null);
@@ -40,30 +69,14 @@ const DashboardContent = () => {
     setIsModalOpen(true);
   }, []);
 
-  const findNodeInTree = (nodes: TreeNode[], nodeId: string): TreeNode | null => {
-    for (const node of nodes) {
-      if (node.id === nodeId) {
-        return node;
-      }
-      if (node.children) {
-        const found = findNodeInTree(node.children, nodeId);
-        if (found) {
-          return found;
-        }
-      }
-    }
-    return null;
-  };
-
   const handleOpenEditModal = useCallback((nodeId: string) => {
-    const nodeToEdit = findNodeInTree(tree, nodeId);
+    const nodeToEdit = findNodeInTree(useTreeStore.getState().tree, nodeId);
     if(nodeToEdit) {
       setModalAction('edit');
       setCurrentNode(nodeToEdit);
       setIsModalOpen(true);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tree]);
+  }, []);
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
@@ -80,11 +93,11 @@ const DashboardContent = () => {
     handleCloseModal();
   };
 
-  const handleDeleteNode = async (nodeId: string) => {
+  const handleDeleteNode = useCallback(async (nodeId: string) => {
     if (window.confirm('Are you sure you want to delete this node?')) {
-      await deleteNode(nodeId);
+      await useTreeStore.getState().deleteNode(nodeId);
     }
-  };
+  }, []);
 
 
   return (
@@ -109,9 +122,9 @@ const DashboardContent = () => {
         </header>
       </div>
       <main className="flex-grow relative z-10">
-        {isLoading && <p className="p-4">Loading tree...</p>}
-        {!isLoading && tree.length === 0 && <p className="p-4">No nodes in your tree yet.</p>}
-        {!isLoading && tree.length > 0 && (
+        {tree.length === 0 && isLoading && <p className="p-4">Loading tree...</p>}
+        {tree.length === 0 && !isLoading && <p className="p-4">No nodes in your tree yet.</p>}
+        {tree.length > 0 && (
             <div className="h-full">
                 <TreeVisualizer
                     treeData={tree}
@@ -144,9 +157,3 @@ const DashboardContent = () => {
     </div>
   );
 };
-
-export const DashboardPage = () => (
-  <TreeProvider>
-    <DashboardContent />
-  </TreeProvider>
-);

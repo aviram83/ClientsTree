@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { TreeNode as TreeNodeType } from '../api/types';
-import { useTree } from '../context/TreeContext';
+import { useTreeStore } from '../store/treeStore';
 import { Plus, Edit, Trash } from 'lucide-react';
 import { Modal } from './Modal';
 import { NodeForm } from './NodeForm';
@@ -10,7 +10,10 @@ interface TreeNodeProps {
 }
 
 export const TreeNode = ({ node }: TreeNodeProps) => {
-  const { addNode, updateNode, deleteNode, isLoading } = useTree();
+  const addNode = useTreeStore((s) => s.addNode);
+  const updateNode = useTreeStore((s) => s.updateNode);
+  const deleteNode = useTreeStore((s) => s.deleteNode);
+  const isLoading = useTreeStore((s) => s.isLoading);
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
 

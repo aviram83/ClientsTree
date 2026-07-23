@@ -18,6 +18,22 @@ const getShapeStyles = (status: ClientStatus | string) => {
   }
 };
 
+const areDataPropsEqual = (prevProps: any, nextProps: any) => {
+  const prev = prevProps.data;
+  const next = nextProps.data;
+  return (
+    prev.id === next.id &&
+    prev.label === next.label &&
+    prev.status === next.status &&
+    prev.active === next.active &&
+    prev.parentId === next.parentId &&
+    prev.isDimmed === next.isDimmed &&
+    prev.onAdd === next.onAdd &&
+    prev.onEdit === next.onEdit &&
+    prev.onDelete === next.onDelete
+  );
+};
+
 const CustomNode = memo(({ data }: any) => {
   const isRootNode = data.parentId === null;
 
@@ -136,6 +152,6 @@ const CustomNode = memo(({ data }: any) => {
       <Handle type="source" position={Position.Bottom} className="!bg-transparent !border-0 -mb-1" />
     </div>
   );
-});
+}, areDataPropsEqual);
 
 export default CustomNode;

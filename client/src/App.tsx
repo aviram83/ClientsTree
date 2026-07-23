@@ -1,31 +1,24 @@
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { useAuthStore } from './store/authStore';
 import { AppRouter } from './Router';
 import { Modal } from './components/Modal';
 
 function App() {
-  const auth = useAuth();
+  const errorMessage = useAuthStore((s) => s.errorMessage);
+  const closeErrorModal = useAuthStore((s) => s.closeErrorModal);
 
   return (
     <>
       <AppRouter />
       <Modal
-        isOpen={!!auth.errorMessage}
-        onClose={auth.closeErrorModal}
+        isOpen={!!errorMessage}
+        onClose={closeErrorModal}
         title="Error"
         textColor="text-destructive"
       >
-        <p>{auth.errorMessage}</p>
+        <p>{errorMessage}</p>
       </Modal>
     </>
   );
 }
 
-function Root() {
-  return (
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  )
-}
-
-export default Root;
+export default App;

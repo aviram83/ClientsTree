@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../store/authStore';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 export const RegisterPage = () => {
   const { register, handleSubmit, watch, setValue, formState: { errors, isValid } } = useForm({ mode: 'onChange' });
-  const { register: registerUser, isLoading } = useAuth();
+  const registerUser = useAuthStore((s) => s.register);
+  const isLoading = useAuthStore((s) => s.isLoading);
   const navigate = useNavigate();
 
   const password = watch('password');

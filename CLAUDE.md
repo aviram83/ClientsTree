@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Full-stack monorepo with a `client/` (React 18 + Vite + TypeScript) and `server/` (Express + TypeScript) split. PostgreSQL database accessed via Prisma ORM. Authentication is JWT-based with tokens stored in localStorage.
 
-**Key data flow:** User logs in → JWT stored in AuthContext → TreeContext fetches all nodes for the user → TreeVisualizer renders the tree graph using @xyflow/react with Dagre layout.
+**Key data flow:** User logs in → JWT stored in `authStore` → `treeStore` fetches all nodes for the user → TreeVisualizer renders the tree graph using @xyflow/react with Dagre layout.
 
 ## Commands
 
@@ -67,7 +67,7 @@ Destructive changes (dropped/renamed columns) can lose data — back up first; P
 
 ## Frontend Structure
 
-- **State:** Two React Contexts — `AuthContext` (user/token) and `TreeContext` (tree CRUD). No Redux or Zustand.
+- **State:** Zustand stores — `authStore` (user/token), `treeStore` (tree CRUD), `profileStore` (profile). No React Context, no Redux. Components read state via selectors (e.g. `useAuthStore(s => s.token)`) so they only re-render when the slice they use changes.
 - **API layer:** `client/src/api/api.ts` — axios instance with request interceptor (injects Bearer token) and response interceptor (handles 401 → logout). Functions in `client/src/api/index.ts`.
 - **Routing:** React Router v6 in `client/src/Router.tsx`. `/dashboard` is protected by `ProtectedRoute`.
 - **Tree visualization:** `TreeVisualizer.tsx` uses `@xyflow/react` + `dagre` for hierarchical layout. Nodes are non-draggable. Children sorted descending by `createdAt`.
@@ -93,9 +93,8 @@ The app must work on both mobile and desktop web browsers. Every new component s
 ## Code Organization
 
 - **Client** (`client/src/`):
-  - `hooks/` — extracted stateful/business logic (e.g. `useAuthLogic`, `useTreeLogic`), testable via `renderHook` without deep component rendering.
+  - `store/` — Zustand stores (`authStore`, `treeStore`, `profileStore`) holding app-wide state and the actions that mutate it; testable directly via `getState()`/`setState()` without rendering.
   - `lib/` — pure functions/data transforms with no React dependency (e.g. `treeLayout.ts`).
-  - `context/` — thin Provider wrappers that call a hook and expose its return value via `Provider value={...}`; no logic lives here directly.
   - `components/` — presentational/JSX components.
   - `api/` — HTTP layer (axios instance + endpoint functions).
   - `config/` — static config/enums (e.g. `statusConfig.ts`).
@@ -109,13 +108,12 @@ The app must work on both mobile and desktop web browsers. Every new component s
 ## Testing
 
 - Test files are colocated as `*.test.ts` next to the source they test (not a separate `tests/`/`__tests__/` folder).
-- Client: logic tests target `hooks/` (via `renderHook`) and `lib/` (pure function tests). No component-render (JSX) tests currently.
+- Client: logic tests target `store/` (calling actions and asserting on `getState()`, no `renderHook` needed) and `lib/` (pure function tests). No component-render (JSX) tests currently.
 - Server: `utils/` helpers get direct unit tests; controllers are tested by calling them directly with hand-built mock `req`/`res` objects and a mocked Prisma client (`vi.mock('../db')`) — no real Postgres, no `supertest`/HTTP layer.
 - Both sides: no integration tests against a real database — that's a deliberate scope boundary, not an oversight.
 
 ## Key Patterns
 
-- **Tree mutations refetch the full tree** — `TreeContext` calls `fetchTree()` after every add/update/delete (no optimistic updates).
-- **Double-fetch prevention:** `TreeContext` uses a `useRef` flag to avoid double-fetch in React StrictMode.
-- **API circular-dependency avoidance:** The axios instance receives `logout` and `showError` callbacks via injection rather than importing contexts directly.
+- **Tree mutations refetch the full tree** — `treeStore` calls `fetchTree()` after every add/update/delete (no optimistic updates).
+- **API circular-dependency avoidance:** The axios instance receives `logout` and `showError` callbacks via injection (`injectLogout`/`injectShowErrorModal` in `api/api.ts`) rather than importing the stores directly; `authStore` wires these up at module load.
 - **Prisma adapter:** Uses `@prisma/adapter-pg` with a `pg` connection pool (not the default Prisma engine).
