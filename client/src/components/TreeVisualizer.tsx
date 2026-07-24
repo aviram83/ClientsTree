@@ -16,13 +16,10 @@ import { buildFlowGraph, getLayoutedElements, CustomNodeData } from '../lib/tree
 // Props for the TreeVisualizer component
 interface TreeVisualizerProps {
   treeData: TreeNode[];
-  onAddNode: (nodeId: string) => void;
-  onEditNode: (nodeId: string) => void;
-  onDeleteNode: (nodeId: string) => void;
   activeCount: number;
 }
 
-const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ treeData, onAddNode, onEditNode, onDeleteNode, activeCount }) => {
+const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ treeData, activeCount }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<CustomNodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,18 +28,14 @@ const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ treeData, onAddNode, on
 
   useEffect(() => {
     if (treeData) {
-      const { nodes: allNodes, edges: allEdges } = buildFlowGraph(treeData, searchQuery, {
-        onAdd: onAddNode,
-        onEdit: onEditNode,
-        onDelete: onDeleteNode,
-      });
+      const { nodes: allNodes, edges: allEdges } = buildFlowGraph(treeData, searchQuery);
 
       const layouted = getLayoutedElements(allNodes, allEdges, { direction: 'TB' });
 
       setNodes(layouted.nodes);
       setEdges(layouted.edges);
     }
-  }, [treeData, onAddNode, onEditNode, onDeleteNode, setNodes, setEdges, searchQuery]);
+  }, [treeData, setNodes, setEdges, searchQuery]);
 
   return (
     <div style={{ height: '100%', width: '100%' }}>

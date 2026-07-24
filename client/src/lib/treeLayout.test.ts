@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { buildFlowGraph, getLayoutedElements } from './treeLayout';
 import { TreeNode } from '../api/types';
 import { ClientStatus } from '../config/statusConfig';
@@ -15,8 +15,6 @@ const makeNode = (overrides: Partial<TreeNode>): TreeNode => ({
   ...overrides,
 });
 
-const callbacks = { onAdd: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn() };
-
 describe('buildFlowGraph', () => {
   it('produces one node per tree node and one edge per parent-child link', () => {
     const tree: TreeNode[] = [
@@ -30,7 +28,7 @@ describe('buildFlowGraph', () => {
       }),
     ];
 
-    const { nodes, edges } = buildFlowGraph(tree, '', callbacks);
+    const { nodes, edges } = buildFlowGraph(tree, '');
 
     expect(nodes).toHaveLength(3);
     expect(edges).toHaveLength(2);
@@ -48,7 +46,7 @@ describe('buildFlowGraph', () => {
       }),
     ];
 
-    const { edges } = buildFlowGraph(tree, '', callbacks);
+    const { edges } = buildFlowGraph(tree, '');
 
     expect(edges[0].target).toBe('newer');
     expect(edges[1].target).toBe('older');
@@ -60,7 +58,7 @@ describe('buildFlowGraph', () => {
       makeNode({ id: 'b', name: 'Beta' }),
     ];
 
-    const { nodes } = buildFlowGraph(tree, 'alp', callbacks);
+    const { nodes } = buildFlowGraph(tree, 'alp');
 
     const alpha = nodes.find((n) => n.id === 'a')!;
     const beta = nodes.find((n) => n.id === 'b')!;
@@ -72,7 +70,7 @@ describe('buildFlowGraph', () => {
   it('does not dim any node when the search query is empty', () => {
     const tree: TreeNode[] = [makeNode({ id: 'a', name: 'Alpha' })];
 
-    const { nodes } = buildFlowGraph(tree, '', callbacks);
+    const { nodes } = buildFlowGraph(tree, '');
 
     expect(nodes[0].data.isDimmed).toBe(false);
   });

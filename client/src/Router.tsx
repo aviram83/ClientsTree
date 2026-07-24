@@ -3,11 +3,11 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { useAuth } from './context/AuthContext';
+import { useAuthStore } from './store/authStore';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
 
 export const AppRouter = () => {
-  const { token } = useAuth();
+  const token = useAuthStore((s) => s.token);
   return (
     <BrowserRouter>
       <Routes>

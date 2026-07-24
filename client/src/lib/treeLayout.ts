@@ -15,9 +15,6 @@ export interface CustomNodeData extends Record<string, unknown> {
   id: string;
   active: boolean;
   parentId: string | null;
-  onAdd: (nodeId: string) => void;
-  onEdit: (nodeId: string) => void;
-  onDelete: (nodeId: string) => void;
   isDimmed: boolean;
 }
 
@@ -65,18 +62,11 @@ export const getLayoutedElements = (
   return { nodes: layoutedNodes, edges };
 };
 
-export interface FlowGraphCallbacks {
-  onAdd: (nodeId: string) => void;
-  onEdit: (nodeId: string) => void;
-  onDelete: (nodeId: string) => void;
-}
-
 // Walks the tree, producing React Flow nodes/edges (unlayouted, position {0,0}).
 // Children are ordered newest-first so Dagre places the newest child on the left.
 export const buildFlowGraph = (
   treeData: TreeNode[],
-  searchQuery: string,
-  callbacks: FlowGraphCallbacks
+  searchQuery: string
 ): { nodes: Node<CustomNodeData>[]; edges: Edge[] } => {
   const allNodes: Node<CustomNodeData>[] = [];
   const allEdges: Edge[] = [];
@@ -91,9 +81,6 @@ export const buildFlowGraph = (
         id: node.id,
         active: node.active,
         parentId: node.parentId,
-        onAdd: callbacks.onAdd,
-        onEdit: callbacks.onEdit,
-        onDelete: callbacks.onDelete,
         isDimmed: searchQuery !== '' && !node.name.toLowerCase().includes(searchQuery.toLowerCase()),
       },
       position: { x: 0, y: 0 }, // Position will be set by Dagre
