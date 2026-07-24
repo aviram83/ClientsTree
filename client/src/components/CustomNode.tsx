@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Plus, Edit, Trash } from 'lucide-react';
 import { STATUS_CONFIG, ClientStatus } from '../config/statusConfig';
+import { useTreeUIStore } from '../store/treeUIStore';
 
 const getShapeStyles = (status: ClientStatus | string) => {
   switch (status) {
@@ -18,20 +19,15 @@ const getShapeStyles = (status: ClientStatus | string) => {
   }
 };
 
+// `data` now holds only plain visual/domain fields (no callbacks), so a
+// generic shallow comparison is safe — every key added to CustomNodeData
+// is automatically covered without updating this function.
 const areDataPropsEqual = (prevProps: any, nextProps: any) => {
   const prev = prevProps.data;
   const next = nextProps.data;
-  return (
-    prev.id === next.id &&
-    prev.label === next.label &&
-    prev.status === next.status &&
-    prev.active === next.active &&
-    prev.parentId === next.parentId &&
-    prev.isDimmed === next.isDimmed &&
-    prev.onAdd === next.onAdd &&
-    prev.onEdit === next.onEdit &&
-    prev.onDelete === next.onDelete
-  );
+  const prevKeys = Object.keys(prev);
+  const nextKeys = Object.keys(next);
+  return prevKeys.length === nextKeys.length && prevKeys.every((key) => prev[key] === next[key]);
 };
 
 const CustomNode = memo(({ data }: any) => {
@@ -70,10 +66,10 @@ const CustomNode = memo(({ data }: any) => {
           <div className="text-lg font-bold">{data.label}</div>
         </div>
         <div className="absolute right-[-35px] top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-secondary rounded-full hover:bg-secondary/80">
+          <button onClick={() => useTreeUIStore.getState().openAddModal(data.id)} className="p-1.5 bg-secondary rounded-full hover:bg-secondary/80">
             <Plus size={16} />
           </button>
-          <button onClick={() => data.onEdit(data.id)} className="p-1.5 bg-secondary rounded-full hover:bg-secondary/80">
+          <button onClick={() => useTreeUIStore.getState().openEditModal(data.id)} className="p-1.5 bg-secondary rounded-full hover:bg-secondary/80">
             <Edit size={16} />
           </button>
         </div>
@@ -107,13 +103,13 @@ const CustomNode = memo(({ data }: any) => {
         </div>
 
         <div className="absolute -right-8 top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
-          <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
+          <button onClick={() => useTreeUIStore.getState().openAddModal(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
             <Plus size={14} />
           </button>
-          <button onClick={() => data.onEdit(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
+          <button onClick={() => useTreeUIStore.getState().openEditModal(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
             <Edit size={14} />
           </button>
-          <button onClick={() => data.onDelete(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
+          <button onClick={() => useTreeUIStore.getState().requestDelete(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
             <Trash size={14} />
           </button>
         </div>
@@ -139,13 +135,13 @@ const CustomNode = memo(({ data }: any) => {
         <div className="text-[10px] uppercase opacity-80 mt-1">{statusLabel}</div>
       </div>
       <div className="absolute -right-8 top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
-        <button onClick={() => data.onAdd(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
+        <button onClick={() => useTreeUIStore.getState().openAddModal(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
           <Plus size={14} />
         </button>
-        <button onClick={() => data.onEdit(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
+        <button onClick={() => useTreeUIStore.getState().openEditModal(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
           <Edit size={14} />
         </button>
-        <button onClick={() => data.onDelete(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
+        <button onClick={() => useTreeUIStore.getState().requestDelete(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
           <Trash size={14} />
         </button>
       </div>

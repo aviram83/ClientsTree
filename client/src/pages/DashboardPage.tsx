@@ -1,7 +1,8 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { User } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useTreeStore } from '../store/treeStore';
+import { useTreeUIStore } from '../store/treeUIStore';
 import { useProfileStore } from '../store/profileStore';
 import TreeVisualizer from '../components/TreeVisualizer';
 import { Modal } from '../components/Modal';
@@ -11,21 +12,6 @@ import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { UserSideMenu } from '../components/UserSideMenu';
 import { Logo } from '../components/Logo';
 
-const findNodeInTree = (nodes: TreeNode[], nodeId: string): TreeNode | null => {
-  for (const node of nodes) {
-    if (node.id === nodeId) {
-      return node;
-    }
-    if (node.children) {
-      const found = findNodeInTree(node.children, nodeId);
-      if (found) {
-        return found;
-      }
-    }
-  }
-  return null;
-};
-
 export const DashboardPage = () => {
   const logout = useAuthStore((s) => s.logout);
   const profile = useProfileStore((s) => s.profile);
@@ -34,6 +20,10 @@ export const DashboardPage = () => {
   const addNode = useTreeStore((s) => s.addNode);
   const updateNode = useTreeStore((s) => s.updateNode);
   const fetchTree = useTreeStore((s) => s.fetchTree);
+  const isModalOpen = useTreeUIStore((s) => s.isModalOpen);
+  const modalAction = useTreeUIStore((s) => s.modalAction);
+  const currentNode = useTreeUIStore((s) => s.currentNode);
+  const closeModal = useTreeUIStore((s) => s.closeModal);
   const effectRan = useRef(false);
 
   useEffect(() => {
@@ -45,9 +35,6 @@ export const DashboardPage = () => {
     }
   }, [fetchTree]);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalAction, setModalAction] = useState<'add' | 'edit' | null>(null);
-  const [currentNode, setCurrentNode] = useState<TreeNode | null>(null);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
 
   const countActiveNodes = (nodes: TreeNode[]): number => {
@@ -63,41 +50,14 @@ export const DashboardPage = () => {
     return count;
   };
 
-  const handleOpenAddModal = useCallback((parentId: string) => {
-    setModalAction('add');
-    setCurrentNode({ parentId } as TreeNode);
-    setIsModalOpen(true);
-  }, []);
-
-  const handleOpenEditModal = useCallback((nodeId: string) => {
-    const nodeToEdit = findNodeInTree(useTreeStore.getState().tree, nodeId);
-    if(nodeToEdit) {
-      setModalAction('edit');
-      setCurrentNode(nodeToEdit);
-      setIsModalOpen(true);
-    }
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
-    setModalAction(null);
-    setCurrentNode(null);
-  }, []);
-
   const handleSaveNode = async (data: any) => {
     if (modalAction === 'add' && currentNode) {
       await addNode({ ...data, parentId: currentNode.parentId });
     } else if (modalAction === 'edit' && currentNode) {
       await updateNode(currentNode.id, data);
     }
-    handleCloseModal();
+    closeModal();
   };
-
-  const handleDeleteNode = useCallback(async (nodeId: string) => {
-    if (window.confirm('Are you sure you want to delete this node?')) {
-      await useTreeStore.getState().deleteNode(nodeId);
-    }
-  }, []);
 
 
   return (
@@ -128,25 +88,22 @@ export const DashboardPage = () => {
             <div className="h-full">
                 <TreeVisualizer
                     treeData={tree}
-                    onAddNode={handleOpenAddModal}
-                    onEditNode={handleOpenEditModal}
-                    onDeleteNode={handleDeleteNode}
                     activeCount={countActiveNodes(tree) - 1}
                 />
             </div>
         )}
       </main>
-      <Modal 
-        isOpen={isModalOpen} 
-        onClose={handleCloseModal} 
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
         title={modalAction === 'add' ? 'Add New Client' : 'Edit Client'}
         textColor="text-foreground"
       >
-        <NodeForm 
-          onSubmit={handleSaveNode} 
-          onClose={handleCloseModal} 
+        <NodeForm
+          onSubmit={handleSaveNode}
+          onClose={closeModal}
           node={currentNode}
-          isLoading={isLoading} 
+          isLoading={isLoading}
         />
       </Modal>
       <UserSideMenu
