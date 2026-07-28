@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { ClientsHousePage } from './pages/ClientsHousePage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
@@ -17,6 +18,7 @@ export const AppRouter = () => {
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/clients-house" element={<ClientsHousePage />} />
         </Route>
       </Routes>
     </BrowserRouter>
