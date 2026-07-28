@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
@@ -13,13 +12,6 @@ interface UserSideMenuProps {
 export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [pendingPath, setPendingPath] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setPendingPath(null);
-    }
-  }, [isOpen]);
 
   return (
     <div
@@ -41,12 +33,6 @@ export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) =
         )}
         role="dialog"
         aria-modal="true"
-        onTransitionEnd={(e) => {
-          if (e.propertyName === 'transform' && !isOpen && pendingPath) {
-            navigate(pendingPath);
-            setPendingPath(null);
-          }
-        }}
       >
         <nav className="flex-grow overflow-y-auto p-4">
           <ul className="flex flex-col gap-1">
@@ -57,7 +43,7 @@ export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) =
                   <button
                     type="button"
                     onClick={() => {
-                      setPendingPath(item.path);
+                      navigate(item.path);
                       onClose();
                     }}
                     className={cn(
