@@ -30,6 +30,13 @@
     --status-supervisor:  142 69% 58%;
     --status-inactive:    220 9% 78%;
 
+    /* ── Clients House percentage-level colors — ascending intensity = higher discount ── */
+    --percentage-level-0: 215 25% 88%;
+    --percentage-level-1: 173 50% 78%;
+    --percentage-level-2: 173 60% 62%;
+    --percentage-level-3: 173 70% 46%;
+    --percentage-level-4: 173 80% 32%;
+
     /* ── Brand colors (Poligon) ── */
     --brand-primary:   173 80% 36%;
     --brand-secondary: 160 84% 39%;
@@ -62,6 +69,12 @@
     --status-distributor: 0 91% 66%;
     --status-supervisor:  142 69% 53%;
     --status-inactive:    0 0% 40%;
+
+    --percentage-level-0: 215 20% 30%;
+    --percentage-level-1: 173 40% 32%;
+    --percentage-level-2: 173 55% 38%;
+    --percentage-level-3: 173 65% 44%;
+    --percentage-level-4: 173 70% 50%;
 
     --brand-primary:   173 70% 45%;
     --brand-secondary: 160 70% 48%;
@@ -104,6 +117,12 @@
   --color-status-distributor:   hsl(var(--status-distributor));
   --color-status-supervisor:    hsl(var(--status-supervisor));
   --color-status-inactive:      hsl(var(--status-inactive));
+
+  --color-percentage-level-0:   hsl(var(--percentage-level-0));
+  --color-percentage-level-1:   hsl(var(--percentage-level-1));
+  --color-percentage-level-2:   hsl(var(--percentage-level-2));
+  --color-percentage-level-3:   hsl(var(--percentage-level-3));
+  --color-percentage-level-4:   hsl(var(--percentage-level-4));
 
   --color-brand-primary:        hsl(var(--brand-primary));
   --color-brand-secondary:      hsl(var(--brand-secondary));

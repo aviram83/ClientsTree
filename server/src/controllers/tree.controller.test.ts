@@ -73,6 +73,34 @@ describe('tree.controller', () => {
       });
       expect(res.status).toHaveBeenCalledWith(201);
     });
+
+    it('rejects an invalid percentageLevel without calling Prisma', async () => {
+      const req = {
+        user: { userId: 'user-1' },
+        body: { name: 'Node', status: 'CLIENT', percentageLevel: 'LEVEL_5' },
+      } as any;
+      const res = buildRes();
+
+      await addNode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(prisma.treeNode.create).not.toHaveBeenCalled();
+    });
+
+    it('passes a valid percentageLevel through to Prisma', async () => {
+      vi.mocked(prisma.treeNode.create).mockResolvedValue({ id: 'new-node' } as any);
+      const req = {
+        user: { userId: 'user-1' },
+        body: { name: 'Node', status: 'CLIENT', percentageLevel: 'LEVEL_2' },
+      } as any;
+      const res = buildRes();
+
+      await addNode(req, res);
+
+      expect(prisma.treeNode.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ percentageLevel: 'LEVEL_2' }),
+      });
+    });
   });
 
   describe('updateNode', () => {
@@ -100,6 +128,19 @@ describe('tree.controller', () => {
         where: { id: 'node-1' },
         data: expect.objectContaining({ description: '&lt;script&gt;alert(1)&lt;/script&gt;hi' }),
       });
+    });
+
+    it('rejects an invalid percentageLevel without calling Prisma', async () => {
+      const req = {
+        params: { id: 'node-1' },
+        body: { percentageLevel: 'NOT_A_LEVEL' },
+      } as any;
+      const res = buildRes();
+
+      await updateNode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(prisma.treeNode.update).not.toHaveBeenCalled();
     });
   });
 

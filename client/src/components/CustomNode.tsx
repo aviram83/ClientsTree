@@ -4,7 +4,7 @@ import { Plus, Edit, Trash } from 'lucide-react';
 import { STATUS_CONFIG, ClientStatus } from '../config/statusConfig';
 import { useTreeUIStore } from '../store/treeUIStore';
 
-const getShapeStyles = (status: ClientStatus | string) => {
+export const getShapeStyles = (status: ClientStatus | string) => {
   switch (status) {
     case ClientStatus.CLIENT:
       return 'rounded-full border-2';

@@ -54,7 +54,10 @@ export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) =
                     )}
                     aria-current={isActive ? 'page' : undefined}
                   >
-                    {item.label}
+                    <span className="flex items-center gap-2">
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {item.label}
+                    </span>
                   </button>
                 </li>
               );

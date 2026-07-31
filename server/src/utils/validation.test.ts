@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { ClientStatus } from '@prisma/client';
-import { isValidClientStatus, sanitizeDescription } from './validation';
+import { ClientStatus, PercentageLevel } from '@prisma/client';
+import { isValidClientStatus, isValidPercentageLevel, sanitizeDescription } from './validation';
 
 describe('isValidClientStatus', () => {
   it('accepts every ClientStatus enum value', () => {
@@ -13,6 +13,21 @@ describe('isValidClientStatus', () => {
     expect(isValidClientStatus('NOT_A_STATUS')).toBe(false);
     expect(isValidClientStatus(undefined)).toBe(false);
     expect(isValidClientStatus(null)).toBe(false);
+  });
+});
+
+describe('isValidPercentageLevel', () => {
+  it('accepts every PercentageLevel enum value', () => {
+    Object.values(PercentageLevel).forEach(level => {
+      expect(isValidPercentageLevel(level)).toBe(true);
+    });
+  });
+
+  it('rejects invalid strings', () => {
+    expect(isValidPercentageLevel('LEVEL_5')).toBe(false);
+    expect(isValidPercentageLevel('NOT_A_LEVEL')).toBe(false);
+    expect(isValidPercentageLevel(undefined)).toBe(false);
+    expect(isValidPercentageLevel(null)).toBe(false);
   });
 });
 
