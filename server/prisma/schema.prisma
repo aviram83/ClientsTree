@@ -19,12 +19,13 @@ model User {
 }
 
 model TreeNode {
-  id          String     @id @default(uuid())
-  name        String
-  status      ClientStatus
-  description String?
-  active      Boolean    @default(true)
-  createdAt   DateTime   @default(now())
+  id              String           @id @default(uuid())
+  name            String
+  status          ClientStatus
+  percentageLevel PercentageLevel? @default(LEVEL_6)
+  description     String?
+  active          Boolean          @default(true)
+  createdAt       DateTime         @default(now())
   user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   String
   parent   TreeNode?  @relation("TreeHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
@@ -37,4 +38,13 @@ enum ClientStatus {
   DISTRIBUTOR
   SUPERVISOR
   CLIENT
+}
+
+enum PercentageLevel {
+  LEVEL_0
+  LEVEL_1
+  LEVEL_2
+  LEVEL_3
+  LEVEL_4
+  LEVEL_6
 }

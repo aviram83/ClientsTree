@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../db';
-import { isValidClientStatus, sanitizeDescription } from '../utils/validation';
+import { isValidClientStatus, isValidPercentageLevel, sanitizeDescription } from '../utils/validation';
 
 interface AuthRequest extends Request {
   user?: { userId: string };
@@ -38,7 +38,7 @@ export const getTree = async (req: AuthRequest, res: Response) => {
 
 export const addNode = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
-  const { parentId, name, status, active, description } = req.body;
+  const { parentId, name, status, active, description, percentageLevel } = req.body;
 
   if (!userId) {
     return res.status(401).json({ message: 'Not authorized' });
@@ -46,6 +46,10 @@ export const addNode = async (req: AuthRequest, res: Response) => {
 
   if (!isValidClientStatus(status)) {
     return res.status(400).json({ message: `Invalid status value provided: ${status}` });
+  }
+
+  if (percentageLevel !== undefined && percentageLevel !== null && !isValidPercentageLevel(percentageLevel)) {
+    return res.status(400).json({ message: `Invalid percentageLevel value provided: ${percentageLevel}` });
   }
 
   if (description && description.length > 4000) {
@@ -63,6 +67,7 @@ export const addNode = async (req: AuthRequest, res: Response) => {
         parentId,
         active,
         description: cleanDescription,
+        percentageLevel,
       },
     });
     res.status(201).json(newNode);
@@ -73,11 +78,15 @@ export const addNode = async (req: AuthRequest, res: Response) => {
 
 export const updateNode = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { name, status, active, description } = req.body;
+  const { name, status, active, description, percentageLevel } = req.body;
 
   // Validate status only if it's provided in the request
   if (status && !isValidClientStatus(status)) {
     return res.status(400).json({ message: `Invalid status value provided: ${status}` });
+  }
+
+  if (percentageLevel !== undefined && percentageLevel !== null && !isValidPercentageLevel(percentageLevel)) {
+    return res.status(400).json({ message: `Invalid percentageLevel value provided: ${percentageLevel}` });
   }
 
   if (description && description.length > 4000) {
@@ -94,6 +103,7 @@ export const updateNode = async (req: Request, res: Response) => {
         status,
         active,
         description: cleanDescription,
+        percentageLevel,
       },
     });
     res.json(updatedNode);

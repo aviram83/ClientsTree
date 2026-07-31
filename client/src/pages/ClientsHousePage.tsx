@@ -1,9 +1,10 @@
 import { AppLayout } from './AppLayout';
+import ClientsHouseView from '../components/ClientsHouse/ClientsHouseView';
 
 export const ClientsHousePage = () => (
   <AppLayout>
-    <div className="p-4">
-      <h1 className="text-xl font-bold">Clients House</h1>
+    <div style={{ height: '100%', width: '100%' }}>
+      <ClientsHouseView />
     </div>
   </AppLayout>
 );

@@ -1,4 +1,5 @@
 import { ClientStatus } from '../config/statusConfig';
+import { PercentageLevel } from '../config/percentageConfig';
 
 export interface User {
   id: string;
@@ -12,6 +13,7 @@ export interface TreeNode {
   id: string;
   name: string;
   status: ClientStatus;
+  percentageLevel?: PercentageLevel;
   userId: string;
   parentId: string | null;
   active: boolean;
