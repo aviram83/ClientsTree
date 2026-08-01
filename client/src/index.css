@@ -30,12 +30,14 @@
     --status-supervisor:  142 69% 58%;
     --status-inactive:    220 9% 78%;
 
-    /* ── Clients House percentage-level colors — ascending intensity = higher discount ── */
-    --percentage-level-0: 215 25% 88%;
-    --percentage-level-1: 173 50% 78%;
-    --percentage-level-2: 173 60% 62%;
-    --percentage-level-3: 173 70% 46%;
-    --percentage-level-4: 173 80% 32%;
+    /* ── Clients House percentage-level colors — ascending lightness scale, same hue.
+       LEVEL_0 (roof, full price) is the base at 50% lightness; each room level
+       (1→4, smallest→largest discount) gets progressively lighter. ── */
+    --percentage-level-0: 173 70% 50%;
+    --percentage-level-1: 173 62% 62%;
+    --percentage-level-2: 173 52% 74%;
+    --percentage-level-3: 173 42% 84%;
+    --percentage-level-4: 173 34% 92%;
 
     /* ── Brand colors (Poligon) ── */
     --brand-primary:   173 80% 36%;
@@ -70,11 +72,11 @@
     --status-supervisor:  142 69% 53%;
     --status-inactive:    0 0% 40%;
 
-    --percentage-level-0: 215 20% 30%;
-    --percentage-level-1: 173 40% 32%;
-    --percentage-level-2: 173 55% 38%;
-    --percentage-level-3: 173 65% 44%;
-    --percentage-level-4: 173 70% 50%;
+    --percentage-level-0: 173 50% 30%;
+    --percentage-level-1: 173 44% 38%;
+    --percentage-level-2: 173 38% 46%;
+    --percentage-level-3: 173 32% 54%;
+    --percentage-level-4: 173 26% 62%;
 
     --brand-primary:   173 70% 45%;
     --brand-secondary: 160 70% 48%;

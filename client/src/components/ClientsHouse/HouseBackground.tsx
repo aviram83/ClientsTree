@@ -1,6 +1,18 @@
 import { PercentageLevel, PERCENTAGE_LEVEL_CONFIG, resolveLabel } from '../../config/percentageConfig';
 import { HOUSE_SLOT_BOUNDS, HOUSE_WIDTH, HOUSE_HEIGHT, ROOF_HEIGHT, ROOF_LABEL_Y } from '../../lib/houseLayout';
 
+// Static Tailwind class names per room, spelled out in full so the build-time
+// class scanner can find them (a template-literal class name wouldn't survive
+// production purge).
+const ROOM_FILL_CLASS: Record<PercentageLevel, string> = {
+  [PercentageLevel.LEVEL_1]: 'fill-percentage-level-1',
+  [PercentageLevel.LEVEL_2]: 'fill-percentage-level-2',
+  [PercentageLevel.LEVEL_3]: 'fill-percentage-level-3',
+  [PercentageLevel.LEVEL_4]: 'fill-percentage-level-4',
+  [PercentageLevel.LEVEL_0]: 'fill-percentage-level-0',
+  [PercentageLevel.LEVEL_6]: '',
+};
+
 // Static house shape (roof = full price, 2x2 room grid = discount levels).
 // Rendered as a single non-interactive React Flow node so it pans/zooms with
 // the canvas but never intercepts drag/click like a real node would.
@@ -12,8 +24,8 @@ const HouseBackground = () => {
       {/* Roof */}
       <polygon
         points={`${HOUSE_WIDTH / 2},0 ${HOUSE_WIDTH},${ROOF_HEIGHT} 0,${ROOF_HEIGHT}`}
-        className="fill-percentage-level-0 stroke-border"
-        strokeWidth={2}
+        className="fill-percentage-level-0 stroke-black"
+        strokeWidth={3}
       />
       {/* Label sits above ROOF_ICON_TOP_Y (where client icons start packing),
           so it never overlaps client icons regardless of how many rows the
@@ -38,9 +50,8 @@ const HouseBackground = () => {
               y={bounds.y}
               width={bounds.width}
               height={bounds.height}
-              className={`stroke-border ${config.colorClass}`}
-              strokeWidth={2}
-              fillOpacity={0.15}
+              className={`stroke-black ${ROOM_FILL_CLASS[level]}`}
+              strokeWidth={3}
             />
             <text
               x={bounds.x + bounds.width / 2}
