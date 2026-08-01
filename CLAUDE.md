@@ -74,6 +74,7 @@ Destructive changes (dropped/renamed columns) can lose data — back up first; P
 - **Node shapes** (defined in `CustomNode.tsx`): CLIENT = circle, CLIENT_VIP = diamond, DISTRIBUTOR = hexagon, SUPERVISOR = square.
 - **Status config:** `client/src/config/statusConfig.ts` — single source of truth for `ClientStatus` enum, labels (Hebrew), and Tailwind color classes.
 - **UI language:** Partially Hebrew (RTL search bar placeholder, status legend labels).
+- **Clients House view:** `ClientsHouse/ClientsHouseView.tsx` renders an alternate, read-only visualization of the same tree data as a house: a roof (full-price clients) plus a 2x2 grid of rooms for each `PercentageLevel` discount tier, laid out by `client/src/lib/houseLayout.ts` and drawn by `HouseBackground.tsx`. Room/roof fill colors use an ascending-lightness scale keyed by `PercentageLevel` (roof darkest, higher discount levels progressively lighter), defined in `client/src/config/percentageConfig.ts`. Every client renders as an identical black-bordered square via `HouseNode.tsx` (unlike `CustomNode.tsx`'s per-status shapes) with its name split across two lines; nodes are non-interactive (no drag, no click, no React Flow Handles). `flattenVisibleHouseNodes` in `houseLayout.ts` filters out clients that are inactive or whose `percentageLevel` is unset/hidden (`LEVEL_6`).
 
 ## Responsive Design (Mobile + Desktop)
 
