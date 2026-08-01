@@ -51,6 +51,16 @@ describe('flattenVisibleHouseNodes', () => {
     const result = flattenVisibleHouseNodes(tree);
     expect(result.map((n) => n.id)).toEqual(['visible']);
   });
+
+  it('excludes inactive clients even when their level is house-eligible', () => {
+    const tree: TreeNode[] = [
+      makeNode({ id: 'inactive', active: false, percentageLevel: PercentageLevel.LEVEL_1 }),
+      makeNode({ id: 'active', active: true, percentageLevel: PercentageLevel.LEVEL_1 }),
+    ];
+
+    const result = flattenVisibleHouseNodes(tree);
+    expect(result.map((n) => n.id)).toEqual(['active']);
+  });
 });
 
 describe('groupNodesByPercentageLevel', () => {

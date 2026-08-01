@@ -42,13 +42,14 @@ const ROOF_WIDTH_MARGIN = 0.85;
 
 const roofWidthAtY = (y: number): number => (HOUSE_WIDTH * (y / ROOF_HEIGHT)) * ROOF_WIDTH_MARGIN;
 
-// Flattens the tree and drops clients whose level is hidden (LEVEL_6) or unset.
+// Flattens the tree and drops clients whose level is hidden (LEVEL_6) or
+// unset, and clients marked inactive — the house only shows current clients.
 export const flattenVisibleHouseNodes = (treeData: TreeNode[]): TreeNode[] => {
   const result: TreeNode[] = [];
 
   const visit = (node: TreeNode) => {
     const level = node.percentageLevel;
-    if (level && PERCENTAGE_LEVEL_CONFIG[level]?.showsInHouse) {
+    if (node.active && level && PERCENTAGE_LEVEL_CONFIG[level]?.showsInHouse) {
       result.push(node);
     }
     node.children?.forEach(visit);
