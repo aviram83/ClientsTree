@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [0.0.1.1] - 2026-08-01
+
+### Fixed
+- Clients House view: node label font size now scales with tile size instead of staying fixed, so client names no longer truncate to "..." on small tiles.
+- Clients House view: node border thinned from 3px to 2px.
+
 ## [0.0.1.0] - 2026-08-01
 
 ### Changed
