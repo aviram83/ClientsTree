@@ -26,9 +26,9 @@ const HouseNode = memo(({ data }: { data: HouseNodeData }) => {
       title={data.label}
     >
       {data.size >= MIN_SIZE_FOR_LABEL && (
-        <div className="text-[10px] font-bold leading-tight">
-          <div>{firstName}</div>
-          {lastName && <div>{lastName}</div>}
+        <div className="min-w-0 max-w-full text-[10px] font-bold leading-tight">
+          <div className="overflow-hidden text-ellipsis whitespace-nowrap">{firstName}</div>
+          {lastName && <div className="overflow-hidden text-ellipsis whitespace-nowrap">{lastName}</div>}
         </div>
       )}
     </div>
