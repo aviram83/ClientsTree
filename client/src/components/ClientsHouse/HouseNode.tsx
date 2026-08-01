@@ -14,12 +14,12 @@ const MIN_SIZE_FOR_LABEL = 30;
 // status — no drag handles, no edit/delete affordances, no React Flow
 // Handles, since clients in the house aren't connected by tree edges.
 const HouseNode = memo(({ data }: { data: HouseNodeData }) => {
-  const [firstName, ...rest] = data.label.split(' ');
+  const [firstName, ...rest] = data.label.trim().split(/\s+/);
   const lastName = rest.join(' ');
 
   return (
     <div
-      className="flex items-center justify-center text-center p-1 border-[3px] border-black rounded-none bg-white text-foreground"
+      className="flex items-center justify-center overflow-hidden text-center p-1 border-[3px] border-black rounded-none bg-card text-foreground"
       style={{ width: data.size, height: data.size }}
       title={data.label}
     >
