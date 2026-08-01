@@ -2,8 +2,6 @@ import { memo } from 'react';
 
 export interface HouseNodeData extends Record<string, unknown> {
   label: string;
-  status: string;
-  active: boolean;
   size: number;
 }
 

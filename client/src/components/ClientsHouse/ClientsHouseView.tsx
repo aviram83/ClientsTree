@@ -47,7 +47,7 @@ const ClientsHouseView = () => {
     const roofClientNodes: Node<HouseNodeData>[] = roofNodes.map((node, i) => ({
       id: node.id,
       type: 'houseNode',
-      data: { label: node.name, status: node.status, active: node.active, size: roofLayout.nodeSize },
+      data: { label: node.name, size: roofLayout.nodeSize },
       position: roofLayout.positions[i],
       draggable: false,
       selectable: false,
@@ -61,7 +61,7 @@ const ClientsHouseView = () => {
       return nodesInLevel.map((node, i) => ({
         id: node.id,
         type: 'houseNode',
-        data: { label: node.name, status: node.status, active: node.active, size: nodeSize },
+        data: { label: node.name, size: nodeSize },
         position: positions[i],
         draggable: false,
         selectable: false,
