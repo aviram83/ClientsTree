@@ -65,7 +65,7 @@ const CustomNode = memo(({ data }: any) => {
         <div>
           <div className="text-lg font-bold">{data.label}</div>
         </div>
-        <div className="absolute right-[-35px] top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute right-[-35px] top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
           <button onClick={() => useTreeUIStore.getState().openAddModal(data.id)} className="p-1.5 bg-secondary rounded-full hover:bg-secondary/80">
             <Plus size={16} />
           </button>
@@ -102,7 +102,7 @@ const CustomNode = memo(({ data }: any) => {
           <div className="text-[10px] uppercase opacity-80 mt-1">{statusLabel}</div>
         </div>
 
-        <div className="absolute -right-8 top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
+        <div className="absolute -right-8 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-50">
           <button onClick={() => useTreeUIStore.getState().openAddModal(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
             <Plus size={14} />
           </button>
@@ -134,7 +134,7 @@ const CustomNode = memo(({ data }: any) => {
         <div className="text-sm font-bold leading-tight">{data.label}</div>
         <div className="text-[10px] uppercase opacity-80 mt-1">{statusLabel}</div>
       </div>
-      <div className="absolute -right-8 top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
+      <div className="absolute -right-8 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-50">
         <button onClick={() => useTreeUIStore.getState().openAddModal(data.id)} className="p-1.5 bg-card shadow-sm rounded-full hover:bg-secondary">
           <Plus size={14} />
         </button>
