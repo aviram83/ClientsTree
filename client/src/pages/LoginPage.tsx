@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/authStore';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 
 export const LoginPage = () => {
@@ -27,7 +28,7 @@ export const LoginPage = () => {
           </div>
           <div className="space-y-1">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" {...register('password')} type="password" required />
+            <PasswordInput id="password" {...register('password')} required />
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Logging in...' : 'Login'}

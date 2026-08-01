@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/authStore';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -40,10 +41,9 @@ export const RegisterPage = () => {
           </div>
           <div className="space-y-1">
             <Label htmlFor="password">Password</Label>
-            <Input
+            <PasswordInput
               id="password"
               {...register('password', { required: true, minLength: 6 })}
-              type="password"
             />
             {errors.password && (
               <p className="text-destructive text-xs mt-1">Password must be at least 6 characters.</p>
@@ -51,13 +51,12 @@ export const RegisterPage = () => {
           </div>
           <div className="space-y-1">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
+            <PasswordInput
               id="confirmPassword"
               {...register('confirmPassword', {
                 required: true,
                 validate: (value) => value === password || "Passwords don't match",
               })}
-              type="password"
             />
             {errors.confirmPassword && (
               <p className="text-destructive text-xs mt-1">
