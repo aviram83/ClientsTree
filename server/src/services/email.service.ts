@@ -1,5 +1,7 @@
 import nodemailer from 'nodemailer';
+import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 import crypto from 'crypto';
+import dns from 'dns';
 
 export interface EmailService {
   sendPasswordResetEmail(to: string, resetLink: string): Promise<void>;
@@ -11,12 +13,16 @@ const maskEmail = (email: string): string => {
 
 class NodemailerGmailEmailService implements EmailService {
   private transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_APP_PASSWORD,
     },
-  });
+    lookup: (hostname: string, options: dns.LookupOptions, callback: (err: NodeJS.ErrnoException | null, address: string | dns.LookupAddress[], family: number) => void) =>
+      dns.lookup(hostname, { ...options, family: 4 }, callback),
+  } as SMTPTransport.Options);
 
   async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
     const maskedTo = maskEmail(to);
