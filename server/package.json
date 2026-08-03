@@ -21,6 +21,7 @@
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
+    "@getbrevo/brevo": "^6.0.2",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@prisma/config": "^7.2.0",

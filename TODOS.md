@@ -60,6 +60,18 @@ Once fixed, consider adding `tsc --noEmit` to `npm run lint` or CI so these can'
 **Priority:** P2
 **Depends on:** None
 
+### Detect async Brevo send failures (sender rejected after 201)
+
+**What:** `server/src/services/email.service.ts` logs `EMAIL_INFO: ... sent successfully` as soon as `client.transactionalEmails.sendTransacEmail()` resolves (HTTP 201). Brevo's API accepts the request synchronously even when the send is later rejected — e.g. an unverified sender — and only reports that failure asynchronously via its event log / webhooks, not as a rejected promise.
+
+**Why:** Confirmed directly while integrating Brevo: two real test sends both returned `201` from the API but were rejected moments later per `GET /v3/smtp/statistics/events`, reason `"Sending has been rejected because the sender you used ... is not valid."` Our app has no way to see that rejection today, so a misconfigured `EMAIL_FROM` (unverified sender, revoked domain auth, etc.) would silently log success while password-reset emails never actually deliver.
+
+**Context:** Found while migrating from Resend to Brevo for password-reset emails (`fix/smtp-resend-migration`, 2026-08-04). Fix likely needs a Brevo webhook endpoint (their `event` webhook posts `delivered`/`error`/etc. per messageId) wired into the server, or a periodic poll of `/v3/smtp/statistics/events`, to catch async failures and alert/log properly.
+
+**Effort:** M
+**Priority:** P2
+**Depends on:** None
+
 ## Completed
 
 ### Document the Clients House feature in CLAUDE.md
