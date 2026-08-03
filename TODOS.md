@@ -34,6 +34,18 @@ Once fixed, consider adding `tsc --noEmit` to `npm run lint` or CI so these can'
 **Priority:** P1
 **Depends on:** #20 (forgot-password/reset flow) — do not close this without a working legitimate reset path in place, or users lose their only password-recovery mechanism.
 
+### Session invalidation on password reset
+
+**What:** Existing authenticated sessions should be invalidated when a user changes their password.
+
+**Why:** A session established before a password change should not silently remain valid after it.
+
+**Context:** Full technical details tracked privately via GitHub Security Advisory (not detailed here — public repo). See the advisory for reproduction and fix options.
+
+**Effort:** M
+**Priority:** P2
+**Depends on:** None
+
 ## Backend
 
 ### Validate non-empty `name` on tree node create/update
