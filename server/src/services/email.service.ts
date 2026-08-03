@@ -1,54 +1,43 @@
-import nodemailer from 'nodemailer';
-import crypto from 'crypto';
-import dns from 'dns';
-
-// Render's outbound network cannot route to Gmail's IPv6 SMTP endpoints
-// (ENETUNREACH); force Node's resolver to prefer IPv4 addresses globally,
-// since nodemailer connects via net/tls.connect with no way to override
-// DNS resolution per-transport.
-dns.setDefaultResultOrder('ipv4first');
+import { BrevoClient } from '@getbrevo/brevo';
 
 export interface EmailService {
   sendPasswordResetEmail(to: string, resetLink: string): Promise<void>;
 }
 
 const maskEmail = (email: string): string => {
-  return crypto.createHash('sha256').update(email).digest('hex').slice(0, 12);
+  const [localPart, domain] = email.split('@');
+  if (!domain) {
+    return '***';
+  }
+  const visible = localPart.slice(0, 2);
+  return `${visible}${'*'.repeat(Math.max(localPart.length - visible.length, 3))}@${domain}`;
 };
 
-class NodemailerGmailEmailService implements EmailService {
-  private transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
-
+class BrevoEmailService implements EmailService {
   async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
     const maskedTo = maskEmail(to);
-    const gmailUser = process.env.GMAIL_USER?.trim();
-    const gmailAppPassword = process.env.GMAIL_APP_PASSWORD?.trim();
+    const apiKey = process.env.BREVO_API_KEY?.trim();
+    const from = process.env.EMAIL_FROM?.trim();
 
-    if (!gmailUser || !gmailAppPassword) {
-      console.warn(`EMAIL_WARN: skipping password reset email for ${maskedTo} because Gmail credentials are not configured.`);
+    if (!apiKey || !from) {
+      console.warn(`EMAIL_WARN: skipping password reset email for ${maskedTo} because Brevo credentials are not configured.`);
       return;
     }
 
+    const client = new BrevoClient({ apiKey });
+
     try {
-      await this.transporter.sendMail({
-        from: gmailUser,
-        to,
+      await client.transactionalEmails.sendTransacEmail({
+        sender: { email: from },
+        to: [{ email: to }],
         subject: 'Reset your password',
-        html: `<p>You requested a password reset.</p><p><a href="${resetLink}">Click here to reset your password</a></p><p>This link expires in 50 minutes. If you did not request this, you can ignore this email.</p>`,
+        htmlContent: `<p>You requested a password reset.</p><p><a href="${resetLink}">Click here to reset your password</a></p><p>This link expires in 50 minutes. If you did not request this, you can ignore this email.</p>`,
       });
       console.log(`EMAIL_INFO: Password reset email sent successfully to ${maskedTo}.`);
     } catch (error) {
-      const authError = error as { code?: string; responseCode?: number };
-      if (authError.code === 'EAUTH' || authError.responseCode === 535) {
-        console.warn(`EMAIL_WARN: skipping password reset email for ${maskedTo} because Gmail authentication failed. Update GMAIL_USER and GMAIL_APP_PASSWORD.`);
+      const brevoError = error as { statusCode?: number };
+      if (brevoError.statusCode === 401) {
+        console.warn(`EMAIL_WARN: skipping password reset email for ${maskedTo} because Brevo authentication failed. Update BREVO_API_KEY and EMAIL_FROM.`);
         return;
       }
 
@@ -58,4 +47,4 @@ class NodemailerGmailEmailService implements EmailService {
   }
 }
 
-export const emailService: EmailService = new NodemailerGmailEmailService();
+export const emailService: EmailService = new BrevoEmailService();

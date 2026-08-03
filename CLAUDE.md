@@ -66,8 +66,8 @@ Destructive changes (dropped/renamed columns) can lose data — back up first; P
 - `VITE_API_URL` — API base URL (defaults to `http://localhost:3000`)
 
 **server/.env.development** (additional, required for the password-reset email flow):
-- `GMAIL_USER` — Gmail address used to send password-reset emails via `EmailService`
-- `GMAIL_APP_PASSWORD` — Gmail app password (not the account password) for that address
+- `BREVO_API_KEY` — API key for [Brevo](https://www.brevo.com), used by `EmailService` to send password-reset emails over HTTPS (SMTP is not used — cloud hosts like Render commonly block outbound SMTP ports)
+- `EMAIL_FROM` — the sender address verified in Brevo via Single Sender Verification (no custom domain required)
 
 ## Frontend Structure
 
@@ -92,7 +92,7 @@ The app must work on both mobile and desktop web browsers. Every new component s
 
 - **Routes:** `server/src/routes/` → `auth.routes.ts` (`/api/auth`, includes public `POST /forgot-password` and `POST /reset-password`) and `tree.routes.ts` (`/api/tree`, JWT-protected).
 - **Auth middleware:** `server/src/middleware/auth.ts` — validates JWT and attaches user to request.
-- **Services:** `server/src/services/` — thin wrappers around third-party integrations, injected as a singleton (e.g. `email.service.ts` exports `emailService: EmailService`, backed by `nodemailer`'s Gmail transport, used by `auth.controller.ts` to send password-reset links).
+- **Services:** `server/src/services/` — thin wrappers around third-party integrations, injected as a singleton (e.g. `email.service.ts` exports `emailService: EmailService`, backed by the Brevo HTTP API, used by `auth.controller.ts` to send password-reset links).
 - **Database:** `server/prisma/schema.prisma` — `User` and `TreeNode` models. `TreeNode` is self-referential (parentId) for hierarchy. Cascading deletes are configured. `User` also carries `resetTokenHash`/`resetTokenExpiresAt` for the password-reset flow (the raw token is never stored, only its hash).
 - **XSS:** Server uses the `xss` library for sanitization.
 
@@ -105,7 +105,7 @@ The app must work on both mobile and desktop web browsers. Every new component s
   - `api/` — HTTP layer (axios instance + endpoint functions).
   - `config/` — static config/enums (e.g. `statusConfig.ts`).
 - **Server** (`server/src/`):
-  - `controllers/` — route handler business logic; controllers call Prisma directly (no data-access layer), but third-party integrations are wrapped in `services/` (e.g. `auth.controller.ts` calls `emailService.sendPasswordResetEmail(...)` rather than using `nodemailer` directly).
+  - `controllers/` — route handler business logic; controllers call Prisma directly (no data-access layer), but third-party integrations are wrapped in `services/` (e.g. `auth.controller.ts` calls `emailService.sendPasswordResetEmail(...)` rather than using Brevo directly).
   - `services/` — singleton wrappers around third-party integrations (e.g. `email.service.ts`), so controllers stay Prisma/Express-focused and integrations are swappable/mockable in tests.
   - `utils/` — pure helpers with no Express dependency (e.g. `validation.ts`), extracted out of controllers so they're unit-testable in isolation.
   - `middleware/` — Express middleware (e.g. `auth.ts`).
