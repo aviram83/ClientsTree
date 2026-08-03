@@ -20,6 +20,20 @@ Once fixed, consider adding `tsc --noEmit` to `npm run lint` or CI so these can'
 **Priority:** P3
 **Depends on:** None
 
+## Security
+
+### Harden `register()` duplicate-email handling
+
+**What:** Registration handling of an already-registered email needs to change once a proper password-recovery path exists.
+
+**Why:** Current behavior around duplicate-email registration should not remain the only path to account recovery once issue #20 ships a real one.
+
+**Context:** Full technical details tracked privately via GitHub Security Advisory (not detailed here — public repo). See the advisory for reproduction and fix options.
+
+**Effort:** M
+**Priority:** P1
+**Depends on:** #20 (forgot-password/reset flow) — do not close this without a working legitimate reset path in place, or users lose their only password-recovery mechanism.
+
 ## Backend
 
 ### Validate non-empty `name` on tree node create/update
