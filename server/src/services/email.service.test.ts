@@ -51,6 +51,22 @@ describe('email.service', () => {
     ).rejects.toThrow('SMTP failure');
   });
 
+  it('skips sending when Gmail credentials are missing', async () => {
+    delete process.env.GMAIL_USER;
+    delete process.env.GMAIL_APP_PASSWORD;
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { emailService } = await import('./email.service');
+
+    await expect(
+      emailService.sendPasswordResetEmail('user@example.com', 'https://app.example.com/reset-password?token=abc'),
+    ).resolves.toBeUndefined();
+
+    expect(sendMailMock).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('skipping'));
+
+    warnSpy.mockRestore();
+  });
+
   it('logs a masked (non-plaintext) email address on successful send, never the raw address', async () => {
     sendMailMock.mockResolvedValue(undefined);
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});

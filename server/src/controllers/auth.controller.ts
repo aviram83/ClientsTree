@@ -156,11 +156,13 @@ export const forgotPassword = async (req: Request, res: Response) => {
       const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
       const resetLink = `${clientUrl}/reset-password?token=${rawToken}`;
 
-      try {
-        await emailService.sendPasswordResetEmail(user.email, resetLink);
-      } catch (error) {
+      // Fire-and-forget: don't block the response on SMTP latency. Awaiting the
+      // send here would make the response take visibly longer for a registered
+      // email than an unregistered one, turning the "Sending..." UI state into
+      // a timing side-channel that defeats the enumeration-safe generic message.
+      emailService.sendPasswordResetEmail(user.email, resetLink).catch((error) => {
         console.error('Forgot password email send error:', error);
-      }
+      });
     }
 
     res.status(200).json({ message: GENERIC_FORGOT_PASSWORD_MESSAGE });
@@ -171,14 +173,10 @@ export const forgotPassword = async (req: Request, res: Response) => {
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
-  const { token, password, confirmPassword } = req.body;
+  const { token, password } = req.body;
 
-  if (!token || !password || !confirmPassword) {
-    return res.status(400).json({ message: 'Token, password, and confirmPassword are required' });
-  }
-
-  if (password !== confirmPassword) {
-    return res.status(400).json({ message: 'Passwords do not match' });
+  if (!token || !password) {
+    return res.status(400).json({ message: 'Token and password are required' });
   }
 
   if (password.length < PASSWORD_MIN_LENGTH) {

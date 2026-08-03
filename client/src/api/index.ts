@@ -8,7 +8,7 @@ export const login = (data: any) => api.post<{ token: string; user: User }>('/au
 export const getProfile = () => api.get<User>('/auth/me');
 export const forgotPassword = (email: string) => api.post<{ message: string }>('/auth/forgot-password', { email });
 export const resetPassword = (token: string, password: string) =>
-  api.post<{ message: string }>('/auth/reset-password', { token, password, confirmPassword: password });
+  api.post<{ message: string }>('/auth/reset-password', { token, password });
 
 // Tree
 export const fetchTree = () => api.get<TreeNode[]>('/tree');

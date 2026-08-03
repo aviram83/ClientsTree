@@ -228,7 +228,7 @@ describe('auth.controller', () => {
       vi.mocked(bcrypt.hash).mockResolvedValue('new-hashed-password' as never);
       vi.mocked(prisma.user.update).mockResolvedValue({} as any);
 
-      const req = { body: { token: 'raw-token', password: 'newpass', confirmPassword: 'newpass' } } as any;
+      const req = { body: { token: 'raw-token', password: 'newpass' } } as any;
       const res = buildRes();
 
       await resetPassword(req, res);
@@ -243,7 +243,7 @@ describe('auth.controller', () => {
     it('returns 400 with a generic message for an expired or invalid token', async () => {
       vi.mocked(prisma.user.findFirst).mockResolvedValue(null);
 
-      const req = { body: { token: 'raw-token', password: 'newpass', confirmPassword: 'newpass' } } as any;
+      const req = { body: { token: 'raw-token', password: 'newpass' } } as any;
       const res = buildRes();
 
       await resetPassword(req, res);
@@ -255,7 +255,7 @@ describe('auth.controller', () => {
     it('returns 400 for an invalid token without distinguishing from expired', async () => {
       vi.mocked(prisma.user.findFirst).mockResolvedValue(null);
 
-      const req = { body: { token: 'bogus-token', password: 'newpass', confirmPassword: 'newpass' } } as any;
+      const req = { body: { token: 'bogus-token', password: 'newpass' } } as any;
       const res = buildRes();
 
       await resetPassword(req, res);
@@ -264,18 +264,8 @@ describe('auth.controller', () => {
       expect(res.json).toHaveBeenCalledWith({ message: 'Invalid or expired reset link' });
     });
 
-    it('returns 400 when password and confirmPassword do not match', async () => {
-      const req = { body: { token: 'raw-token', password: 'newpass', confirmPassword: 'different' } } as any;
-      const res = buildRes();
-
-      await resetPassword(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(prisma.user.findFirst).not.toHaveBeenCalled();
-    });
-
     it('returns 400 when the password is under 6 characters', async () => {
-      const req = { body: { token: 'raw-token', password: 'abc', confirmPassword: 'abc' } } as any;
+      const req = { body: { token: 'raw-token', password: 'abc' } } as any;
       const res = buildRes();
 
       await resetPassword(req, res);
@@ -284,15 +274,15 @@ describe('auth.controller', () => {
       expect(prisma.user.findFirst).not.toHaveBeenCalled();
     });
 
-    it('returns 400 when token, password, or confirmPassword is missing', async () => {
-      const req = { body: { password: 'newpass', confirmPassword: 'newpass' } } as any;
+    it('returns 400 when token or password is missing', async () => {
+      const req = { body: { password: 'newpass' } } as any;
       const res = buildRes();
 
       await resetPassword(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Token, password, and confirmPassword are required',
+        message: 'Token and password are required',
       });
       expect(prisma.user.findFirst).not.toHaveBeenCalled();
     });
@@ -300,7 +290,7 @@ describe('auth.controller', () => {
     it('returns 500 when the database lookup throws', async () => {
       vi.mocked(prisma.user.findFirst).mockRejectedValue(new Error('DB down'));
 
-      const req = { body: { token: 'raw-token', password: 'newpass', confirmPassword: 'newpass' } } as any;
+      const req = { body: { token: 'raw-token', password: 'newpass' } } as any;
       const res = buildRes();
 
       await resetPassword(req, res);
