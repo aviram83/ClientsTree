@@ -1,7 +1,12 @@
 import nodemailer from 'nodemailer';
-import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 import crypto from 'crypto';
 import dns from 'dns';
+
+// Render's outbound network cannot route to Gmail's IPv6 SMTP endpoints
+// (ENETUNREACH); force Node's resolver to prefer IPv4 addresses globally,
+// since nodemailer connects via net/tls.connect with no way to override
+// DNS resolution per-transport.
+dns.setDefaultResultOrder('ipv4first');
 
 export interface EmailService {
   sendPasswordResetEmail(to: string, resetLink: string): Promise<void>;
@@ -20,9 +25,7 @@ class NodemailerGmailEmailService implements EmailService {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_APP_PASSWORD,
     },
-    lookup: (hostname: string, options: dns.LookupOptions, callback: (err: NodeJS.ErrnoException | null, address: string | dns.LookupAddress[], family: number) => void) =>
-      dns.lookup(hostname, { ...options, family: 4 }, callback),
-  } as SMTPTransport.Options);
+  });
 
   async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
     const maskedTo = maskEmail(to);
