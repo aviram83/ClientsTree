@@ -16,6 +16,8 @@ model User {
   language  String     @default("he")
   createdAt DateTime   @default(now())
   treeNodes TreeNode[]
+  resetTokenHash      String?    @unique
+  resetTokenExpiresAt DateTime?
 }
 
 model TreeNode {
