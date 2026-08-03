@@ -178,10 +178,10 @@ describe('auth.controller', () => {
       vi.mocked(emailService.sendPasswordResetEmail).mockResolvedValue(undefined);
 
       const capturedHashes: string[] = [];
-      vi.mocked(prisma.user.update).mockImplementation(async (args: any) => {
+      vi.mocked(prisma.user.update).mockImplementation((async (args: any) => {
         capturedHashes.push(args.data.resetTokenHash);
         return {} as any;
-      });
+      }) as any);
 
       const req1 = { body: { email: 'jane@example.com' } } as any;
       await forgotPassword(req1, buildRes());

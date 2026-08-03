@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const sendMailMock = vi.fn();
-const createTransportMock = vi.fn(() => ({ sendMail: sendMailMock }));
+const createTransportMock = vi.fn((..._args: any[]) => ({ sendMail: sendMailMock }));
 
 vi.mock('nodemailer', () => ({
   default: {
