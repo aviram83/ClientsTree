@@ -20,10 +20,15 @@ describe('email.service', () => {
   it('creates a Gmail nodemailer transport with credentials from env vars', async () => {
     await import('./email.service');
 
-    expect(createTransportMock).toHaveBeenCalledWith({
-      service: 'gmail',
-      auth: { user: 'sender@gmail.com', pass: 'app-password' },
-    });
+    expect(createTransportMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: { user: 'sender@gmail.com', pass: 'app-password' },
+        lookup: expect.any(Function),
+      }),
+    );
   });
 
   it('calls sendMail with the recipient, subject, and reset link', async () => {
