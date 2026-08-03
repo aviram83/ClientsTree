@@ -120,6 +120,8 @@ cd server && npm run test:watch   # watch mode
 | `JWT_SECRET` | Secret for signing JWT tokens (any string locally) |
 | `PORT` | Server port (default: `3000`) |
 | `CLIENT_URL` | CORS origin (default: `http://localhost:5173`) |
+| `GMAIL_USER` | Gmail address used to send password-reset emails |
+| `GMAIL_APP_PASSWORD` | Gmail app password for that address (not the account password) |
 
 ### `client/.env` — Client config (optional)
 

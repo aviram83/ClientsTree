@@ -5,9 +5,19 @@ import { ClientStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
+import { emailService } from '../services/email.service';
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
+
+const RESET_TOKEN_DURATION_MS = 50 * 60 * 1000; // 50 minutes
+const GENERIC_FORGOT_PASSWORD_MESSAGE = 'If that email is registered, a reset link has been sent.';
+const GENERIC_INVALID_RESET_MESSAGE = 'Invalid or expired reset link';
+// Keep in sync with client/src/lib/passwordValidation.ts's PASSWORD_MIN_LENGTH
+const PASSWORD_MIN_LENGTH = 6;
+
+const hashToken = (token: string): string => crypto.createHash('sha256').update(token).digest('hex');
 
 interface AuthRequest extends Request {
   user?: { userId: string };
@@ -119,6 +129,88 @@ export const login = async (req: Request, res: Response) => {
     res.json({ token, user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }, expiresAt });
   } catch (error) {
     console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  if (!email || typeof email !== 'string') {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (user) {
+      const rawToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenHash = hashToken(rawToken);
+      const resetTokenExpiresAt = new Date(Date.now() + RESET_TOKEN_DURATION_MS);
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { resetTokenHash, resetTokenExpiresAt },
+      });
+
+      const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+      const resetLink = `${clientUrl}/reset-password?token=${rawToken}`;
+
+      // Fire-and-forget: don't block the response on SMTP latency. Awaiting the
+      // send here would make the response take visibly longer for a registered
+      // email than an unregistered one, turning the "Sending..." UI state into
+      // a timing side-channel that defeats the enumeration-safe generic message.
+      emailService.sendPasswordResetEmail(user.email, resetLink).catch((error) => {
+        console.error('Forgot password email send error:', error);
+      });
+    }
+
+    res.status(200).json({ message: GENERIC_FORGOT_PASSWORD_MESSAGE });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({ message: 'Token and password are required' });
+  }
+
+  if (password.length < PASSWORD_MIN_LENGTH) {
+    return res.status(400).json({ message: `Password must be at least ${PASSWORD_MIN_LENGTH} characters` });
+  }
+
+  try {
+    const resetTokenHash = hashToken(token);
+
+    const user = await prisma.user.findFirst({
+      where: {
+        resetTokenHash,
+        resetTokenExpiresAt: { gt: new Date() },
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: GENERIC_INVALID_RESET_MESSAGE });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: passwordHash,
+        resetTokenHash: null,
+        resetTokenExpiresAt: null,
+      },
+    });
+
+    res.status(200).json({ message: 'Password has been reset successfully' });
+  } catch (error) {
+    console.error('Reset password error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

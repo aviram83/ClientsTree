@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { PASSWORD_MIN_LENGTH, passwordsMatchValidator } from '@/lib/passwordValidation';
 
 export const RegisterPage = () => {
   const { register, handleSubmit, watch, setValue, formState: { errors, isValid } } = useForm({ mode: 'onChange' });
@@ -43,10 +44,10 @@ export const RegisterPage = () => {
             <Label htmlFor="password">Password</Label>
             <PasswordInput
               id="password"
-              {...register('password', { required: true, minLength: 6 })}
+              {...register('password', { required: true, minLength: PASSWORD_MIN_LENGTH })}
             />
             {errors.password && (
-              <p className="text-destructive text-xs mt-1">Password must be at least 6 characters.</p>
+              <p className="text-destructive text-xs mt-1">Password must be at least {PASSWORD_MIN_LENGTH} characters.</p>
             )}
           </div>
           <div className="space-y-1">
@@ -55,7 +56,7 @@ export const RegisterPage = () => {
               id="confirmPassword"
               {...register('confirmPassword', {
                 required: true,
-                validate: (value) => value === password || "Passwords don't match",
+                validate: (value) => passwordsMatchValidator(value, password),
               })}
             />
             {errors.confirmPassword && (

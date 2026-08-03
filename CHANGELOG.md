@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here.
 
+## [0.1.0.0] - 2026-08-03
+
+### Added
+- Forgot-password flow: users who forget their password can now request a reset link by email from the login page, instead of having to re-register to recover access.
+- Reset-password page: clicking the emailed link takes users to a page where they can set a new password; links expire after 50 minutes, and requesting a new link invalidates any earlier one.
+
+### Changed
+- Password confirmation validation on the Register page now shares its logic with the new Reset Password page instead of duplicating it.
+
 ## [0.0.1.1] - 2026-08-01
 
 ### Fixed
