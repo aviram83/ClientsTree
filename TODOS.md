@@ -20,6 +20,18 @@ Once fixed, consider adding `tsc --noEmit` to `npm run lint` or CI so these can'
 **Priority:** P3
 **Depends on:** None
 
+### Handle mid-session Render cold starts in the API layer
+
+**What:** The `WakeGate` (added for the graceful "server is waking up" screen) only probes `/health` on app mount. It does not cover cold starts that happen *after* the app is loaded.
+
+**Why:** Render's free tier spins the server down after 15 minutes of inactivity. A logged-in user who leaves a tab idle for 15+ minutes and then acts (add node, edit, refetch tree) triggers a cold start mid-session — the exact raw hang/error the wake screen was built to remove, but the mount-only gate never sees it. On a 15-min spin-down this is arguably the *more common* cold start than initial load.
+
+**Context:** Deferred during `/plan-eng-review` of the wake-screen plan (2026-08-11). Chosen fix: add a response-interceptor path in `client/src/api/api.ts` — on a request timeout/network error, show the same wake splash (reuse `WakeGate`'s splash + `waitForServer` from `client/src/api/health.ts`), poll `/health`, then auto-retry the failed request once the server is back. Needs a shared way to trigger the splash from outside React (e.g. a small zustand slice or the existing `injectShowErrorModal` injection pattern in `api.ts`).
+
+**Effort:** M
+**Priority:** P2
+**Depends on:** Wake-screen feature (`health.ts` + `WakeGate.tsx`) landing first.
+
 ## Security
 
 ### Harden `register()` duplicate-email handling

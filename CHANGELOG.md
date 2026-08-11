@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## [0.2.0.0] - 2026-08-11
+
+### Added
+- Graceful "server is waking up" screen: on the free-tier host the server sleeps after 15 minutes of inactivity and takes up to a minute to wake. The app now detects a cold start on load, shows a branded splash with a spinner and reassurance copy that escalates as the wait passes ~30s, polls the server under the hood, and loads normally once it responds. A warm server shows nothing extra (no flash), and if the server never wakes within the cap the user gets a clear retry button instead of a hang.
+
 ## [0.1.1.0] - 2026-08-04
 
 ### Fixed
