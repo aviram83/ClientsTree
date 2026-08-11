@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WakeGate } from './WakeGate';
+import { WAKE_COPY } from './wakeGate.constants';
 import { pingHealth, waitForServer } from '../api/health';
 
 vi.mock('../api/health', () => ({
@@ -31,7 +32,7 @@ describe('WakeGate', () => {
     renderGate();
 
     expect(await screen.findByText(CHILD)).toBeInTheDocument();
-    expect(screen.queryByText('מתחברים לשרת…')).not.toBeInTheDocument();
+    expect(screen.queryByText(WAKE_COPY.heading)).not.toBeInTheDocument();
     expect(waitMock).not.toHaveBeenCalled();
   });
 
@@ -42,7 +43,7 @@ describe('WakeGate', () => {
 
     renderGate();
 
-    expect(await screen.findByText('מתחברים לשרת…')).toBeInTheDocument();
+    expect(await screen.findByText(WAKE_COPY.heading)).toBeInTheDocument();
     expect(screen.queryByText(CHILD)).not.toBeInTheDocument();
   });
 
@@ -54,9 +55,9 @@ describe('WakeGate', () => {
     renderGate();
 
     // Nothing yet (still within the grace window).
-    expect(screen.queryByText('מתחברים לשרת…')).not.toBeInTheDocument();
+    expect(screen.queryByText(WAKE_COPY.heading)).not.toBeInTheDocument();
     await vi.advanceTimersByTimeAsync(800);
-    expect(screen.getByText('מתחברים לשרת…')).toBeInTheDocument();
+    expect(screen.getByText(WAKE_COPY.heading)).toBeInTheDocument();
   });
 
   it('enters the failed state at the cap, then retry recovers and renders children', async () => {
@@ -68,14 +69,14 @@ describe('WakeGate', () => {
 
     renderGate();
 
-    const retry = await screen.findByRole('button', { name: 'נסו שוב' });
-    expect(screen.getByText('עדיין לא הצלחנו להתחבר.')).toBeInTheDocument();
+    const retry = await screen.findByRole('button', { name: WAKE_COPY.retryButton });
+    expect(screen.getByText(WAKE_COPY.failedHeading)).toBeInTheDocument();
 
     await userEvent.click(retry);
 
     // Retry restarts the probe; the server is now up, so children render...
     expect(await screen.findByText(CHILD)).toBeInTheDocument();
     // ...and the failed message is gone.
-    expect(screen.queryByText('עדיין לא הצלחנו להתחבר.')).not.toBeInTheDocument();
+    expect(screen.queryByText(WAKE_COPY.failedHeading)).not.toBeInTheDocument();
   });
 });
