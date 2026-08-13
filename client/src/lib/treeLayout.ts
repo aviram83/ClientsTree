@@ -1,4 +1,4 @@
-import dagre from 'dagre';
+import { stratify, tree, HierarchyPointNode } from 'd3-hierarchy';
 import { MarkerType } from '@xyflow/react';
 import type { Node, Edge } from '@xyflow/react';
 import { TreeNode } from '../api/types';
@@ -18,44 +18,66 @@ export interface CustomNodeData extends Record<string, unknown> {
   isDimmed: boolean;
 }
 
+// --- d3-hierarchy (Reingold–Tilford) tree layout ---------------------------
+// A true tree layout (not a general layered/Sugiyama graph layout): siblings
+// pack tightly and a parent is never stranded over an empty "valley" between
+// two bushy subtrees. Hierarchy is derived from each node's data.parentId.
+//
+// Horizontal gap tuning lives in SIBLING_GAP + the `separation` function below;
+// vertical gap is NODE_HEIGHT + RANK_GAP.
+const SIBLING_GAP = 80; // extra px between adjacent siblings (added to NODE_WIDTH)
+const RANK_GAP = 100; // vertical gap between levels
+
 export const getLayoutedElements = (
   nodes: Node<CustomNodeData>[],
   edges: Edge[],
-  options: { direction: string }
+  // `direction` kept for signature-compatibility with callers; the tree layout
+  // is always top-to-bottom.
+  _options: { direction: string }
 ): { nodes: Node<CustomNodeData>[]; edges: Edge[] } => {
-  const g = new dagre.graphlib.Graph();
+  if (nodes.length === 0) return { nodes, edges };
 
-  // 'nodesep' is the horizontal space between siblings
-  // 'ranksep' is the vertical gap between levels
-  g.setGraph({ rankdir: options.direction, nodesep: 50, ranksep: 100 });
+  const idSet = new Set(nodes.map((n) => n.id));
+  const SYNTHETIC_ROOT = '__synthetic_root__';
 
-  g.setDefaultEdgeLabel(() => ({}));
+  // Build stratify records. The data may be a forest (multiple real roots), but
+  // d3.stratify requires exactly one root, so we parent every real root under a
+  // synthetic root and strip it back out afterwards.
+  const records = nodes.map((n) => {
+    const parentId = n.data.parentId;
+    const hasParentInSet = parentId != null && idSet.has(parentId);
+    return { id: n.id, parentId: hasParentInSet ? parentId : SYNTHETIC_ROOT };
+  });
+  records.push({ id: SYNTHETIC_ROOT, parentId: '' });
 
-  // 1. Set Edges (Order matters for Left-to-Right positioning)
-  edges.forEach((edge) => {
-    g.setEdge(edge.source, edge.target);
+  const root = stratify<{ id: string; parentId: string }>()
+    .id((d) => d.id)
+    .parentId((d) => (d.parentId === '' ? null : d.parentId))(records);
+
+  // nodeSize: [horizontal span per node, vertical span per rank]. separation
+  // returns a multiplier of the horizontal span: siblings sit one node apart,
+  // cousins (different parents) get a little more breathing room.
+  const layout = tree<{ id: string; parentId: string }>()
+    .nodeSize([NODE_WIDTH + SIBLING_GAP, NODE_HEIGHT + RANK_GAP])
+    .separation((a, b) => (a.parent === b.parent ? 1 : 1.25));
+
+  const laidOut = layout(root);
+
+  // Map id -> computed point, skipping the synthetic root. The synthetic root
+  // occupies depth 0, so real roots land at depth 1; shift y up one rank so the
+  // real roots sit at y = 0.
+  const posById = new Map<string, { x: number; y: number }>();
+  laidOut.each((d: HierarchyPointNode<{ id: string; parentId: string }>) => {
+    if (d.data.id === SYNTHETIC_ROOT) return;
+    posById.set(d.data.id, { x: d.x, y: d.y - (NODE_HEIGHT + RANK_GAP) });
   });
 
-  // 2. Set Nodes with explicit Dimensions
-  nodes.forEach((node) => {
-    // You must provide width/height so Dagre knows how much space to reserve
-    g.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
-  });
-
-  // 3. Calculate Layout
-  dagre.layout(g);
-
-  // 4. Map back to React Flow (Center -> Top-Left conversion)
   const layoutedNodes = nodes.map((node) => {
-    const nodeWithPosition = g.node(node.id);
-
+    const p = posById.get(node.id) ?? { x: 0, y: 0 };
     return {
       ...node,
-      position: {
-        // Shift x by half width, y by half height
-        x: nodeWithPosition.x - NODE_WIDTH / 2,
-        y: nodeWithPosition.y - NODE_HEIGHT / 2,
-      },
+      // Center → top-left conversion (React Flow positions from the top-left).
+      position: { x: p.x - NODE_WIDTH / 2, y: p.y - NODE_HEIGHT / 2 },
     };
   });
 
@@ -63,7 +85,7 @@ export const getLayoutedElements = (
 };
 
 // Walks the tree, producing React Flow nodes/edges (unlayouted, position {0,0}).
-// Children are ordered newest-first so Dagre places the newest child on the left.
+// Children are ordered newest-first so the newest child is placed on the left.
 export const buildFlowGraph = (
   treeData: TreeNode[],
   searchQuery: string
