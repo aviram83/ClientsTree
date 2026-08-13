@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [0.2.1.0] - 2026-08-13
+
+### Fixed
+- Tree view node action buttons (add/edit/delete) are now always visible. They were revealed on hover on larger screens, which left them permanently unreachable on touch tablets like iPad (wide enough to trigger the hover-only styling, but unable to hover).
+- Tree layout no longer opens large empty gaps under a parent whose children each have their own children. The graph layout (Dagre) was replaced with a true tree layout (d3-hierarchy / Reingold–Tilford) that packs siblings tightly; sibling spacing is also configurable.
+
 ## [0.2.0.0] - 2026-08-11
 
 ### Added

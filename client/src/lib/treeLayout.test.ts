@@ -78,9 +78,11 @@ describe('buildFlowGraph', () => {
 
 describe('getLayoutedElements', () => {
   it('assigns a distinct position to each node', () => {
+    // The tree layout derives hierarchy from data.parentId (not edges), so the
+    // child must point at its parent.
     const nodes = [
-      { id: 'root', type: 'custom', position: { x: 0, y: 0 }, data: {} as any },
-      { id: 'child', type: 'custom', position: { x: 0, y: 0 }, data: {} as any },
+      { id: 'root', type: 'custom', position: { x: 0, y: 0 }, data: { parentId: null } as any },
+      { id: 'child', type: 'custom', position: { x: 0, y: 0 }, data: { parentId: 'root' } as any },
     ];
     const edges = [{ id: 'e-root-child', source: 'root', target: 'child' }];
 
