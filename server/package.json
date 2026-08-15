@@ -15,9 +15,7 @@
     "start:dev": "dotenv -e .env.development -- nodemon src/index.ts",
     "prisma": "npm run prisma:dev",
     "prisma:dev": "dotenv -e .env.development -- prisma",
-    "prisma:prod": "dotenv -e .env.production -- prisma",
-    "backfill:supervisor-level:dev": "dotenv -e .env.development -- ts-node scripts/backfill-supervisor-level.ts",
-    "backfill:supervisor-level:prod": "dotenv -e .env.production -- ts-node scripts/backfill-supervisor-level.ts"
+    "prisma:prod": "dotenv -e .env.production -- prisma"
   },
   "keywords": [],
   "author": "",
