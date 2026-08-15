@@ -93,6 +93,10 @@ export const updateNode = async (req: Request, res: Response) => {
     return res.status(400).json({ message: `Invalid percentageLevel value provided: ${percentageLevel}` });
   }
 
+  // Known race: two concurrent updates to the same node can each read a stale
+  // row here and individually pass validation, combining into an invalid
+  // final state (e.g. SUPERVISOR at a non-LEVEL_4 percentage). Accepted risk
+  // for this single-user app — not worth a transaction for a double-click.
   if (status !== undefined || percentageLevel !== undefined) {
     const existing = await prisma.treeNode.findUnique({ where: { id } });
     if (!existing) {

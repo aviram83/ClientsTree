@@ -224,6 +224,46 @@ describe('tree.controller', () => {
       });
     });
 
+    it('allows demoting a SUPERVISOR to CLIENT while percentageLevel stays LEVEL_4', async () => {
+      vi.mocked(prisma.treeNode.findUnique).mockResolvedValue({
+        id: 'node-1',
+        status: 'SUPERVISOR',
+        percentageLevel: 'LEVEL_4',
+      } as any);
+      vi.mocked(prisma.treeNode.update).mockResolvedValue({ id: 'node-1' } as any);
+      const req = {
+        params: { id: 'node-1' },
+        body: { status: 'CLIENT' },
+      } as any;
+      const res = buildRes();
+
+      await updateNode(req, res);
+
+      expect(prisma.treeNode.update).toHaveBeenCalledWith({
+        where: { id: 'node-1' },
+        data: expect.objectContaining({ status: 'CLIENT' }),
+      });
+      expect(res.status).not.toHaveBeenCalledWith(400);
+    });
+
+    it('rejects explicitly nulling percentageLevel on an existing SUPERVISOR node', async () => {
+      vi.mocked(prisma.treeNode.findUnique).mockResolvedValue({
+        id: 'node-1',
+        status: 'SUPERVISOR',
+        percentageLevel: 'LEVEL_4',
+      } as any);
+      const req = {
+        params: { id: 'node-1' },
+        body: { percentageLevel: null },
+      } as any;
+      const res = buildRes();
+
+      await updateNode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(prisma.treeNode.update).not.toHaveBeenCalled();
+    });
+
     it('returns 404 when updating status/percentageLevel on a node that no longer exists', async () => {
       vi.mocked(prisma.treeNode.findUnique).mockResolvedValue(null);
       const req = {
