@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## [0.2.2.0] - 2026-08-15
+
+### Added
+- SUPERVISOR clients are now always locked to the 50% discount tier — the server rejects creating or editing a SUPERVISOR node at any other discount level. A one-time backfill script (`npm run backfill:supervisor-level:dev`/`:prod` in `server/`) corrects any existing SUPERVISOR rows that predate this rule. First half of the upcoming Supervisor House view; no UI changes in this release.
+
 ## [0.2.1.0] - 2026-08-13
 
 ### Fixed
