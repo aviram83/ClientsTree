@@ -95,6 +95,7 @@ The app must work on both mobile and desktop web browsers. Every new component s
 - **Services:** `server/src/services/` — thin wrappers around third-party integrations, injected as a singleton (e.g. `email.service.ts` exports `emailService: EmailService`, backed by the Brevo HTTP API, used by `auth.controller.ts` to send password-reset links).
 - **Database:** `server/prisma/schema.prisma` — `User` and `TreeNode` models. `TreeNode` is self-referential (parentId) for hierarchy. Cascading deletes are configured. `User` also carries `resetTokenHash`/`resetTokenExpiresAt` for the password-reset flow (the raw token is never stored, only its hash).
 - **XSS:** Server uses the `xss` library for sanitization.
+- **Validation rules:** `server/src/utils/validation.ts` couples `ClientStatus.SUPERVISOR` to `PercentageLevel.LEVEL_4` — a SUPERVISOR node's discount level is not independently editable. `isSupervisorLevelValid()` is enforced in `tree.controller.ts` on both `addNode` and `updateNode` (the latter reads the existing row to compute the effective status/level before validating, since either field alone may be omitted from the PATCH body). A one-time backfill for rows that predate this rule lives at `server/scripts/backfill-supervisor-level.ts`, run via `npm run backfill:supervisor-level:dev` / `npm run backfill:supervisor-level:prod` from `server/`; it's idempotent (`WHERE status = SUPERVISOR AND percentageLevel != LEVEL_4`).
 
 ## Code Organization
 
