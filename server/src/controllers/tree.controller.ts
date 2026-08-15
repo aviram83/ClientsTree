@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../db';
-import { isValidClientStatus, isValidPercentageLevel, sanitizeDescription } from '../utils/validation';
+import { isValidClientStatus, isValidPercentageLevel, isSupervisorLevelValid, sanitizeDescription } from '../utils/validation';
 
 interface AuthRequest extends Request {
   user?: { userId: string };
@@ -52,6 +52,10 @@ export const addNode = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ message: `Invalid percentageLevel value provided: ${percentageLevel}` });
   }
 
+  if (!isSupervisorLevelValid(status, percentageLevel)) {
+    return res.status(400).json({ message: 'SUPERVISOR nodes must have percentageLevel LEVEL_4' });
+  }
+
   if (description && description.length > 4000) {
     return res.status(400).json({ message: 'Description too long' });
   }
@@ -87,6 +91,20 @@ export const updateNode = async (req: Request, res: Response) => {
 
   if (percentageLevel !== undefined && percentageLevel !== null && !isValidPercentageLevel(percentageLevel)) {
     return res.status(400).json({ message: `Invalid percentageLevel value provided: ${percentageLevel}` });
+  }
+
+  if (status !== undefined || percentageLevel !== undefined) {
+    const existing = await prisma.treeNode.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ message: 'Node not found' });
+    }
+
+    const effectiveStatus = status ?? existing.status;
+    const effectivePercentageLevel = percentageLevel !== undefined ? percentageLevel : existing.percentageLevel;
+
+    if (!isSupervisorLevelValid(effectiveStatus, effectivePercentageLevel)) {
+      return res.status(400).json({ message: 'SUPERVISOR nodes must have percentageLevel LEVEL_4' });
+    }
   }
 
   if (description && description.length > 4000) {
