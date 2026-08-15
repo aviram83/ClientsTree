@@ -60,6 +60,18 @@ Once fixed, consider adding `tsc --noEmit` to `npm run lint` or CI so these can'
 
 ## Backend
 
+### Scope `tree.controller.ts` node lookups to `req.user.userId` (IDOR)
+
+**What:** `addNode`/`updateNode`/`deleteNode` in `server/src/controllers/tree.controller.ts` all trust `req.params.id` (or a node found via `findUnique({ where: { id } })`) without checking it belongs to the authenticated user. Any authenticated user can read/update/delete another user's `TreeNode` by guessing or observing its id.
+
+**Why:** JWT auth confirms *who* the caller is, but nothing here confirms the caller *owns* the node being touched — a classic IDOR gap. `getTree` is correctly scoped (`where: { userId }`), which makes the other three handlers' lack of scoping an inconsistency within the same file, not a design choice.
+
+**Context:** Flagged by the security specialist during `/review` of `feat/supervisor-level-validation` (2026-08-15) — the `findUnique` added for SUPERVISOR/LEVEL_4 validation extends this exact pattern rather than introducing it, so fixing just the new call would leave `update`/`delete` still exposed. Needs a full pass across all three handlers (add `userId: req.user?.userId` to each `where` clause, treat "found but wrong owner" the same as "not found" → 404), not a one-line patch.
+
+**Effort:** S
+**Priority:** P1
+**Depends on:** None
+
 ### Validate non-empty `name` on tree node create/update
 
 **What:** `server/src/controllers/tree.controller.ts` destructures `name` from `req.body` and writes it straight to Prisma with no non-empty check, unlike `auth.controller.ts` which validates `!email || !password` before proceeding.
