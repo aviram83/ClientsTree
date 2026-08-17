@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-import { NAV_ITEMS, isNavGroup } from '@/config/navConfig';
+import { NAV_ITEMS, isNavGroup, NavItem } from '@/config/navConfig';
 
 interface UserSideMenuProps {
   isOpen: boolean;
@@ -12,6 +12,30 @@ interface UserSideMenuProps {
 export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const renderNavButton = (item: NavItem) => {
+    const isActive = location.pathname === item.path;
+    return (
+      <button
+        type="button"
+        dir="rtl"
+        onClick={() => {
+          navigate(item.path);
+          onClose();
+        }}
+        className={cn(
+          'w-full rounded-md px-3 py-2 text-right text-sm font-medium transition-colors',
+          isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+        )}
+        aria-current={isActive ? 'page' : undefined}
+      >
+        <span className="flex items-center gap-2">
+          <item.icon className="h-4 w-4 shrink-0" />
+          {item.label}
+        </span>
+      </button>
+    );
+  };
 
   return (
     <div
@@ -45,63 +69,15 @@ export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) =
                       {entry.label}
                     </div>
                     <ul className="flex flex-col gap-1 pe-4">
-                      {entry.children.map((item) => {
-                        const isActive = location.pathname === item.path;
-                        return (
-                          <li key={item.path}>
-                            <button
-                              type="button"
-                              dir="rtl"
-                              onClick={() => {
-                                navigate(item.path);
-                                onClose();
-                              }}
-                              className={cn(
-                                'w-full rounded-md px-3 py-2 text-right text-sm font-medium transition-colors',
-                                isActive
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'hover:bg-muted'
-                              )}
-                              aria-current={isActive ? 'page' : undefined}
-                            >
-                              <span className="flex items-center gap-2">
-                                <item.icon className="h-4 w-4 shrink-0" />
-                                {item.label}
-                              </span>
-                            </button>
-                          </li>
-                        );
-                      })}
+                      {entry.children.map((item) => (
+                        <li key={item.path}>{renderNavButton(item)}</li>
+                      ))}
                     </ul>
                   </li>
                 );
               }
 
-              const isActive = location.pathname === entry.path;
-              return (
-                <li key={entry.path}>
-                  <button
-                    type="button"
-                    dir="rtl"
-                    onClick={() => {
-                      navigate(entry.path);
-                      onClose();
-                    }}
-                    className={cn(
-                      'w-full rounded-md px-3 py-2 text-right text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-muted'
-                    )}
-                    aria-current={isActive ? 'page' : undefined}
-                  >
-                    <span className="flex items-center gap-2">
-                      <entry.icon className="h-4 w-4 shrink-0" />
-                      {entry.label}
-                    </span>
-                  </button>
-                </li>
-              );
+              return <li key={entry.path}>{renderNavButton(entry)}</li>;
             })}
           </ul>
         </nav>

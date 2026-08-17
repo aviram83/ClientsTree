@@ -87,7 +87,7 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading }: NodeFormProps) 
           ))}
         </select>
         {isSupervisor && (
-          <p className="text-xs text-muted-foreground">מפקח מוגדר תמיד ב-50% הנחה</p>
+          <p dir="rtl" className="text-right text-xs text-muted-foreground">מפקח מוגדר תמיד ב-50% הנחה</p>
         )}
       </div>
       <div className="flex items-center gap-3">
