@@ -1,6 +1,7 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { TreeNode } from '../api/types';
-import { STATUS_CONFIG } from '../config/statusConfig';
+import { ClientStatus, STATUS_CONFIG } from '../config/statusConfig';
 import { PERCENTAGE_LEVEL_CONFIG, PercentageLevel, resolveLabel } from '../config/percentageConfig';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,9 +28,23 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading }: NodeFormProps) 
   });
 
   const activeValue = watch('active');
+  const statusValue = watch('status');
+  const isSupervisor = statusValue === ClientStatus.SUPERVISOR;
+
+  // SUPERVISOR nodes are always 50% (LEVEL_4) — lock the field the moment
+  // the status is selected, so the UI can never submit a mismatched pair
+  // (the server enforces the same rule, but this avoids a round-trip 400).
+  useEffect(() => {
+    if (isSupervisor) {
+      setValue('percentageLevel', PercentageLevel.LEVEL_4);
+    }
+  }, [isSupervisor, setValue]);
 
   const handleFormSubmit = handleSubmit((data) => {
-    onSubmit(data);
+    // Disabled <select> fields are excluded from react-hook-form's submitted
+    // values, so the locked percentageLevel must be re-applied here rather
+    // than relying on the (disabled) field's own value.
+    onSubmit(isSupervisor ? { ...data, percentageLevel: PercentageLevel.LEVEL_4 } : data);
   });
 
   return (
@@ -64,12 +79,16 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading }: NodeFormProps) 
         <select
           id="percentageLevel"
           {...register('percentageLevel')}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          disabled={isSupervisor}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {Object.entries(PERCENTAGE_LEVEL_CONFIG).map(([levelKey, { labelKey }]) => (
             <option key={levelKey} value={levelKey}>{resolveLabel(labelKey)}</option>
           ))}
         </select>
+        {isSupervisor && (
+          <p className="text-xs text-muted-foreground">מפקח מוגדר תמיד ב-50% הנחה</p>
+        )}
       </div>
       <div className="flex items-center gap-3">
         <Switch
