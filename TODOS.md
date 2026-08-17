@@ -2,6 +2,18 @@
 
 ## Frontend
 
+### Reparent an inactive SUPERVISOR's children one level up
+
+**What:** When a SUPERVISOR node is deactivated, its children currently just stop counting as "supervised" (they fall back to the Clients House, per the ancestor rule in `houseLayout.ts`) but stay parented under the inactive supervisor in the actual tree structure. The desired behavior is to reparent them one level up (to the inactive supervisor's own parent) so the tree stays structurally clean.
+
+**Why:** Discussed during `/review` of `feat/supervisor-house-view` (2026-08-16) — decided that for now, an inactive supervisor simply doesn't count as an ancestor (its children stay visible in the Clients House rather than disappearing into a Supervisor House with no visible supervisor to explain why). The actual reparenting is a separate, deliberately deferred task.
+
+**Context:** `flattenVisibleHouseNodes` in `client/src/lib/houseLayout.ts` already treats `hasSupervisorAncestor` as `false` once it hits an inactive SUPERVISOR — that's the house-rendering fix, already shipped. This TODO is about the underlying tree structure itself (parentId), not just how it renders.
+
+**Effort:** M
+**Priority:** P3
+**Depends on:** None
+
 ### Fix pre-existing `tsc --noEmit` errors
 
 **What:** Five TypeScript errors surface under `tsc --noEmit` on `client/`, present on `main` (not introduced by any recent branch). The project currently ships without running this check (Vite/esbuild transpile-only), so they've been silently accumulating.

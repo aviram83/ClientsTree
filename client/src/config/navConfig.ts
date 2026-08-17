@@ -6,7 +6,24 @@ export interface NavItem {
   icon: LucideIcon;
 }
 
-export const NAV_ITEMS: NavItem[] = [
-  { label: 'Clients Tree', path: '/dashboard', icon: TreePine },
-  { label: 'Clients House', path: '/clients-house', icon: Home },
+export interface NavGroup {
+  label: string;
+  icon: LucideIcon;
+  children: NavItem[];
+}
+
+export type NavEntry = NavItem | NavGroup;
+
+export const isNavGroup = (entry: NavEntry): entry is NavGroup => 'children' in entry;
+
+export const NAV_ITEMS: NavEntry[] = [
+  { label: 'עץ לקוחות', path: '/dashboard', icon: TreePine },
+  {
+    label: 'בתים',
+    icon: Home,
+    children: [
+      { label: 'ניקוד אישי', path: '/houses/clients', icon: Home },
+      { label: 'ניקוד מפקחים', path: '/houses/supervisors', icon: Home },
+    ],
+  },
 ];

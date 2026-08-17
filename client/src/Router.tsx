@@ -3,6 +3,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ClientsHousePage } from './pages/ClientsHousePage';
+import { SupervisorHousePage } from './pages/SupervisorHousePage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
@@ -22,7 +23,8 @@ export const AppRouter = () => {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/clients-house" element={<ClientsHousePage />} />
+          <Route path="/houses/clients" element={<ClientsHousePage />} />
+          <Route path="/houses/supervisors" element={<SupervisorHousePage />} />
         </Route>
       </Routes>
     </BrowserRouter>
