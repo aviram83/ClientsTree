@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here.
 
+## [0.3.0.0] - 2026-08-17
+
+### Added
+- New "ניקוד מפקחים" (Supervisor House) view, reachable from a "בתים" (Houses) menu group alongside the renamed "ניקוד אישי" (Personal House). Every SUPERVISOR now appears in the 50% room of both houses; a supervisor's clients appear only in the Supervisor House. An inactive supervisor no longer counts toward this — its active clients stay in the Personal House instead of silently disappearing with no visible supervisor to explain why.
+- The node create/edit form now locks the discount field to 50% automatically the moment you select the Supervisor status, so it can't be saved at a mismatched percentage.
+
+### Changed
+- The nav menu is now partially Hebrew: "עץ לקוחות" (was "Clients Tree"), and both house links are right-aligned with icons to match RTL text.
+
 ## [0.2.2.0] - 2026-08-15
 
 ### Added
