@@ -1,4 +1,5 @@
 import { TreeNode } from '../api/types';
+import { ClientStatus } from '../config/statusConfig';
 import { PercentageLevel, PERCENTAGE_LEVEL_CONFIG, ROOM_LEVELS } from '../config/percentageConfig';
 
 // Matches the tree view's node size (client/src/lib/treeLayout.ts NODE_WIDTH/HEIGHT)
@@ -42,22 +43,49 @@ const ROOF_WIDTH_MARGIN = 0.85;
 
 const roofWidthAtY = (y: number): number => (HOUSE_WIDTH * (y / ROOF_HEIGHT)) * ROOF_WIDTH_MARGIN;
 
+export type HouseMembershipFilter = (node: TreeNode, hasSupervisorAncestor: boolean) => boolean;
+
 // Flattens the tree and drops clients whose level is hidden (LEVEL_6) or
 // unset, and clients marked inactive — the house only shows current clients.
-export const flattenVisibleHouseNodes = (treeData: TreeNode[]): TreeNode[] => {
+// An optional membership filter further restricts which visible nodes are
+// included; it receives whether a SUPERVISOR sits anywhere above the node
+// (tracked in a single pass down the recursion, not a separate tree walk).
+export const flattenVisibleHouseNodes = (
+  treeData: TreeNode[],
+  filter?: HouseMembershipFilter
+): TreeNode[] => {
   const result: TreeNode[] = [];
 
-  const visit = (node: TreeNode) => {
+  const visit = (node: TreeNode, hasSupervisorAncestor: boolean) => {
     const level = node.percentageLevel;
-    if (node.active && level && PERCENTAGE_LEVEL_CONFIG[level]?.showsInHouse) {
+    const isVisible = Boolean(node.active && level && PERCENTAGE_LEVEL_CONFIG[level]?.showsInHouse);
+    if (isVisible && (!filter || filter(node, hasSupervisorAncestor))) {
       result.push(node);
     }
-    node.children?.forEach(visit);
+
+    // An inactive supervisor doesn't count as an ancestor — its descendants
+    // are treated as if they have no supervisor above them. (Reparenting an
+    // inactive supervisor's children one level up is a separate future task.)
+    const descendantHasSupervisorAncestor =
+      hasSupervisorAncestor || (node.status === ClientStatus.SUPERVISOR && node.active);
+    node.children?.forEach((child) => visit(child, descendantHasSupervisorAncestor));
   };
 
-  treeData.forEach(visit);
+  treeData.forEach((node) => visit(node, false));
   return result;
 };
+
+// Original house: every SUPERVISOR (any depth) + every non-supervisor client
+// with no SUPERVISOR ancestor. Nested supervisors stay here, never move to
+// the supervisor house.
+export const isClientsHouseMember: HouseMembershipFilter = (node, hasSupervisorAncestor) =>
+  node.status === ClientStatus.SUPERVISOR || !hasSupervisorAncestor;
+
+// Supervisor house: every SUPERVISOR node (any depth — they anchor their
+// group's 50% room, same as in the clients house) + every non-supervisor
+// client that has a SUPERVISOR ancestor.
+export const isSupervisorHouseMember: HouseMembershipFilter = (node, hasSupervisorAncestor) =>
+  node.status === ClientStatus.SUPERVISOR || hasSupervisorAncestor;
 
 export const groupNodesByPercentageLevel = (
   nodes: TreeNode[]

@@ -4,6 +4,8 @@ import {
   groupNodesByPercentageLevel,
   computeAdaptiveGridLayout,
   computeRoofGridLayout,
+  isClientsHouseMember,
+  isSupervisorHouseMember,
   MAX_HOUSE_NODE_SIZE,
   HOUSE_WIDTH,
   ROOF_ICON_TOP_Y,
@@ -60,6 +62,126 @@ describe('flattenVisibleHouseNodes', () => {
 
     const result = flattenVisibleHouseNodes(tree);
     expect(result.map((n) => n.id)).toEqual(['active']);
+  });
+});
+
+describe('isClientsHouseMember / isSupervisorHouseMember', () => {
+  it('CLIENT with no SUPERVISOR ancestor: clients house only', () => {
+    const tree: TreeNode[] = [
+      makeNode({ id: 'client', status: ClientStatus.CLIENT, percentageLevel: PercentageLevel.LEVEL_1 }),
+    ];
+
+    expect(flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id)).toEqual(['client']);
+    expect(flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id)).toEqual([]);
+  });
+
+  it('regression: a client under a SUPERVISOR moves out of the clients house into the supervisor house; the supervisor itself appears in both', () => {
+    const tree: TreeNode[] = [
+      makeNode({
+        id: 'supervisor',
+        status: ClientStatus.SUPERVISOR,
+        percentageLevel: PercentageLevel.LEVEL_4,
+        children: [
+          makeNode({
+            id: 'supervised-client',
+            parentId: 'supervisor',
+            status: ClientStatus.CLIENT,
+            percentageLevel: PercentageLevel.LEVEL_2,
+          }),
+        ],
+      }),
+    ];
+
+    const clientsHouse = flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id);
+    const supervisorHouse = flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id).sort();
+
+    // Supervisor stays in the original house AND appears in the supervisor house; only the client moves.
+    expect(clientsHouse).toEqual(['supervisor']);
+    expect(supervisorHouse).toEqual(['supervised-client', 'supervisor']);
+  });
+
+  it('a SUPERVISOR with zero visible descendants still appears in both houses (anchors an otherwise-empty 50% room)', () => {
+    const tree: TreeNode[] = [
+      makeNode({ id: 'lone-supervisor', status: ClientStatus.SUPERVISOR, percentageLevel: PercentageLevel.LEVEL_4 }),
+    ];
+
+    expect(flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id)).toEqual(['lone-supervisor']);
+    expect(flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id)).toEqual(['lone-supervisor']);
+  });
+
+  it('nested SUPERVISOR (under another SUPERVISOR) stays in the clients house AND appears in the supervisor house, same as any supervisor', () => {
+    const tree: TreeNode[] = [
+      makeNode({
+        id: 'top-supervisor',
+        status: ClientStatus.SUPERVISOR,
+        percentageLevel: PercentageLevel.LEVEL_4,
+        children: [
+          makeNode({
+            id: 'nested-supervisor',
+            parentId: 'top-supervisor',
+            status: ClientStatus.SUPERVISOR,
+            percentageLevel: PercentageLevel.LEVEL_4,
+            children: [
+              makeNode({
+                id: 'client-of-nested',
+                parentId: 'nested-supervisor',
+                status: ClientStatus.CLIENT,
+                percentageLevel: PercentageLevel.LEVEL_3,
+              }),
+            ],
+          }),
+        ],
+      }),
+    ];
+
+    const clientsHouse = flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id).sort();
+    const supervisorHouse = flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id).sort();
+
+    expect(clientsHouse).toEqual(['nested-supervisor', 'top-supervisor']);
+    expect(supervisorHouse).toEqual(['client-of-nested', 'nested-supervisor', 'top-supervisor']);
+  });
+
+  it('an inactive SUPERVISOR does not count as an ancestor — its active children stay in the clients house', () => {
+    const tree: TreeNode[] = [
+      makeNode({
+        id: 'inactive-supervisor',
+        status: ClientStatus.SUPERVISOR,
+        active: false,
+        percentageLevel: PercentageLevel.LEVEL_4,
+        children: [
+          makeNode({
+            id: 'orphaned-client',
+            parentId: 'inactive-supervisor',
+            status: ClientStatus.CLIENT,
+            percentageLevel: PercentageLevel.LEVEL_2,
+          }),
+        ],
+      }),
+    ];
+
+    expect(flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id)).toEqual(['orphaned-client']);
+    expect(flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id)).toEqual([]);
+  });
+
+  it('inactive/hidden descendants of a SUPERVISOR are excluded (existing visibility rule applies unchanged), but the supervisor itself still shows', () => {
+    const tree: TreeNode[] = [
+      makeNode({
+        id: 'supervisor',
+        status: ClientStatus.SUPERVISOR,
+        percentageLevel: PercentageLevel.LEVEL_4,
+        children: [
+          makeNode({
+            id: 'inactive-client',
+            parentId: 'supervisor',
+            status: ClientStatus.CLIENT,
+            active: false,
+            percentageLevel: PercentageLevel.LEVEL_2,
+          }),
+        ],
+      }),
+    ];
+
+    expect(flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id)).toEqual(['supervisor']);
   });
 });
 
