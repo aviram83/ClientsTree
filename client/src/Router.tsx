@@ -4,6 +4,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ClientsHousePage } from './pages/ClientsHousePage';
 import { SupervisorHousePage } from './pages/SupervisorHousePage';
+import { SettingsPage } from './pages/SettingsPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
@@ -25,6 +26,7 @@ export const AppRouter = () => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/houses/clients" element={<ClientsHousePage />} />
           <Route path="/houses/supervisors" element={<SupervisorHousePage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

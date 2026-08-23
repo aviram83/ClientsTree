@@ -1,6 +1,8 @@
 import { ClientStatus } from '../config/statusConfig';
 import { PercentageLevel } from '../config/percentageConfig';
 
+export type LanguageCode = 'he' | 'en';
+
 export interface User {
   id: string;
   email: string;

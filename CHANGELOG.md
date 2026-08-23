@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## [0.4.0.0] - 2026-08-23
+
+### Added
+- New "הגדרות" (Settings) page, reachable from the side menu, showing your name and email and a language dropdown (עברית / English). Changing the language and pressing "שמור" (Save) saves the preference and reloads the page.
+
 ## [0.3.0.0] - 2026-08-17
 
 ### Added

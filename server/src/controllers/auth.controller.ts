@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 import { emailService } from '../services/email.service';
+import { isValidLanguage } from '../utils/validation';
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
@@ -231,6 +232,28 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
     res.json(user);
   } catch (error) {
     console.error('Get profile error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const updateProfile = async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.userId;
+  const { language } = req.body;
+
+  if (!isValidLanguage(language)) {
+    return res.status(400).json({ message: 'Invalid language' });
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { language },
+      select: { id: true, email: true, firstName: true, lastName: true, language: true },
+    });
+
+    res.json(user);
+  } catch (error) {
+    console.error('Update profile error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
