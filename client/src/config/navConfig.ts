@@ -1,4 +1,4 @@
-import { TreePine, Home, type LucideIcon } from 'lucide-react';
+import { TreePine, Home, Settings, type LucideIcon } from 'lucide-react';
 
 export interface NavItem {
   label: string;
@@ -26,4 +26,5 @@ export const NAV_ITEMS: NavEntry[] = [
       { label: 'ניקוד מפקחים', path: '/houses/supervisors', icon: Home },
     ],
   },
+  { label: 'הגדרות', path: '/settings', icon: Settings },
 ];
