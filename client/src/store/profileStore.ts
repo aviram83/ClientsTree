@@ -1,11 +1,12 @@
 import { create } from 'zustand';
-import { User } from '../api/types';
+import { User, LanguageCode } from '../api/types';
 import * as api from '../api';
 
 interface ProfileState {
   profile: User | null;
   isLoading: boolean;
   fetchProfile: () => Promise<void>;
+  updateLanguage: (language: LanguageCode) => Promise<void>;
   clearProfile: () => void;
 }
 
@@ -22,6 +23,10 @@ export const useProfileStore = create<ProfileState>((set) => ({
     } finally {
       set({ isLoading: false });
     }
+  },
+  updateLanguage: async (language: LanguageCode) => {
+    const response = await api.updateProfile(language);
+    set({ profile: response.data });
   },
   clearProfile: () => set({ profile: null }),
 }));

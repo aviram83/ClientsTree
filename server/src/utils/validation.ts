@@ -20,3 +20,9 @@ export const isSupervisorLevelValid = (
 export const sanitizeDescription = (description: string | null | undefined): string | null => {
   return description ? xss(description) : null;
 };
+
+export const SUPPORTED_LANGUAGES = ['he', 'en'] as const;
+
+export const isValidLanguage = (value: unknown): value is (typeof SUPPORTED_LANGUAGES)[number] => {
+  return SUPPORTED_LANGUAGES.includes(value as (typeof SUPPORTED_LANGUAGES)[number]);
+};

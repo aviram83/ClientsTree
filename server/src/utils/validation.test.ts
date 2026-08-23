@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ClientStatus, PercentageLevel } from '@prisma/client';
-import { isValidClientStatus, isValidPercentageLevel, isSupervisorLevelValid, sanitizeDescription } from './validation';
+import { isValidClientStatus, isValidPercentageLevel, isSupervisorLevelValid, sanitizeDescription, isValidLanguage, SUPPORTED_LANGUAGES } from './validation';
 
 describe('isValidClientStatus', () => {
   it('accepts every ClientStatus enum value', () => {
@@ -68,5 +68,20 @@ describe('sanitizeDescription', () => {
     expect(sanitizeDescription(undefined)).toBeNull();
     expect(sanitizeDescription(null)).toBeNull();
     expect(sanitizeDescription('')).toBeNull();
+  });
+});
+
+describe('isValidLanguage', () => {
+  it('accepts every supported language', () => {
+    SUPPORTED_LANGUAGES.forEach(language => {
+      expect(isValidLanguage(language)).toBe(true);
+    });
+  });
+
+  it('rejects unsupported values', () => {
+    expect(isValidLanguage('fr')).toBe(false);
+    expect(isValidLanguage('')).toBe(false);
+    expect(isValidLanguage(undefined)).toBe(false);
+    expect(isValidLanguage(null)).toBe(false);
   });
 });

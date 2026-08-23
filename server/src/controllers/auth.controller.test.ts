@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { register, login, getProfile, forgotPassword, resetPassword } from './auth.controller';
+import { register, login, getProfile, updateProfile, forgotPassword, resetPassword } from './auth.controller';
 import prisma from '../db';
 import { emailService } from '../services/email.service';
 
@@ -319,6 +319,51 @@ describe('auth.controller', () => {
         select: { id: true, email: true, firstName: true, lastName: true, language: true },
       });
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ id: 'user-1' }));
+    });
+  });
+
+  describe('updateProfile', () => {
+    it('updates the language scoped to the JWT userId, not a body-supplied id', async () => {
+      vi.mocked(prisma.user.update).mockResolvedValue({
+        id: 'user-1',
+        email: 'jane@example.com',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        language: 'en',
+      } as any);
+
+      const req = { user: { userId: 'user-1' }, body: { language: 'en', id: 'attacker-controlled-id' } } as any;
+      const res = buildRes();
+
+      await updateProfile(req, res);
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
+        data: { language: 'en' },
+        select: { id: true, email: true, firstName: true, lastName: true, language: true },
+      });
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ id: 'user-1', language: 'en' }));
+    });
+
+    it('returns 400 and does not write when the language is invalid', async () => {
+      const req = { user: { userId: 'user-1' }, body: { language: 'fr' } } as any;
+      const res = buildRes();
+
+      await updateProfile(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(prisma.user.update).not.toHaveBeenCalled();
+    });
+
+    it('returns 500 when the database update throws', async () => {
+      vi.mocked(prisma.user.update).mockRejectedValue(new Error('DB down'));
+
+      const req = { user: { userId: 'user-1' }, body: { language: 'he' } } as any;
+      const res = buildRes();
+
+      await updateProfile(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
     });
   });
 });
