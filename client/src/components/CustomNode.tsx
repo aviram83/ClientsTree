@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Plus, Edit, Trash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { STATUS_CONFIG, ClientStatus } from '../config/statusConfig';
 import { useTreeUIStore } from '../store/treeUIStore';
 
@@ -31,10 +32,11 @@ const areDataPropsEqual = (prevProps: any, nextProps: any) => {
 };
 
 const CustomNode = memo(({ data }: any) => {
+  const { t } = useTranslation();
   const isRootNode = data.parentId === null;
 
   const statusInfo = STATUS_CONFIG[data.status as ClientStatus];
-  const statusLabel = statusInfo ? statusInfo.label : 'Unknown';
+  const statusLabel = statusInfo ? t(statusInfo.labelKey) : t('common.unknown');
 
   let nodeClasses = 'bg-muted rounded-lg border-2';
   let wrapperClasses = 'filter drop-shadow-md';

@@ -1,0 +1,118 @@
+{
+  "nav": {
+    "tree": "עץ לקוחות",
+    "houses": "בתים",
+    "personalHouse": "ניקוד אישי",
+    "supervisorHouse": "ניקוד מפקחים",
+    "settings": "הגדרות"
+  },
+  "status": {
+    "CLIENT": "לקוח",
+    "CLIENT_VIP": "לקוח VIP",
+    "DISTRIBUTOR": "מפיץ",
+    "SUPERVISOR": "מפקח"
+  },
+  "percentageLevel": {
+    "fullPrice": "מחיר מלא",
+    "level1": "15-25%",
+    "level2": "35%",
+    "level3": "42%",
+    "level4": "50%",
+    "hidden": "מוסתר (לא מוצג בבית)"
+  },
+  "wakeGate": {
+    "heading": "מתחברים לשרת…",
+    "subtextInitial": "ההתחברות הראשונה עשויה לקחת עד דקה.",
+    "subtextEscalated": "כמעט שם, תודה על הסבלנות.",
+    "failedHeading": "עדיין לא הצלחנו להתחבר.",
+    "failedSubtext": "בדקו את החיבור לאינטרנט ונסו שוב.",
+    "retryButton": "נסו שוב"
+  },
+  "common": {
+    "error": "שגיאה",
+    "unknown": "לא ידוע",
+    "save": "שמור",
+    "saving": "שומר...",
+    "cancel": "ביטול",
+    "logout": "התנתקות",
+    "openLegend": "פתח מקרא",
+    "closeLegend": "סגור מקרא"
+  },
+  "settings": {
+    "title": "הגדרות",
+    "nameLabel": "שם",
+    "emailLabel": "אימייל",
+    "languageLabel": "שפה",
+    "savedMessage": "נשמר, טוען מחדש…",
+    "saveError": "אירעה שגיאה בשמירה, נסה שוב."
+  },
+  "nodeForm": {
+    "nameLabel": "שם",
+    "descriptionLabel": "תיאור",
+    "statusLabel": "סטטוס",
+    "discountLabel": "אחוז הנחה",
+    "activeLabel": "פעיל",
+    "supervisorLockedNote": "מפקח מוגדר תמיד ב-50% הנחה"
+  },
+  "dashboard": {
+    "loadingTree": "טוען עץ...",
+    "noNodes": "אין עדיין צמתים בעץ שלך.",
+    "addClientTitle": "הוספת לקוח חדש",
+    "editClientTitle": "עריכת לקוח"
+  },
+  "floatingToolbar": {
+    "activeLine1": "לקוחות",
+    "activeLine2": "פעילים"
+  },
+  "searchBar": {
+    "placeholder": "חיפוש לקוחות...",
+    "focusAria": "מיקוד בחיפוש"
+  },
+  "login": {
+    "title": "התחברות",
+    "emailLabel": "אימייל",
+    "passwordLabel": "סיסמה",
+    "forgotPassword": "שכחת סיסמה?",
+    "submit": "התחברות",
+    "submitting": "מתחבר...",
+    "noAccount": "אין לך חשבון?",
+    "registerLink": "הרשמה"
+  },
+  "register": {
+    "title": "הרשמה",
+    "firstNameLabel": "שם פרטי",
+    "lastNameLabel": "שם משפחה",
+    "emailLabel": "אימייל",
+    "passwordLabel": "סיסמה",
+    "passwordTooShort": "הסיסמה חייבת להכיל לפחות {{minLength}} תווים.",
+    "confirmPasswordLabel": "אימות סיסמה",
+    "passwordsDontMatch": "הסיסמאות אינן תואמות",
+    "termsAgreementPrefix": "אני מסכים/ה ל",
+    "termsOfServiceLink": "תנאי השימוש",
+    "mustAcceptTerms": "עליך לאשר את תנאי השימוש.",
+    "submit": "הרשמה",
+    "submitting": "נרשם...",
+    "haveAccount": "כבר יש לך חשבון?",
+    "loginLink": "התחברות"
+  },
+  "forgotPassword": {
+    "title": "שכחתי סיסמה",
+    "emailRequired": "יש להזין אימייל.",
+    "submit": "שליחת קישור לאיפוס",
+    "submitting": "שולח...",
+    "backToLogin": "חזרה להתחברות",
+    "rememberedPassword": "נזכרת בסיסמה?",
+    "loginLink": "התחברות"
+  },
+  "resetPassword": {
+    "title": "איפוס סיסמה",
+    "newPasswordLabel": "סיסמה חדשה",
+    "confirmPasswordLabel": "אימות סיסמה",
+    "passwordTooShort": "הסיסמה חייבת להכיל לפחות {{minLength}} תווים.",
+    "genericInvalid": "קישור האיפוס אינו תקין או שפג תוקפו",
+    "requestNewLink": "בקשת קישור חדש",
+    "submit": "איפוס סיסמה",
+    "submitting": "מאפס...",
+    "backToLogin": "חזרה להתחברות"
+  }
+}

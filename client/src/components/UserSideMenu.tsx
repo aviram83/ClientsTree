@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { NAV_ITEMS, isNavGroup, NavItem } from '@/config/navConfig';
@@ -12,6 +13,7 @@ interface UserSideMenuProps {
 export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const renderNavButton = (item: NavItem) => {
     const isActive = location.pathname === item.path;
@@ -31,7 +33,7 @@ export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) =
       >
         <span className="flex items-center gap-2">
           <item.icon className="h-4 w-4 shrink-0" />
-          {item.label}
+          {t(item.labelKey)}
         </span>
       </button>
     );
@@ -63,10 +65,10 @@ export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) =
             {NAV_ITEMS.map((entry) => {
               if (isNavGroup(entry)) {
                 return (
-                  <li key={entry.label}>
+                  <li key={entry.labelKey}>
                     <div dir="rtl" className="flex items-center gap-2 px-3 pt-3 pb-1 text-xs font-semibold uppercase text-muted-foreground">
                       <entry.icon className="h-4 w-4 shrink-0" />
-                      {entry.label}
+                      {t(entry.labelKey)}
                     </div>
                     <ul className="flex flex-col gap-1 pe-4">
                       {entry.children.map((item) => (
@@ -91,7 +93,7 @@ export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) =
               onClose();
             }}
           >
-            Logout
+            {t('common.logout')}
           </Button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { PASSWORD_MIN_LENGTH, passwordsMatchValidator } from '@/lib/passwordValidation';
 
 export const RegisterPage = () => {
+  const { t } = useTranslation();
   const { register, handleSubmit, watch, setValue, formState: { errors, isValid } } = useForm({ mode: 'onChange' });
   const registerUser = useAuthStore((s) => s.register);
   const isLoading = useAuthStore((s) => s.isLoading);
@@ -26,32 +28,32 @@ export const RegisterPage = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-muted px-5">
       <div className="w-full max-w-md p-8 space-y-6 bg-card rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center">Register</h2>
+        <h2 className="text-2xl font-bold text-center">{t('register.title')}</h2>
         <form onSubmit={onSubmit} className="space-y-6">
           <div className="space-y-1">
-            <Label htmlFor="firstName">First Name</Label>
+            <Label htmlFor="firstName">{t('register.firstNameLabel')}</Label>
             <Input id="firstName" {...register('firstName', { required: true })} />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="lastName">Last Name</Label>
+            <Label htmlFor="lastName">{t('register.lastNameLabel')}</Label>
             <Input id="lastName" {...register('lastName', { required: true })} />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('register.emailLabel')}</Label>
             <Input id="email" {...register('email', { required: true })} type="email" />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('register.passwordLabel')}</Label>
             <PasswordInput
               id="password"
               {...register('password', { required: true, minLength: PASSWORD_MIN_LENGTH })}
             />
             {errors.password && (
-              <p className="text-destructive text-xs mt-1">Password must be at least {PASSWORD_MIN_LENGTH} characters.</p>
+              <p className="text-destructive text-xs mt-1">{t('register.passwordTooShort', { minLength: PASSWORD_MIN_LENGTH })}</p>
             )}
           </div>
           <div className="space-y-1">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">{t('register.confirmPasswordLabel')}</Label>
             <PasswordInput
               id="confirmPassword"
               {...register('confirmPassword', {
@@ -71,23 +73,23 @@ export const RegisterPage = () => {
               onCheckedChange={(checked) => setValue('termsAccepted', checked, { shouldValidate: true })}
             />
             <Label htmlFor="termsAccepted" className="cursor-pointer font-normal">
-              I agree to the{' '}
+              {t('register.termsAgreementPrefix')}{' '}
               <a href="/terms" target="_blank" className="text-primary underline underline-offset-4 hover:opacity-80">
-                Terms of Service
+                {t('register.termsOfServiceLink')}
               </a>
             </Label>
           </div>
           {errors.termsAccepted && (
-            <p className="text-destructive text-xs">You must accept the terms of service.</p>
+            <p className="text-destructive text-xs">{t('register.mustAcceptTerms')}</p>
           )}
           <Button type="submit" className="w-full" disabled={!isValid || isLoading}>
-            {isLoading ? 'Registering...' : 'Register'}
+            {isLoading ? t('register.submitting') : t('register.submit')}
           </Button>
         </form>
         <p className="text-sm text-center">
-          Already have an account?{' '}
+          {t('register.haveAccount')}{' '}
           <Link to="/login" className="text-primary underline underline-offset-4 hover:opacity-80">
-            Login
+            {t('register.loginLink')}
           </Link>
         </p>
       </div>

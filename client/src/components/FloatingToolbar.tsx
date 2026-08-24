@@ -1,6 +1,7 @@
 // client/src/components/FloatingToolbar.tsx
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import SearchBar from './SearchBar';
 import LegendContent from './LegendContent';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -17,6 +18,7 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
   setSearchQuery,
   activeCount,
 }) => {
+  const { t } = useTranslation();
   const [isLegendOpen, setIsLegendOpen] = useState(false);
 
   return (
@@ -30,8 +32,8 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 
         <div className="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 min-w-0">
           <div className="flex flex-col leading-tight text-[10px] font-medium text-muted-foreground text-right">
-            <span>Active</span>
-            <span>Clients</span>
+            <span>{t('floatingToolbar.activeLine1')}</span>
+            <span>{t('floatingToolbar.activeLine2')}</span>
           </div>
           <span className="text-foreground font-bold text-[clamp(1rem,4vw,1.75rem)] truncate">
             {activeCount}
@@ -46,7 +48,7 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
               variant="ghost"
               size="icon"
               className={`rounded-full mx-1 self-center ${isLegendOpen ? 'text-primary bg-primary/10' : 'text-muted-foreground'}`}
-              aria-label={isLegendOpen ? 'Close Legend' : 'Open Legend'}
+              aria-label={isLegendOpen ? t('common.closeLegend') : t('common.openLegend')}
             >
               <ChevronDown
                 size={20}

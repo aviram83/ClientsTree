@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from './AppLayout';
 import { useProfileStore } from '../store/profileStore';
 import { LanguageCode } from '../api/types';
@@ -23,6 +24,7 @@ const LANGUAGE_OPTIONS: { value: LanguageCode; label: string }[] = [
 const SAVED_MESSAGE_DELAY_MS = 600;
 
 export const SettingsPage = () => {
+  const { t } = useTranslation();
   const profile = useProfileStore((s) => s.profile);
   const isLoading = useProfileStore((s) => s.isLoading);
   const updateLanguage = useProfileStore((s) => s.updateLanguage);
@@ -62,7 +64,7 @@ export const SettingsPage = () => {
       }, SAVED_MESSAGE_DELAY_MS);
     } catch (error) {
       console.error('Failed to update language', error);
-      setSaveError('אירעה שגיאה בשמירה, נסה שוב.');
+      setSaveError(t('settings.saveError'));
       setIsSaving(false);
     }
   };
@@ -80,25 +82,25 @@ export const SettingsPage = () => {
   return (
     <AppLayout>
       <div className="mx-auto w-full max-w-md p-4 sm:p-6">
-        <h1 className="mb-4 text-2xl font-bold">הגדרות</h1>
+        <h1 className="mb-4 text-2xl font-bold">{t('settings.title')}</h1>
         <Card>
           <CardContent className="flex flex-col gap-4 p-6">
             <div className="flex flex-col gap-1">
-              <Label>שם</Label>
+              <Label>{t('settings.nameLabel')}</Label>
               <p className="text-sm text-muted-foreground">
                 {profile.firstName} {profile.lastName}
               </p>
             </div>
 
             <div className="flex flex-col gap-1">
-              <Label>אימייל</Label>
+              <Label>{t('settings.emailLabel')}</Label>
               <p className="text-sm text-muted-foreground">{profile.email}</p>
             </div>
 
             <Separator />
 
             <div className="flex flex-col gap-1">
-              <Label htmlFor="language-select">שפה</Label>
+              <Label htmlFor="language-select">{t('settings.languageLabel')}</Label>
               <Select
                 value={selectedLanguage ?? profile.language}
                 disabled={isSaving}
@@ -125,11 +127,11 @@ export const SettingsPage = () => {
                   onClick={handleSave}
                 >
                   {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-                  שמור
+                  {t('common.save')}
                 </Button>
               </div>
               <div aria-live="polite" className="text-sm">
-                {justSaved && <span className="text-muted-foreground">נשמר, טוען מחדש…</span>}
+                {justSaved && <span className="text-muted-foreground">{t('settings.savedMessage')}</span>}
                 {saveError && <span className="text-destructive">{saveError}</span>}
               </div>
             </div>

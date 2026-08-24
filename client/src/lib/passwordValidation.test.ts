@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { PASSWORD_MIN_LENGTH, passwordsMatchValidator } from './passwordValidation';
+import he from '../i18n/locales/he.json';
 
 describe('passwordsMatchValidator', () => {
   it('returns true when the confirmation matches the password', () => {
@@ -7,7 +8,9 @@ describe('passwordsMatchValidator', () => {
   });
 
   it('returns an error message when the confirmation does not match the password', () => {
-    expect(passwordsMatchValidator('different', 'secret123')).toBe("Passwords don't match");
+    // Asserted against literal locale content, not i18n.t() with the same key
+    // the implementation uses, so a deleted/renamed key fails this test.
+    expect(passwordsMatchValidator('different', 'secret123')).toBe(he.register.passwordsDontMatch);
   });
 });
 

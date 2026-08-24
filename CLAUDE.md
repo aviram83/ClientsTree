@@ -74,11 +74,11 @@ Destructive changes (dropped/renamed columns) can lose data — back up first; P
 - **State:** Zustand stores — `authStore` (user/token), `treeStore` (tree CRUD), `profileStore` (profile). No React Context, no Redux. Components read state via selectors (e.g. `useAuthStore(s => s.token)`) so they only re-render when the slice they use changes.
 - **API layer:** `client/src/api/api.ts` — axios instance with request interceptor (injects Bearer token) and response interceptor (handles 401 → logout). Functions in `client/src/api/index.ts`.
 - **Routing:** React Router v6 in `client/src/Router.tsx`. `/dashboard`, `/houses/clients`, `/houses/supervisors`, and `/settings` are protected by `ProtectedRoute`.
-- **Nav config:** `client/src/config/navConfig.ts` — `NAV_ITEMS` is a `NavEntry[]` union of flat `NavItem` (label/path/icon) and `NavGroup` (label/icon/children: `NavItem[]`), disambiguated by `isNavGroup()`. `UserSideMenu.tsx` renders groups as an expandable submenu. Labels are Hebrew ("עץ לקוחות", "בתים" grouping "ניקוד אישי" and "ניקוד מפקחים", "הגדרות" for Settings). `SettingsPage.tsx` (`/settings`) shows the user's name/email (read-only) and a language dropdown backed by `profileStore.updateLanguage()`, which calls `PATCH /api/auth/me` and saves the returned profile.
+- **Nav config:** `client/src/config/navConfig.ts` — `NAV_ITEMS` is a `NavEntry[]` union of flat `NavItem` (labelKey/path/icon) and `NavGroup` (labelKey/icon/children: `NavItem[]`), disambiguated by `isNavGroup()`. `UserSideMenu.tsx` renders groups as an expandable submenu. Labels are i18next keys (`nav.tree`, `nav.houses` grouping `nav.personalHouse` and `nav.supervisorHouse`, `nav.settings`) resolved via `useTranslation()`; the strings themselves live in `client/src/i18n/locales/{he,en}.json`. `SettingsPage.tsx` (`/settings`) shows the user's name/email (read-only) and a language dropdown backed by `profileStore.updateLanguage()`, which calls `PATCH /api/auth/me` and saves the returned profile.
 - **Tree visualization:** `TreeVisualizer.tsx` uses `@xyflow/react` + `dagre` for hierarchical layout. Nodes are non-draggable. Children sorted descending by `createdAt`.
 - **Node shapes** (defined in `CustomNode.tsx`): CLIENT = circle, CLIENT_VIP = diamond, DISTRIBUTOR = hexagon, SUPERVISOR = square.
-- **Status config:** `client/src/config/statusConfig.ts` — single source of truth for `ClientStatus` enum, labels (Hebrew), and Tailwind color classes.
-- **UI language:** Partially Hebrew (RTL search bar placeholder, status legend labels).
+- **Status config:** `client/src/config/statusConfig.ts` — single source of truth for `ClientStatus` enum, i18next `labelKey`s (`status.CLIENT`, `status.CLIENT_VIP`, `status.DISTRIBUTOR`, `status.SUPERVISOR`), and Tailwind color classes.
+- **i18n:** `react-i18next`, wired up in `client/src/i18n/index.ts` (`lng`/`fallbackLng` both `'he'`). Translation strings live in `client/src/i18n/locales/{he,en}.json`; components call `useTranslation()` and resolve `labelKey`/`t()` keys rather than hardcoding text. `client/src/lib/applyProfileLanguage.ts` applies the user's saved `profileStore` language on login and falls back to `'he'` on logout, so a previous user's language choice doesn't leak into the login screen on a shared device. The app is i18n-driven end to end (default Hebrew) — not hardcoded-Hebrew-in-some-spots.
 - **House views:** `ClientsHouse/HouseView.tsx` is the shared read-only visualization of tree data as a house — a roof (full-price clients) plus a 2x2 grid of rooms for each `PercentageLevel` discount tier, laid out by `client/src/lib/houseLayout.ts` and drawn by `HouseBackground.tsx`. Room/roof fill colors use an ascending-lightness scale keyed by `PercentageLevel` (roof darkest, higher discount levels progressively lighter), defined in `client/src/config/percentageConfig.ts`. Every client renders as an identical black-bordered square via `HouseNode.tsx` (unlike `CustomNode.tsx`'s per-status shapes) with its name split across two lines; nodes are non-interactive (no drag, no click, no React Flow Handles). `flattenVisibleHouseNodes` in `houseLayout.ts` filters out clients that are inactive or whose `percentageLevel` is unset/hidden (`LEVEL_6`); an optional `HouseMembershipFilter` further restricts which visible nodes are included, based on whether a SUPERVISOR ancestor sits above the node. Two pages consume `HouseView`: `ClientsHouseView.tsx` (route `/houses/clients`, "ניקוד אישי" / Personal House) uses `isClientsHouseMember` — every SUPERVISOR (any depth) plus every non-supervisor client with no SUPERVISOR ancestor; `SupervisorHouseView.tsx` (route `/houses/supervisors`, "ניקוד מפקחים" / Supervisor House) uses `isSupervisorHouseMember` — every SUPERVISOR plus every non-supervisor client that has a SUPERVISOR ancestor. Both filters put every SUPERVISOR in the 50% (`LEVEL_4`) room; an inactive supervisor doesn't count as an ancestor, so its active clients fall back to the Personal House rather than disappearing. `NodeForm.tsx` locks the discount `<select>` to `LEVEL_4` and disables it the moment `SUPERVISOR` status is selected, mirroring the server-side `isSupervisorLevelValid()` rule client-side.
 
 ## Responsive Design (Mobile + Desktop)
@@ -126,3 +126,22 @@ The app must work on both mobile and desktop web browsers. Every new component s
 - **Tree mutations refetch the full tree** — `treeStore` calls `fetchTree()` after every add/update/delete (no optimistic updates).
 - **API circular-dependency avoidance:** The axios instance receives `logout` and `showError` callbacks via injection (`injectLogout`/`injectShowErrorModal` in `api/api.ts`) rather than importing the stores directly; `authStore` wires these up at module load.
 - **Prisma adapter:** Uses `@prisma/adapter-pg` with a `pg` connection pool (not the default Prisma engine).
+
+## Skill routing
+
+When the user's request matches an available skill, invoke it via the Skill tool. When in doubt, invoke the skill.
+
+Key routing rules:
+- Product ideas/brainstorming → invoke /office-hours
+- Strategy/scope → invoke /plan-ceo-review
+- Architecture → invoke /plan-eng-review
+- Design system/plan review → invoke /design-consultation or /plan-design-review
+- Full review pipeline → invoke /autoplan
+- Bugs/errors → invoke /investigate
+- QA/testing site behavior → invoke /qa or /qa-only
+- Code review/diff check → invoke /review
+- Visual polish → invoke /design-review
+- Ship/deploy/PR → invoke /ship or /land-and-deploy
+- Save progress → invoke /context-save
+- Resume context → invoke /context-restore
+- Author a backlog-ready spec/issue → invoke /spec
