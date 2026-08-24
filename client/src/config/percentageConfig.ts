@@ -7,21 +7,6 @@ export enum PercentageLevel {
   LEVEL_6 = "LEVEL_6",
 }
 
-// Placeholder until a real i18n library (e.g. i18next) is wired up — swapping
-// this dictionary lookup for a real translator only touches this file.
-const LABEL_DICTIONARY: Record<string, { he: string; en: string }> = {
-  "percentageLevel.fullPrice": { he: "מחיר מלא", en: "Full price" },
-  "percentageLevel.level1": { he: "15-25%", en: "15-25%" },
-  "percentageLevel.level2": { he: "35%", en: "35%" },
-  "percentageLevel.level3": { he: "42%", en: "42%" },
-  "percentageLevel.level4": { he: "50%", en: "50%" },
-  "percentageLevel.hidden": { he: "מוסתר (לא מוצג בבית)", en: "Hidden (not shown in house)" },
-};
-
-export const resolveLabel = (labelKey: string, locale: "he" | "en" = "he"): string => {
-  return LABEL_DICTIONARY[labelKey]?.[locale] ?? labelKey;
-};
-
 interface PercentageLevelConfigEntry {
   labelKey: string;
   colorClass: string;

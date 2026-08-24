@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { TreeNode } from '../api/types';
 import { ClientStatus, STATUS_CONFIG } from '../config/statusConfig';
-import { PERCENTAGE_LEVEL_CONFIG, PercentageLevel, resolveLabel } from '../config/percentageConfig';
+import { PERCENTAGE_LEVEL_CONFIG, PercentageLevel } from '../config/percentageConfig';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +18,7 @@ interface NodeFormProps {
 }
 
 export const NodeForm = ({ onSubmit, onClose, node, isLoading }: NodeFormProps) => {
+  const { t } = useTranslation();
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
       name: node?.name || '',
@@ -50,11 +52,11 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading }: NodeFormProps) 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-4">
       <div className="space-y-1">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">{t('nodeForm.nameLabel')}</Label>
         <Input id="name" {...register('name')} required />
       </div>
       <div className="space-y-1">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{t('nodeForm.descriptionLabel')}</Label>
         <Textarea
           id="description"
           {...register('description')}
@@ -63,19 +65,19 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading }: NodeFormProps) 
         />
       </div>
       <div className="space-y-1">
-        <Label htmlFor="status">Status</Label>
+        <Label htmlFor="status">{t('nodeForm.statusLabel')}</Label>
         <select
           id="status"
           {...register('status')}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          {Object.entries(STATUS_CONFIG).map(([statusKey, { label }]) => (
-            <option key={statusKey} value={statusKey}>{label}</option>
+          {Object.entries(STATUS_CONFIG).map(([statusKey, { labelKey }]) => (
+            <option key={statusKey} value={statusKey}>{t(labelKey)}</option>
           ))}
         </select>
       </div>
       <div className="space-y-1">
-        <Label htmlFor="percentageLevel">Discount percentage</Label>
+        <Label htmlFor="percentageLevel">{t('nodeForm.discountLabel')}</Label>
         <select
           id="percentageLevel"
           {...register('percentageLevel')}
@@ -83,11 +85,11 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading }: NodeFormProps) 
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {Object.entries(PERCENTAGE_LEVEL_CONFIG).map(([levelKey, { labelKey }]) => (
-            <option key={levelKey} value={levelKey}>{resolveLabel(labelKey)}</option>
+            <option key={levelKey} value={levelKey}>{t(labelKey)}</option>
           ))}
         </select>
         {isSupervisor && (
-          <p dir="rtl" className="text-right text-xs text-muted-foreground">מפקח מוגדר תמיד ב-50% הנחה</p>
+          <p dir="rtl" className="text-right text-xs text-muted-foreground">{t('nodeForm.supervisorLockedNote')}</p>
         )}
       </div>
       <div className="flex items-center gap-3">
@@ -96,12 +98,12 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading }: NodeFormProps) 
           checked={activeValue}
           onCheckedChange={(checked) => setValue('active', checked)}
         />
-        <Label htmlFor="active" className="cursor-pointer font-normal">Active</Label>
+        <Label htmlFor="active" className="cursor-pointer font-normal">{t('nodeForm.activeLabel')}</Label>
       </div>
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+        <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Saving...' : 'Save'}
+          {isLoading ? t('common.saving') : t('common.save')}
         </Button>
       </div>
     </form>

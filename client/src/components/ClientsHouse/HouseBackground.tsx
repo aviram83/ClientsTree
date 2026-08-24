@@ -1,4 +1,5 @@
-import { PercentageLevel, PERCENTAGE_LEVEL_CONFIG, resolveLabel } from '../../config/percentageConfig';
+import { useTranslation } from 'react-i18next';
+import { PercentageLevel, PERCENTAGE_LEVEL_CONFIG } from '../../config/percentageConfig';
 import { HOUSE_SLOT_BOUNDS, HOUSE_WIDTH, HOUSE_HEIGHT, ROOF_HEIGHT, ROOF_LABEL_Y } from '../../lib/houseLayout';
 
 // Static Tailwind class names per room, spelled out in full so the build-time
@@ -17,6 +18,7 @@ const ROOM_FILL_CLASS: Record<PercentageLevel, string> = {
 // Rendered as a single non-interactive React Flow node so it pans/zooms with
 // the canvas but never intercepts drag/click like a real node would.
 const HouseBackground = () => {
+  const { t } = useTranslation();
   const roomLevels = [PercentageLevel.LEVEL_1, PercentageLevel.LEVEL_2, PercentageLevel.LEVEL_3, PercentageLevel.LEVEL_4];
 
   return (
@@ -36,7 +38,7 @@ const HouseBackground = () => {
         textAnchor="middle"
         className="fill-foreground text-sm font-bold"
       >
-        {resolveLabel(PERCENTAGE_LEVEL_CONFIG[PercentageLevel.LEVEL_0].labelKey)}
+        {t(PERCENTAGE_LEVEL_CONFIG[PercentageLevel.LEVEL_0].labelKey)}
       </text>
 
       {/* Rooms */}
@@ -59,7 +61,7 @@ const HouseBackground = () => {
               textAnchor="middle"
               className="fill-foreground text-sm font-bold"
             >
-              {resolveLabel(config.labelKey)}
+              {t(config.labelKey)}
             </text>
           </g>
         );

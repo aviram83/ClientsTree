@@ -1,3 +1,6 @@
+// Deliberately not migrated to i18n in this pass: this is formal legal
+// boilerplate that needs a professionally reviewed Hebrew translation, not a
+// mechanical/AI lift. Left hardcoded in English until that review exists.
 export const TermsOfServicePage = () => {
   return (
     <div className="container mx-auto px-4 py-8">

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTreeStore } from '../store/treeStore';
 import { useTreeUIStore } from '../store/treeUIStore';
 import TreeVisualizer from '../components/TreeVisualizer';
@@ -8,6 +9,7 @@ import { TreeNode } from '../api/types';
 import { AppLayout } from './AppLayout';
 
 export const DashboardPage = () => {
+  const { t } = useTranslation();
   const tree = useTreeStore((s) => s.tree);
   const isLoading = useTreeStore((s) => s.isLoading);
   const addNode = useTreeStore((s) => s.addNode);
@@ -52,8 +54,8 @@ export const DashboardPage = () => {
 
   return (
     <AppLayout>
-      {tree.length === 0 && isLoading && <p className="p-4">Loading tree...</p>}
-      {tree.length === 0 && !isLoading && <p className="p-4">No nodes in your tree yet.</p>}
+      {tree.length === 0 && isLoading && <p className="p-4">{t('dashboard.loadingTree')}</p>}
+      {tree.length === 0 && !isLoading && <p className="p-4">{t('dashboard.noNodes')}</p>}
       {tree.length > 0 && (
           <div className="h-full">
               <TreeVisualizer
@@ -65,7 +67,7 @@ export const DashboardPage = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
-        title={modalAction === 'add' ? 'Add New Client' : 'Edit Client'}
+        title={modalAction === 'add' ? t('dashboard.addClientTitle') : t('dashboard.editClientTitle')}
         textColor="text-foreground"
       >
         <NodeForm

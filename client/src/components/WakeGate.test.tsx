@@ -2,8 +2,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WakeGate } from './WakeGate';
-import { WAKE_COPY } from './wakeGate.constants';
+import he from '../i18n/locales/he.json';
 import { pingHealth, waitForServer } from '../api/health';
+
+// Asserted against the literal locale content (not i18n.t() with the same
+// keys the component uses) so a deleted/renamed key fails this test instead
+// of silently passing on the shared fallback-to-key-name behavior.
+const WAKE_COPY = {
+  heading: he.wakeGate.heading,
+  retryButton: he.wakeGate.retryButton,
+  failedHeading: he.wakeGate.failedHeading,
+};
 
 vi.mock('../api/health', () => ({
   pingHealth: vi.fn(),

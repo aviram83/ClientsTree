@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface SearchBarProps {
   searchQuery: string;
@@ -7,6 +8,7 @@ interface SearchBarProps {
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ searchQuery, setSearchQuery }) => {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -15,14 +17,14 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchQuery, setSearchQuery }) =>
         type="button"
         onClick={() => inputRef.current?.focus()}
         className="shrink-0 p-2 text-muted-foreground hover:text-primary transition-colors"
-        aria-label="Focus Search"
+        aria-label={t('searchBar.focusAria')}
       >
         <Search size={20} />
       </button>
       <input
         ref={inputRef}
         type="text"
-        placeholder="Search clients..."
+        placeholder={t('searchBar.placeholder')}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="flex-1 min-w-0 w-full bg-transparent text-sm text-left border-0 border-b border-border focus:outline-none focus:border-primary py-1"

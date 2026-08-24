@@ -1,7 +1,8 @@
 import { ReactNode, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { pingHealth, waitForServer } from '../api/health';
 import { Logo } from './Logo';
-import { WakeState, WAKE_COPY } from './wakeGate.constants';
+import { WakeState } from './wakeGate.constants';
 
 // WakeGate handles Render free-tier cold starts. The server spins down after
 // 15 min idle and takes up to ~1 min to wake. On mount we probe /health; if the
@@ -83,8 +84,9 @@ const WakeSplash = ({
   elapsedMs: number;
   onRetry: () => void;
 }) => {
+  const { t } = useTranslation();
   const subtext =
-    elapsedMs >= ESCALATE_AT_MS ? WAKE_COPY.subtextEscalated : WAKE_COPY.subtextInitial;
+    elapsedMs >= ESCALATE_AT_MS ? t('wakeGate.subtextEscalated') : t('wakeGate.subtextInitial');
 
   return (
     <div
@@ -100,21 +102,21 @@ const WakeSplash = ({
             aria-hidden="true"
           />
           <div role="status" aria-live="polite">
-            <h1 className="text-xl font-bold text-foreground">{WAKE_COPY.heading}</h1>
+            <h1 className="text-xl font-bold text-foreground">{t('wakeGate.heading')}</h1>
             <p className="mt-2 text-foreground/70">{subtext}</p>
           </div>
         </>
       ) : (
         <div role="status" aria-live="polite" className="flex flex-col items-center gap-4">
           <div>
-            <h1 className="text-xl font-bold text-foreground">{WAKE_COPY.failedHeading}</h1>
-            <p className="mt-2 text-foreground/70">{WAKE_COPY.failedSubtext}</p>
+            <h1 className="text-xl font-bold text-foreground">{t('wakeGate.failedHeading')}</h1>
+            <p className="mt-2 text-foreground/70">{t('wakeGate.failedSubtext')}</p>
           </div>
           <button
             onClick={onRetry}
             className="rounded-lg bg-brand-primary px-6 py-2 font-bold text-white"
           >
-            {WAKE_COPY.retryButton}
+            {t('wakeGate.retryButton')}
           </button>
         </div>
       )}
