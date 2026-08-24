@@ -1,0 +1,118 @@
+{
+  "nav": {
+    "tree": "Client Tree",
+    "houses": "Houses",
+    "personalHouse": "Personal House",
+    "supervisorHouse": "Supervisor House",
+    "settings": "Settings"
+  },
+  "status": {
+    "CLIENT": "Client",
+    "CLIENT_VIP": "VIP Client",
+    "DISTRIBUTOR": "Distributor",
+    "SUPERVISOR": "Supervisor"
+  },
+  "percentageLevel": {
+    "fullPrice": "Full price",
+    "level1": "15-25%",
+    "level2": "35%",
+    "level3": "42%",
+    "level4": "50%",
+    "hidden": "Hidden (not shown in house)"
+  },
+  "wakeGate": {
+    "heading": "Connecting to the server…",
+    "subtextInitial": "The first connection may take up to a minute.",
+    "subtextEscalated": "Almost there, thanks for your patience.",
+    "failedHeading": "We still couldn't connect.",
+    "failedSubtext": "Check your internet connection and try again.",
+    "retryButton": "Try again"
+  },
+  "common": {
+    "error": "Error",
+    "unknown": "Unknown",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "logout": "Logout",
+    "openLegend": "Open Legend",
+    "closeLegend": "Close Legend"
+  },
+  "settings": {
+    "title": "Settings",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "languageLabel": "Language",
+    "savedMessage": "Saved, reloading…",
+    "saveError": "Failed to save, please try again."
+  },
+  "nodeForm": {
+    "nameLabel": "Name",
+    "descriptionLabel": "Description",
+    "statusLabel": "Status",
+    "discountLabel": "Discount percentage",
+    "activeLabel": "Active",
+    "supervisorLockedNote": "Supervisor is always set to 50% discount"
+  },
+  "dashboard": {
+    "loadingTree": "Loading tree...",
+    "noNodes": "No nodes in your tree yet.",
+    "addClientTitle": "Add New Client",
+    "editClientTitle": "Edit Client"
+  },
+  "floatingToolbar": {
+    "activeLine1": "Active",
+    "activeLine2": "Clients"
+  },
+  "searchBar": {
+    "placeholder": "Search clients...",
+    "focusAria": "Focus Search"
+  },
+  "login": {
+    "title": "Login",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "forgotPassword": "Forgot password?",
+    "submit": "Login",
+    "submitting": "Logging in...",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Register"
+  },
+  "register": {
+    "title": "Register",
+    "firstNameLabel": "First Name",
+    "lastNameLabel": "Last Name",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "passwordTooShort": "Password must be at least {{minLength}} characters.",
+    "confirmPasswordLabel": "Confirm Password",
+    "passwordsDontMatch": "Passwords don't match",
+    "termsAgreementPrefix": "I agree to the",
+    "termsOfServiceLink": "Terms of Service",
+    "mustAcceptTerms": "You must accept the terms of service.",
+    "submit": "Register",
+    "submitting": "Registering...",
+    "haveAccount": "Already have an account?",
+    "loginLink": "Login"
+  },
+  "forgotPassword": {
+    "title": "Forgot Password",
+    "emailRequired": "Email is required.",
+    "submit": "Send reset link",
+    "submitting": "Sending...",
+    "backToLogin": "Back to login",
+    "rememberedPassword": "Remembered your password?",
+    "loginLink": "Login"
+  },
+  "resetPassword": {
+    "title": "Reset Password",
+    "newPasswordLabel": "New Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "passwordTooShort": "Password must be at least {{minLength}} characters.",
+    "genericInvalid": "Invalid or expired reset link",
+    "requestNewLink": "Request a new reset link",
+    "submit": "Reset password",
+    "submitting": "Resetting...",
+    "backToLogin": "Back to login"
+  }
+}
