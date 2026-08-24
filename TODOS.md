@@ -32,6 +32,18 @@ Once fixed, consider adding `tsc --noEmit` to `npm run lint` or CI so these can'
 **Priority:** P3
 **Depends on:** None
 
+### Add coverage for i18next interpolation substitution and remaining render-test gaps
+
+**What:** The Phase 2 i18n migration (`feat/i18n-infrastructure`) landed with AI-assessed coverage of 71% (target 80%). One gap is genuinely new logic: `register.passwordTooShort` / `resetPassword.passwordTooShort` now use i18next's `{{minLength}}` interpolation (previously a plain JS template literal) — no test verifies the placeholder is actually substituted at render/`t()`-call time, only that the raw string containing `{{minLength}}` exists in both locales. The remaining ~9 gaps are pre-existing "no component-render tests" convention gaps (`CustomNode.tsx`'s `t('common.unknown')` fallback branch, `WakeGate.tsx`'s untested subtext branches, and no render tests at all for `FloatingToolbar`/`LegendContent`/`SearchBar`/`UserSideMenu`/`HouseBackground`/`NodeForm`/the auth pages/`App.tsx`'s language-sync effect wiring) — not introduced by this diff, just newly visible because the coverage audit traced through translated strings for the first time.
+
+**Why:** Deferred at `/ship` time (2026-08-24) — user chose to ship with a TODO rather than block on either writing the one focused interpolation test or (much larger scope) introducing React Testing Library render tests across ~10 components, which this repo has deliberately avoided everywhere except `WakeGate.test.tsx`.
+
+**Context:** Full coverage diagram from the `/ship` Step 7 audit is in the PR description for `feat/i18n-infrastructure`. Priority order if picked up: (1) the interpolation test is cheap and closes real new-logic risk; (2) the render-test gaps are a bigger call — decide whether to extend the `WakeGate.test.tsx` exception project-wide or accept them as intentionally uncovered per the existing convention, rather than fixing piecemeal.
+
+**Effort:** S (interpolation test only) / L (full render-test coverage)
+**Priority:** P3
+**Depends on:** None
+
 ### Handle mid-session Render cold starts in the API layer
 
 **What:** The `WakeGate` (added for the graceful "server is waking up" screen) only probes `/health` on app mount. It does not cover cold starts that happen *after* the app is loaded.

@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here.
 
+## [0.4.1.0] - 2026-08-24
+
+### Changed
+- Switching the language to English in Settings now actually translates the app — nav menu, status legend, house views, the client form, login/register/password pages, and the "server waking up" splash all switch with it. Previously only the Settings page itself and the language dropdown responded to the setting; everything else stayed Hebrew regardless.
+
+### Fixed
+- Logging out now resets the app's language back to the default. Previously a signed-out session on a shared device could keep showing the login screen in the last user's chosen language instead of the app default.
+
+### Added
+- Internal: skill-routing guidance added to the project's contributor docs (no user-facing change).
+
 ## [0.4.0.0] - 2026-08-23
 
 ### Added
