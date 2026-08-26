@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## [0.4.2.0] - 2026-08-26
+
+### Changed
+- Switching to English now also mirrors the app's layout to left-to-right — the side menu, forms, login page, and search bar flip direction along with the text instead of staying laid out for Hebrew. The tree graph and house views keep their existing layout in both languages for now (that's a separate, larger project).
+
 ## [0.4.1.0] - 2026-08-24
 
 ### Changed

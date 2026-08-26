@@ -27,8 +27,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchQuery, setSearchQuery }) =>
         placeholder={t('searchBar.placeholder')}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="flex-1 min-w-0 w-full bg-transparent text-sm text-left border-0 border-b border-border focus:outline-none focus:border-primary py-1"
-        dir="ltr"
+        className="flex-1 min-w-0 w-full bg-transparent text-sm text-start border-0 border-b border-border focus:outline-none focus:border-primary py-1"
       />
     </div>
   );

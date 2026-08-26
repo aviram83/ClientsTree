@@ -12,14 +12,14 @@ const PasswordInput = React.forwardRef<HTMLInputElement, React.ComponentProps<"i
       <div className="relative">
         <Input
           type={visible ? "text" : "password"}
-          className={cn("pr-10", className)}
+          className={cn("pe-10", className)}
           ref={ref}
           {...props}
         />
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+          className="absolute inset-y-0 end-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
           aria-label={visible ? "Hide password" : "Show password"}
         >
           {visible ? <EyeOff size={18} /> : <Eye size={18} />}
