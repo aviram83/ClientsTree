@@ -44,6 +44,18 @@ Once fixed, consider adding `tsc --noEmit` to `npm run lint` or CI so these can'
 **Priority:** P3
 **Depends on:** None
 
+### Mirror TreeVisualizer and House views for RTL/LTR
+
+**What:** Phase 3 of the i18n plan (RTL/LTR layout) made nav, forms, the Settings page, and standard DOM layout direction-aware via `document.documentElement.dir` + Tailwind logical properties. `TreeVisualizer.tsx` (`@xyflow/react` + `dagre`) and the House views (`ClientsHouse/HouseView.tsx`, `HouseBackground.tsx`) were explicitly left out — both position nodes via absolute x/y coordinates computed for a fixed (Hebrew-authored) visual layout, so they render unmirrored regardless of the active language.
+
+**Why:** Coordinate-based layouts don't respond to `dir`/logical CSS properties — mirroring them means re-deriving the dagre/x-y layout math (and `houseLayout.ts`'s slot-bounds math) per direction, a materially larger project than the CSS-class migration this phase did. Deliberately deferred rather than attempted piecemeal.
+
+**Context:** Called out explicitly in the Phase 3 plan as a known, deliberate limitation, not an oversight.
+
+**Effort:** L
+**Priority:** P3
+**Depends on:** None
+
 ### Handle mid-session Render cold starts in the API layer
 
 **What:** The `WakeGate` (added for the graceful "server is waking up" screen) only probes `/health` on app mount. It does not cover cold starts that happen *after* the app is loaded.
