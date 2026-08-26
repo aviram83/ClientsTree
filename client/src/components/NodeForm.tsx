@@ -89,7 +89,7 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading }: NodeFormProps) 
           ))}
         </select>
         {isSupervisor && (
-          <p dir="rtl" className="text-right text-xs text-muted-foreground">{t('nodeForm.supervisorLockedNote')}</p>
+          <p className="text-end text-xs text-muted-foreground">{t('nodeForm.supervisorLockedNote')}</p>
         )}
       </div>
       <div className="flex items-center gap-3">

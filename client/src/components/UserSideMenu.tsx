@@ -20,13 +20,12 @@ export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) =
     return (
       <button
         type="button"
-        dir="rtl"
         onClick={() => {
           navigate(item.path);
           onClose();
         }}
         className={cn(
-          'w-full rounded-md px-3 py-2 text-right text-sm font-medium transition-colors',
+          'w-full rounded-md px-3 py-2 text-start text-sm font-medium transition-colors',
           isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
         )}
         aria-current={isActive ? 'page' : undefined}
@@ -54,8 +53,8 @@ export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) =
 
       <div
         className={cn(
-          'absolute left-0 top-[72px] bottom-0 flex w-3/4 max-w-xs md:max-w-sm flex-col bg-card shadow-xl transition-transform duration-300 ease-in-out',
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+          'absolute start-0 top-[72px] bottom-0 flex w-3/4 max-w-xs md:max-w-sm flex-col bg-card shadow-xl transition-transform duration-300 ease-in-out',
+          isOpen ? 'translate-x-0' : 'rtl:translate-x-full ltr:-translate-x-full'
         )}
         role="dialog"
         aria-modal="true"
@@ -66,7 +65,7 @@ export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) =
               if (isNavGroup(entry)) {
                 return (
                   <li key={entry.labelKey}>
-                    <div dir="rtl" className="flex items-center gap-2 px-3 pt-3 pb-1 text-xs font-semibold uppercase text-muted-foreground">
+                    <div className="flex items-center gap-2 px-3 pt-3 pb-1 text-xs font-semibold uppercase text-muted-foreground">
                       <entry.icon className="h-4 w-4 shrink-0" />
                       {t(entry.labelKey)}
                     </div>

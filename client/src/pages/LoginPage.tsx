@@ -31,7 +31,7 @@ export const LoginPage = () => {
           <div className="space-y-1">
             <Label htmlFor="password">{t('login.passwordLabel')}</Label>
             <PasswordInput id="password" {...register('password')} required />
-            <p className="text-sm text-right">
+            <p className="text-sm text-end">
               <Link to="/forgot-password" className="text-primary underline underline-offset-4 hover:opacity-80">
                 {t('login.forgotPassword')}
               </Link>

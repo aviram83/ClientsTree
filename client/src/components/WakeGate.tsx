@@ -90,7 +90,6 @@ const WakeSplash = ({
 
   return (
     <div
-      dir="rtl"
       className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-card px-6 text-center"
     >
       <Logo />
