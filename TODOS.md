@@ -98,20 +98,6 @@ Once fixed, consider adding `tsc --noEmit` to `npm run lint` or CI so these can'
 
 ## Backend
 
-### ~~Scope `tree.controller.ts` node lookups to `req.user.userId` (IDOR)~~ — DONE
-
-**Fixed 2026-08-30:** `addNode`, `updateNode`, and `deleteNode` in `server/src/controllers/tree.controller.ts` now scope their lookups to `findFirst({ where: { id, userId } })`, treating "found but wrong owner" the same as "not found" (404) — matching `getTree`'s existing scoping. Surfaced during `/plan-ceo-review` of the node-re-parenting feature (2026-08-30), which cross-referenced this entry and widened the fix to include `addNode` (originally scoped to just `updateNode`/`deleteNode` in that review before this TODO was found). Shipped as its own standalone fix, ahead of the move feature it was found alongside. 23/23 controller tests pass, full suite 65/65, `tsc --noEmit` clean.
-
-**What (original):** `addNode`/`updateNode`/`deleteNode` in `server/src/controllers/tree.controller.ts` all trust `req.params.id` (or a node found via `findUnique({ where: { id } })`) without checking it belongs to the authenticated user. Any authenticated user can read/update/delete another user's `TreeNode` by guessing or observing its id.
-
-**Why (original):** JWT auth confirms *who* the caller is, but nothing here confirms the caller *owns* the node being touched — a classic IDOR gap. `getTree` is correctly scoped (`where: { userId }`), which makes the other three handlers' lack of scoping an inconsistency within the same file, not a design choice.
-
-**Context:** Flagged by the security specialist during `/review` of `feat/supervisor-level-validation` (2026-08-15) — the `findUnique` added for SUPERVISOR/LEVEL_4 validation extends this exact pattern rather than introducing it, so fixing just the new call would leave `update`/`delete` still exposed.
-
-**Effort:** N/A — done
-**Priority:** N/A — done
-**Depends on:** None
-
 ### Validate non-empty `name` on tree node create/update
 
 **What:** `server/src/controllers/tree.controller.ts` destructures `name` from `req.body` and writes it straight to Prisma with no non-empty check, unlike `auth.controller.ts` which validates `!email || !password` before proceeding.
@@ -137,6 +123,19 @@ Once fixed, consider adding `tsc --noEmit` to `npm run lint` or CI so these can'
 **Depends on:** None
 
 ## Completed
+
+### Scope `tree.controller.ts` node lookups to `req.user.userId` (IDOR)
+
+**What:** `addNode`/`updateNode`/`deleteNode` in `server/src/controllers/tree.controller.ts` all trusted `req.params.id` (or a node found via `findUnique({ where: { id } })`) without checking it belongs to the authenticated user. Any authenticated user could read/update/delete another user's `TreeNode` by guessing or observing its id.
+
+**Why:** JWT auth confirms *who* the caller is, but nothing confirmed the caller *owned* the node being touched — a classic IDOR gap. `getTree` was correctly scoped (`where: { userId }`), making the other three handlers' lack of scoping an inconsistency within the same file, not a design choice.
+
+**Context:** Flagged by the security specialist during `/review` of `feat/supervisor-level-validation` (2026-08-15). Surfaced again and widened to include `addNode` during `/plan-ceo-review` of the node-re-parenting feature (2026-08-30), which cross-referenced this entry. Fixed via a shared `findOwnedNode(id, userId)` helper (`server/src/utils/tree.ts`), used by all three handlers — "found but wrong owner" treated the same as "not found" (404), matching `getTree`'s existing scoping. Shipped as its own standalone fix, ahead of the larger node-re-parenting feature it was found alongside.
+
+**Effort:** S
+**Priority:** P1
+**Depends on:** None
+**Completed:** v0.4.3.0 (2026-08-31)
 
 ### Document the Clients House feature in CLAUDE.md
 
