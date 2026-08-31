@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## [0.4.3.0] - 2026-08-31
+
+### Fixed
+- Closed a security gap where a signed-in user could view, edit, or delete another user's tree nodes by guessing or observing a node's ID. Editing and deleting a client, distributor, or supervisor now always checks that it actually belongs to you.
+
 ## [0.4.2.0] - 2026-08-26
 
 ### Changed
