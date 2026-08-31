@@ -10,6 +10,10 @@ interface AuthRequest extends Request {
 export const getTree = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
 
+  if (!userId) {
+    return res.status(401).json({ message: 'Not authorized' });
+  }
+
   try {
     const nodes = await prisma.treeNode.findMany({
       where: { userId },
@@ -61,16 +65,16 @@ export const addNode = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ message: 'Description too long' });
   }
 
-  if (parentId) {
-    const parent = await findOwnedNode(parentId, userId);
-    if (!parent) {
-      return res.status(404).json({ message: 'Parent node not found' });
-    }
-  }
-
   const cleanDescription = sanitizeDescription(description);
 
   try {
+    if (parentId) {
+      const parent = await findOwnedNode(parentId, userId);
+      if (!parent) {
+        return res.status(404).json({ message: 'Parent node not found' });
+      }
+    }
+
     const newNode = await prisma.treeNode.create({
       data: {
         name,
@@ -106,27 +110,6 @@ export const updateNode = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ message: `Invalid percentageLevel value provided: ${percentageLevel}` });
   }
 
-  // Ownership must be confirmed on every update, not just when
-  // status/percentageLevel are being changed — a plain rename must not be
-  // reachable for a node belonging to another user.
-  const existing = await findOwnedNode(id, userId);
-  if (!existing) {
-    return res.status(404).json({ message: 'Node not found' });
-  }
-
-  // Known race: two concurrent updates to the same node can each read a stale
-  // row here and individually pass validation, combining into an invalid
-  // final state (e.g. SUPERVISOR at a non-LEVEL_4 percentage). Accepted risk
-  // for this single-user app — not worth a transaction for a double-click.
-  if (status !== undefined || percentageLevel !== undefined) {
-    const effectiveStatus = status ?? existing.status;
-    const effectivePercentageLevel = percentageLevel !== undefined ? percentageLevel : existing.percentageLevel;
-
-    if (!isSupervisorLevelValid(effectiveStatus, effectivePercentageLevel)) {
-      return res.status(400).json({ message: 'SUPERVISOR nodes must have percentageLevel LEVEL_4' });
-    }
-  }
-
   if (description && description.length > 4000) {
     return res.status(400).json({ message: 'Description too long' });
   }
@@ -134,6 +117,27 @@ export const updateNode = async (req: AuthRequest, res: Response) => {
   const cleanDescription = description ? sanitizeDescription(description) : undefined;
 
   try {
+    // Ownership must be confirmed on every update, not just when
+    // status/percentageLevel are being changed — a plain rename must not be
+    // reachable for a node belonging to another user.
+    const existing = await findOwnedNode(id, userId);
+    if (!existing) {
+      return res.status(404).json({ message: 'Node not found' });
+    }
+
+    // Known race: two concurrent updates to the same node can each read a stale
+    // row here and individually pass validation, combining into an invalid
+    // final state (e.g. SUPERVISOR at a non-LEVEL_4 percentage). Accepted risk
+    // for this single-user app — not worth a transaction for a double-click.
+    if (status !== undefined || percentageLevel !== undefined) {
+      const effectiveStatus = status ?? existing.status;
+      const effectivePercentageLevel = percentageLevel !== undefined ? percentageLevel : existing.percentageLevel;
+
+      if (!isSupervisorLevelValid(effectiveStatus, effectivePercentageLevel)) {
+        return res.status(400).json({ message: 'SUPERVISOR nodes must have percentageLevel LEVEL_4' });
+      }
+    }
+
     const updatedNode = await prisma.treeNode.update({
       where: { id },
       data: {
