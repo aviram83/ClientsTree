@@ -137,7 +137,7 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove }: N
       </div>
       <div className="flex items-center justify-between gap-2">
         {canMove ? (
-          <Button type="button" variant="secondary" onClick={handleOpenMoveView}>
+          <Button type="button" variant="destructive" onClick={handleOpenMoveView}>
             {t('nodeForm.move.button')}
           </Button>
         ) : (

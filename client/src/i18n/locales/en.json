@@ -55,15 +55,20 @@
     "activeLabel": "Active",
     "supervisorLockedNote": "Supervisor is always set to 50% discount",
     "move": {
-      "button": "Move...",
+      "button": "Move",
+      "headingPrefix": "Moving",
       "instructions": "Choose a new parent. Greyed-out nodes can't be selected — a node can't move under itself or one of its own descendants.",
+      "targetPrefix": "Will move to",
+      "currentParentNote": "This is the current parent — choose a different target to move.",
       "descendantCount": "{{count}} node will move with it.",
       "descendantCount_other": "{{count}} nodes will move with it.",
       "toSupervisorHouse": "{{count}} client will move from Personal House to Supervisor House.",
       "toSupervisorHouse_other": "{{count}} clients will move from Personal House to Supervisor House.",
       "toPersonalHouse": "{{count}} client will move from Supervisor House to Personal House.",
       "toPersonalHouse_other": "{{count}} clients will move from Supervisor House to Personal House.",
-      "confirm": "Move here"
+      "confirm": "Move here",
+      "confirmPrompt": "Move {{name}} under {{target}}? This will change the tree structure.",
+      "confirmYes": "Yes, move"
     }
   },
   "dashboard": {
