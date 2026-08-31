@@ -36,7 +36,8 @@
     "cancel": "ביטול",
     "logout": "התנתקות",
     "openLegend": "פתח מקרא",
-    "closeLegend": "סגור מקרא"
+    "closeLegend": "סגור מקרא",
+    "networkError": "לא ניתן להתחבר לשרת. בדקו את החיבור שלכם ונסו שוב."
   },
   "settings": {
     "title": "הגדרות",
@@ -52,7 +53,18 @@
     "statusLabel": "סטטוס",
     "discountLabel": "אחוז הנחה",
     "activeLabel": "פעיל",
-    "supervisorLockedNote": "מפקח מוגדר תמיד ב-50% הנחה"
+    "supervisorLockedNote": "מפקח מוגדר תמיד ב-50% הנחה",
+    "move": {
+      "button": "העברה...",
+      "instructions": "בחרו הורה חדש. צמתים מוצללים אינם ניתנים לבחירה — לא ניתן להעביר צומת אל עצמו או אל אחד מצאצאיו.",
+      "descendantCount": "{{count}} צומת יעבור יחד איתו.",
+      "descendantCount_other": "{{count}} צמתים יעברו יחד איתו.",
+      "toSupervisorHouse": "{{count}} לקוח יעבור מניקוד אישי לניקוד מפקחים.",
+      "toSupervisorHouse_other": "{{count}} לקוחות יעברו מניקוד אישי לניקוד מפקחים.",
+      "toPersonalHouse": "{{count}} לקוח יעבור מניקוד מפקחים לניקוד אישי.",
+      "toPersonalHouse_other": "{{count}} לקוחות יעברו מניקוד מפקחים לניקוד אישי.",
+      "confirm": "העבר לכאן"
+    }
   },
   "dashboard": {
     "loadingTree": "טוען עץ...",

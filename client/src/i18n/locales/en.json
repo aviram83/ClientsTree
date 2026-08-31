@@ -36,7 +36,8 @@
     "cancel": "Cancel",
     "logout": "Logout",
     "openLegend": "Open Legend",
-    "closeLegend": "Close Legend"
+    "closeLegend": "Close Legend",
+    "networkError": "Couldn't reach the server. Check your connection and try again."
   },
   "settings": {
     "title": "Settings",
@@ -52,7 +53,18 @@
     "statusLabel": "Status",
     "discountLabel": "Discount percentage",
     "activeLabel": "Active",
-    "supervisorLockedNote": "Supervisor is always set to 50% discount"
+    "supervisorLockedNote": "Supervisor is always set to 50% discount",
+    "move": {
+      "button": "Move...",
+      "instructions": "Choose a new parent. Greyed-out nodes can't be selected — a node can't move under itself or one of its own descendants.",
+      "descendantCount": "{{count}} node will move with it.",
+      "descendantCount_other": "{{count}} nodes will move with it.",
+      "toSupervisorHouse": "{{count}} client will move from Personal House to Supervisor House.",
+      "toSupervisorHouse_other": "{{count}} clients will move from Personal House to Supervisor House.",
+      "toPersonalHouse": "{{count}} client will move from Supervisor House to Personal House.",
+      "toPersonalHouse_other": "{{count}} clients will move from Supervisor House to Personal House.",
+      "confirm": "Move here"
+    }
   },
   "dashboard": {
     "loadingTree": "Loading tree...",

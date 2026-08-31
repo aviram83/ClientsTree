@@ -15,4 +15,5 @@ export const resetPassword = (token: string, password: string) =>
 export const fetchTree = () => api.get<TreeNode[]>('/tree');
 export const addNode = (data: { parentId: string; name: string; status: ClientStatus, description?: string }) => api.post<TreeNode>('/tree', data);
 export const updateNode = (id: string, data: { name?: string; status?: ClientStatus, description?: string }) => api.put<TreeNode>(`/tree/${id}`, data);
+export const moveNode = (id: string, newParentId: string) => api.patch<TreeNode>(`/tree/${id}/move`, { newParentId });
 export const deleteNode = (id: string) => api.delete(`/tree/${id}`);
