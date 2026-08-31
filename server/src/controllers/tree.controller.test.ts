@@ -614,5 +614,23 @@ describe('tree.controller', () => {
 
       expect(res.status).toHaveBeenCalledWith(404);
     });
+
+    it('returns 500 on an unexpected (non-Prisma-known) error', async () => {
+      vi.mocked(prisma.treeNode.findFirst)
+        .mockResolvedValueOnce({ id: 'a', userId: 'user-1', parentId: 'root' } as any)
+        .mockResolvedValueOnce({ id: 'd', userId: 'user-1', parentId: 'root' } as any);
+      vi.mocked(prisma.treeNode.findMany).mockResolvedValue([
+        { id: 'root', parentId: null },
+        { id: 'a', parentId: 'root' },
+        { id: 'd', parentId: 'root' },
+      ] as any);
+      vi.mocked(prisma.treeNode.update).mockRejectedValue(new Error('boom'));
+      const req = { user: { userId: 'user-1' }, params: { id: 'a' }, body: { newParentId: 'd' } } as any;
+      const res = buildRes();
+
+      await moveNode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+    });
   });
 });
