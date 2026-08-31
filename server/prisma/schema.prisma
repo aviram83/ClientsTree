@@ -33,6 +33,10 @@ model TreeNode {
   parent   TreeNode?  @relation("TreeHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
   parentId String?
   children TreeNode[] @relation("TreeHierarchy")
+
+  // getTree and the move endpoint's cycle check both scan all of a user's
+  // nodes by userId — index it so that scan stays cheap as trees grow.
+  @@index([userId])
 }
 
 enum ClientStatus {
