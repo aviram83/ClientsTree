@@ -207,6 +207,7 @@ export const moveNode = async (req: AuthRequest, res: Response) => {
   try {
     const node = await findOwnedNode(id, userId);
     if (!node) {
+      console.warn('Rejected move: node not found or not owned', { userId, nodeId: id, newParentId });
       return res.status(404).json({ message: 'Node not found' });
     }
 

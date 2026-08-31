@@ -122,6 +122,18 @@ Once fixed, consider adding `tsc --noEmit` to `npm run lint` or CI so these can'
 **Priority:** P2
 **Depends on:** None
 
+### Close the check-then-write race in `addNode`'s second-root guard and `moveNode`'s cycle check
+
+**What:** Both `addNode`'s "reject a second root" guard and `moveNode`'s cycle-detection guard in `server/src/controllers/tree.controller.ts` follow a check-then-write pattern with no DB-level lock or transaction: `addNode` does `findFirst({parentId: null})` then `create()`; `moveNode` does `findMany()` (to build the ancestor snapshot) then `update()`. Two concurrent requests can each pass their own check before either write commits.
+
+**Why:** For `addNode`, two simultaneous no-`parentId` creates from the same account (double-submit, two tabs) could both pass the "no existing root" check and produce two roots — the exact shape this guard exists to prevent. For `moveNode`, two concurrent opposing moves (e.g. move A under B while concurrently moving B under A) can each see a stale, cycle-free snapshot and jointly commit a cycle into the tree, which `getTree`'s parent/child walk and the client's recursive tree-rendering code aren't designed to handle.
+
+**Context:** Found by the testing and security specialists during `/ship`'s pre-landing review of the node-re-parenting feature (2026-08-31). User decided to ship as-is rather than block on it — the window only opens on genuinely simultaneous conflicting requests from the same account, low likelihood for this app's usage pattern, and the worst case is a recoverable bad DB state, not a cross-user or security issue. Fix options: wrap the check+write in a Prisma serializable transaction (re-run the check inside the transaction immediately before the write), or add a partial unique index on `TreeNode` for `(userId)` where `parentId IS NULL` to make the single-root invariant DB-enforced rather than app-enforced.
+
+**Effort:** M
+**Priority:** P2
+**Depends on:** None
+
 ## Completed
 
 ### Scope `tree.controller.ts` node lookups to `req.user.userId` (IDOR)
