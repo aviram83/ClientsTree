@@ -14,6 +14,7 @@ export const DashboardPage = () => {
   const isLoading = useTreeStore((s) => s.isLoading);
   const addNode = useTreeStore((s) => s.addNode);
   const updateNode = useTreeStore((s) => s.updateNode);
+  const moveNode = useTreeStore((s) => s.moveNode);
   const fetchTree = useTreeStore((s) => s.fetchTree);
   const isModalOpen = useTreeUIStore((s) => s.isModalOpen);
   const modalAction = useTreeUIStore((s) => s.modalAction);
@@ -52,6 +53,11 @@ export const DashboardPage = () => {
     closeModal();
   };
 
+  const handleMoveNode = async (nodeId: string, newParentId: string) => {
+    await moveNode(nodeId, newParentId);
+    closeModal();
+  };
+
   return (
     <AppLayout>
       {tree.length === 0 && isLoading && <p className="p-4">{t('dashboard.loadingTree')}</p>}
@@ -75,6 +81,8 @@ export const DashboardPage = () => {
           onClose={closeModal}
           node={currentNode}
           isLoading={isLoading}
+          tree={modalAction === 'edit' ? tree : undefined}
+          onMove={modalAction === 'edit' ? handleMoveNode : undefined}
         />
       </Modal>
     </AppLayout>
