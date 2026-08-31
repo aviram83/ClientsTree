@@ -1,19 +1,25 @@
 import { describe, it, expect } from 'vitest';
 import { TreeNode } from '../api/types';
 import { ClientStatus } from '../config/statusConfig';
+import { PercentageLevel } from '../config/percentageConfig';
 import {
   getDescendantIds,
   isValidMoveTarget,
+  findNodeById,
   computeHasSupervisorAncestorAtParent,
   computeHouseReclassificationPreview,
 } from './nodeMove';
 
+// Defaults to a house-visible level (LEVEL_1) so existing reclassification
+// tests exercise the "normal, already-assigned" case by default; tests for
+// the hidden-level (LEVEL_6) exclusion set percentageLevel explicitly.
 const node = (overrides: Partial<TreeNode> & { id: string }): TreeNode => ({
   name: overrides.id,
   status: ClientStatus.CLIENT,
   userId: 'user-1',
   parentId: null,
   active: true,
+  percentageLevel: PercentageLevel.LEVEL_1,
   createdAt: '2024-01-01T00:00:00.000Z',
   children: [],
   ...overrides,
@@ -54,6 +60,23 @@ describe('isValidMoveTarget', () => {
 
   it('allows the current parent (idempotent no-op move)', () => {
     expect(isValidMoveTarget('a', 'root', descendantIds)).toBe(true);
+  });
+});
+
+describe('findNodeById', () => {
+  it('finds a root-level node', () => {
+    const tree = [node({ id: 'a' }), node({ id: 'b' })];
+    expect(findNodeById(tree, 'b')).toEqual(expect.objectContaining({ id: 'b' }));
+  });
+
+  it('finds a nested descendant node', () => {
+    const tree = [node({ id: 'a', children: [node({ id: 'b', children: [node({ id: 'c' })] })] })];
+    expect(findNodeById(tree, 'c')).toEqual(expect.objectContaining({ id: 'c' }));
+  });
+
+  it('returns null when the id is not present anywhere in the tree', () => {
+    const tree = [node({ id: 'a', children: [node({ id: 'b' })] })];
+    expect(findNodeById(tree, 'missing')).toBeNull();
   });
 });
 
@@ -157,6 +180,26 @@ describe('computeHouseReclassificationPreview', () => {
     // "a" and "notShielded" are both affected (2); "inactiveSup" is a
     // supervisor node and never counted itself, and it does not shield its
     // child because it's inactive.
+    expect(preview).toEqual({ count: 2, direction: 'toSupervisor' });
+  });
+
+  // Regression: a node on the hidden default level (LEVEL_6, unset) never
+  // renders in either house per flattenVisibleHouseNodes (houseLayout.ts),
+  // regardless of active/ancestry — the preview must not count it as
+  // "affected" just because it's active.
+  it('excludes a node on the hidden LEVEL_6 percentage level, even if active', () => {
+    const moved = node({
+      id: 'a',
+      children: [
+        node({ id: 'hidden', percentageLevel: PercentageLevel.LEVEL_6 }),
+        node({ id: 'visible' }),
+      ],
+    });
+
+    const preview = computeHouseReclassificationPreview(moved, false, true);
+
+    // Only "a" and "visible" are affected (2); "hidden" is on LEVEL_6 and
+    // never shows in a house, so reclassifying it changes nothing visible.
     expect(preview).toEqual({ count: 2, direction: 'toSupervisor' });
   });
 });

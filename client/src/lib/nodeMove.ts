@@ -1,5 +1,6 @@
 import { TreeNode } from '../api/types';
 import { ClientStatus } from '../config/statusConfig';
+import { PERCENTAGE_LEVEL_CONFIG } from '../config/percentageConfig';
 
 // Collects the ids of every descendant of `node` (not including `node`
 // itself). Used both to grey out invalid targets in the move picker (a node
@@ -18,6 +19,17 @@ export const getDescendantIds = (node: TreeNode): Set<string> => {
 
   visit(node);
   return ids;
+};
+
+// Finds a node by id anywhere in the tree (used to resolve the picker's
+// currently-selected target back to its display name for the move preview).
+export const findNodeById = (tree: TreeNode[], id: string): TreeNode | null => {
+  for (const node of tree) {
+    if (node.id === id) return node;
+    const found = node.children ? findNodeById(node.children, id) : null;
+    if (found) return found;
+  }
+  return null;
 };
 
 // A move target is invalid if it's the node itself or one of its descendants
@@ -62,9 +74,11 @@ export interface HouseReclassificationPreview {
 // itself) would flip Personal-House <-> Supervisor-House membership if the
 // subtree's "incoming" hasSupervisorAncestor flag changed from false to true
 // (or vice versa) at the top. A node is excluded from the count when:
-//  - it's inactive (flattenVisibleHouseNodes never renders inactive nodes in
-//    either house at all, regardless of ancestry, so reclassifying it is
-//    meaningless);
+//  - it isn't actually visible in either house — flattenVisibleHouseNodes
+//    requires active AND a percentageLevel whose showsInHouse is true, so an
+//    inactive node OR one still on the hidden default (LEVEL_6, unset) never
+//    renders in a house regardless of ancestry, and reclassifying it is
+//    meaningless;
 //  - it's a SUPERVISOR node (its own membership is ancestry-independent —
 //    status alone decides it — active or not);
 //  - it's already shielded by an active SUPERVISOR *inside* the subtree —
@@ -76,7 +90,10 @@ export interface HouseReclassificationPreview {
 const countAffectedInSubtree = (node: TreeNode, internalAncestorHasSupervisor: boolean): number => {
   const isSupervisorStatus = node.status === ClientStatus.SUPERVISOR;
   const isActiveSupervisor = isSupervisorStatus && node.active;
-  const isAffected = node.active && !isSupervisorStatus && !internalAncestorHasSupervisor;
+  const isVisibleInAHouse = Boolean(
+    node.active && node.percentageLevel && PERCENTAGE_LEVEL_CONFIG[node.percentageLevel]?.showsInHouse
+  );
+  const isAffected = isVisibleInAHouse && !isSupervisorStatus && !internalAncestorHasSupervisor;
   let count = isAffected ? 1 : 0;
 
   const childFlag = internalAncestorHasSupervisor || isActiveSupervisor;
