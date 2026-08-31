@@ -11,6 +11,7 @@ vi.mock('../db', () => ({
       update: vi.fn(),
       delete: vi.fn(),
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
     },
   },
 }));
@@ -48,6 +49,17 @@ describe('tree.controller', () => {
   });
 
   describe('addNode', () => {
+    it('returns 401 when the request has no authenticated user', async () => {
+      const req = { body: { name: 'Node', status: 'CLIENT' } } as any;
+      const res = buildRes();
+
+      await addNode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(prisma.treeNode.findFirst).not.toHaveBeenCalled();
+      expect(prisma.treeNode.create).not.toHaveBeenCalled();
+    });
+
     it('rejects an invalid status without calling Prisma', async () => {
       const req = { user: { userId: 'user-1' }, body: { status: 'NOT_A_STATUS' } } as any;
       const res = buildRes();
@@ -130,11 +142,53 @@ describe('tree.controller', () => {
       });
       expect(res.status).toHaveBeenCalledWith(201);
     });
+
+    it('returns 404 when parentId belongs to another user', async () => {
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue(null);
+      const req = {
+        user: { userId: 'user-1' },
+        body: { name: 'Node', status: 'CLIENT', parentId: 'someone-elses-node' },
+      } as any;
+      const res = buildRes();
+
+      await addNode(req, res);
+
+      expect(prisma.treeNode.findFirst).toHaveBeenCalledWith({
+        where: { id: 'someone-elses-node', userId: 'user-1' },
+      });
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(prisma.treeNode.create).not.toHaveBeenCalled();
+    });
+
+    it('allows a parentId that belongs to the requesting user', async () => {
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({ id: 'my-node', userId: 'user-1' } as any);
+      vi.mocked(prisma.treeNode.create).mockResolvedValue({ id: 'new-node' } as any);
+      const req = {
+        user: { userId: 'user-1' },
+        body: { name: 'Node', status: 'CLIENT', parentId: 'my-node' },
+      } as any;
+      const res = buildRes();
+
+      await addNode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(201);
+    });
   });
 
   describe('updateNode', () => {
+    it('returns 401 when the request has no authenticated user', async () => {
+      const req = { params: { id: 'node-1' }, body: { name: 'Renamed' } } as any;
+      const res = buildRes();
+
+      await updateNode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(prisma.treeNode.findFirst).not.toHaveBeenCalled();
+      expect(prisma.treeNode.update).not.toHaveBeenCalled();
+    });
+
     it('rejects an invalid status without calling Prisma', async () => {
-      const req = { params: { id: 'node-1' }, body: { status: 'NOT_A_STATUS' } } as any;
+      const req = { user: { userId: 'user-1' }, params: { id: 'node-1' }, body: { status: 'NOT_A_STATUS' } } as any;
       const res = buildRes();
 
       await updateNode(req, res);
@@ -144,8 +198,10 @@ describe('tree.controller', () => {
     });
 
     it('sanitizes description before calling Prisma', async () => {
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({ id: 'node-1', userId: 'user-1', status: 'CLIENT', percentageLevel: 'LEVEL_2' } as any);
       vi.mocked(prisma.treeNode.update).mockResolvedValue({ id: 'node-1' } as any);
       const req = {
+        user: { userId: 'user-1' },
         params: { id: 'node-1' },
         body: { description: '<script>alert(1)</script>hi' },
       } as any;
@@ -161,6 +217,7 @@ describe('tree.controller', () => {
 
     it('rejects an invalid percentageLevel without calling Prisma', async () => {
       const req = {
+        user: { userId: 'user-1' },
         params: { id: 'node-1' },
         body: { percentageLevel: 'NOT_A_LEVEL' },
       } as any;
@@ -173,12 +230,14 @@ describe('tree.controller', () => {
     });
 
     it('rejects setting status to SUPERVISOR with a non-LEVEL_4 percentageLevel', async () => {
-      vi.mocked(prisma.treeNode.findUnique).mockResolvedValue({
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({
         id: 'node-1',
+        userId: 'user-1',
         status: 'CLIENT',
         percentageLevel: 'LEVEL_2',
       } as any);
       const req = {
+        user: { userId: 'user-1' },
         params: { id: 'node-1' },
         body: { status: 'SUPERVISOR', percentageLevel: 'LEVEL_2' },
       } as any;
@@ -191,12 +250,14 @@ describe('tree.controller', () => {
     });
 
     it('rejects changing percentageLevel away from LEVEL_4 on an existing SUPERVISOR node', async () => {
-      vi.mocked(prisma.treeNode.findUnique).mockResolvedValue({
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({
         id: 'node-1',
+        userId: 'user-1',
         status: 'SUPERVISOR',
         percentageLevel: 'LEVEL_4',
       } as any);
       const req = {
+        user: { userId: 'user-1' },
         params: { id: 'node-1' },
         body: { percentageLevel: 'LEVEL_2' },
       } as any;
@@ -209,8 +270,15 @@ describe('tree.controller', () => {
     });
 
     it('accepts setting status to SUPERVISOR with LEVEL_4', async () => {
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({
+        id: 'node-1',
+        userId: 'user-1',
+        status: 'CLIENT',
+        percentageLevel: 'LEVEL_4',
+      } as any);
       vi.mocked(prisma.treeNode.update).mockResolvedValue({ id: 'node-1' } as any);
       const req = {
+        user: { userId: 'user-1' },
         params: { id: 'node-1' },
         body: { status: 'SUPERVISOR', percentageLevel: 'LEVEL_4' },
       } as any;
@@ -225,13 +293,15 @@ describe('tree.controller', () => {
     });
 
     it('allows demoting a SUPERVISOR to CLIENT while percentageLevel stays LEVEL_4', async () => {
-      vi.mocked(prisma.treeNode.findUnique).mockResolvedValue({
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({
         id: 'node-1',
+        userId: 'user-1',
         status: 'SUPERVISOR',
         percentageLevel: 'LEVEL_4',
       } as any);
       vi.mocked(prisma.treeNode.update).mockResolvedValue({ id: 'node-1' } as any);
       const req = {
+        user: { userId: 'user-1' },
         params: { id: 'node-1' },
         body: { status: 'CLIENT' },
       } as any;
@@ -247,12 +317,14 @@ describe('tree.controller', () => {
     });
 
     it('rejects explicitly nulling percentageLevel on an existing SUPERVISOR node', async () => {
-      vi.mocked(prisma.treeNode.findUnique).mockResolvedValue({
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({
         id: 'node-1',
+        userId: 'user-1',
         status: 'SUPERVISOR',
         percentageLevel: 'LEVEL_4',
       } as any);
       const req = {
+        user: { userId: 'user-1' },
         params: { id: 'node-1' },
         body: { percentageLevel: null },
       } as any;
@@ -264,9 +336,10 @@ describe('tree.controller', () => {
       expect(prisma.treeNode.update).not.toHaveBeenCalled();
     });
 
-    it('returns 404 when updating status/percentageLevel on a node that no longer exists', async () => {
-      vi.mocked(prisma.treeNode.findUnique).mockResolvedValue(null);
+    it('returns 404 when updating a node that no longer exists', async () => {
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue(null);
       const req = {
+        user: { userId: 'user-1' },
         params: { id: 'gone' },
         body: { percentageLevel: 'LEVEL_2' },
       } as any;
@@ -278,9 +351,29 @@ describe('tree.controller', () => {
       expect(prisma.treeNode.update).not.toHaveBeenCalled();
     });
 
-    it('allows an unrelated field update (e.g. name) without a status/percentageLevel lookup', async () => {
+    it('returns 404 when updating a node that belongs to another user (IDOR)', async () => {
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue(null);
+      const req = {
+        user: { userId: 'attacker' },
+        params: { id: 'victims-node' },
+        body: { name: 'Hijacked' },
+      } as any;
+      const res = buildRes();
+
+      await updateNode(req, res);
+
+      expect(prisma.treeNode.findFirst).toHaveBeenCalledWith({
+        where: { id: 'victims-node', userId: 'attacker' },
+      });
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(prisma.treeNode.update).not.toHaveBeenCalled();
+    });
+
+    it('scopes an unrelated field update (e.g. name) to the requesting user', async () => {
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({ id: 'node-1', userId: 'user-1', status: 'CLIENT', percentageLevel: 'LEVEL_2' } as any);
       vi.mocked(prisma.treeNode.update).mockResolvedValue({ id: 'node-1' } as any);
       const req = {
+        user: { userId: 'user-1' },
         params: { id: 'node-1' },
         body: { name: 'Renamed' },
       } as any;
@@ -288,7 +381,7 @@ describe('tree.controller', () => {
 
       await updateNode(req, res);
 
-      expect(prisma.treeNode.findUnique).not.toHaveBeenCalled();
+      expect(prisma.treeNode.findFirst).toHaveBeenCalledWith({ where: { id: 'node-1', userId: 'user-1' } });
       expect(prisma.treeNode.update).toHaveBeenCalledWith({
         where: { id: 'node-1' },
         data: expect.objectContaining({ name: 'Renamed' }),
@@ -297,26 +390,50 @@ describe('tree.controller', () => {
   });
 
   describe('deleteNode', () => {
-    it('deletes the node scoped to its id', async () => {
-      vi.mocked(prisma.treeNode.findUnique).mockResolvedValue({ id: 'node-1', parentId: 'root' } as any);
-      vi.mocked(prisma.treeNode.delete).mockResolvedValue({} as any);
+    it('returns 401 when the request has no authenticated user', async () => {
       const req = { params: { id: 'node-1' } } as any;
       const res = buildRes();
 
       await deleteNode(req, res);
 
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(prisma.treeNode.findFirst).not.toHaveBeenCalled();
+      expect(prisma.treeNode.delete).not.toHaveBeenCalled();
+    });
+
+    it('deletes the node scoped to its id', async () => {
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({ id: 'node-1', userId: 'user-1', parentId: 'root' } as any);
+      vi.mocked(prisma.treeNode.delete).mockResolvedValue({} as any);
+      const req = { user: { userId: 'user-1' }, params: { id: 'node-1' } } as any;
+      const res = buildRes();
+
+      await deleteNode(req, res);
+
+      expect(prisma.treeNode.findFirst).toHaveBeenCalledWith({ where: { id: 'node-1', userId: 'user-1' } });
       expect(prisma.treeNode.delete).toHaveBeenCalledWith({ where: { id: 'node-1' } });
       expect(res.status).toHaveBeenCalledWith(204);
     });
 
     it('refuses to delete the root node', async () => {
-      vi.mocked(prisma.treeNode.findUnique).mockResolvedValue({ id: 'root', parentId: null } as any);
-      const req = { params: { id: 'root' } } as any;
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({ id: 'root', userId: 'user-1', parentId: null } as any);
+      const req = { user: { userId: 'user-1' }, params: { id: 'root' } } as any;
       const res = buildRes();
 
       await deleteNode(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
+      expect(prisma.treeNode.delete).not.toHaveBeenCalled();
+    });
+
+    it('returns 404 when deleting a node that belongs to another user (IDOR)', async () => {
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValue(null);
+      const req = { user: { userId: 'attacker' }, params: { id: 'victims-node' } } as any;
+      const res = buildRes();
+
+      await deleteNode(req, res);
+
+      expect(prisma.treeNode.findFirst).toHaveBeenCalledWith({ where: { id: 'victims-node', userId: 'attacker' } });
+      expect(res.status).toHaveBeenCalledWith(404);
       expect(prisma.treeNode.delete).not.toHaveBeenCalled();
     });
   });

@@ -2,16 +2,18 @@
 
 ## Frontend
 
-### Reparent an inactive SUPERVISOR's children one level up
+### ~~Reparent an inactive SUPERVISOR's children one level up~~ — SUPERSEDED
 
-**What:** When a SUPERVISOR node is deactivated, its children currently just stop counting as "supervised" (they fall back to the Clients House, per the ancestor rule in `houseLayout.ts`) but stay parented under the inactive supervisor in the actual tree structure. The desired behavior is to reparent them one level up (to the inactive supervisor's own parent) so the tree stays structurally clean.
+**Superseded by:** the manual node re-parenting feature (planned 2026-08-30, see `/plan-ceo-review` output). During that review, the user explicitly decided this should stay a manual, on-demand action rather than an automatic hook on SUPERVISOR deactivation — if an admin wants to reorganize a deactivated supervisor's clients, they now use the generic move feature by hand. No automatic reparenting will be built. This entry is kept for history; do not implement the original "automatic" version described below.
 
-**Why:** Discussed during `/review` of `feat/supervisor-house-view` (2026-08-16) — decided that for now, an inactive supervisor simply doesn't count as an ancestor (its children stay visible in the Clients House rather than disappearing into a Supervisor House with no visible supervisor to explain why). The actual reparenting is a separate, deliberately deferred task.
+**What (original, no longer planned):** When a SUPERVISOR node is deactivated, its children currently just stop counting as "supervised" (they fall back to the Clients House, per the ancestor rule in `houseLayout.ts`) but stay parented under the inactive supervisor in the actual tree structure. The originally proposed behavior was to automatically reparent them one level up (to the inactive supervisor's own parent) on deactivation.
 
-**Context:** `flattenVisibleHouseNodes` in `client/src/lib/houseLayout.ts` already treats `hasSupervisorAncestor` as `false` once it hits an inactive SUPERVISOR — that's the house-rendering fix, already shipped. This TODO is about the underlying tree structure itself (parentId), not just how it renders.
+**Why (original):** Discussed during `/review` of `feat/supervisor-house-view` (2026-08-16) — decided that for now, an inactive supervisor simply doesn't count as an ancestor (its children stay visible in the Clients House rather than disappearing into a Supervisor House with no visible supervisor to explain why). The actual reparenting was deferred, and has since been resolved as "manual, not automatic" rather than built as originally scoped.
 
-**Effort:** M
-**Priority:** P3
+**Context:** `flattenVisibleHouseNodes` in `client/src/lib/houseLayout.ts` already treats `hasSupervisorAncestor` as `false` once it hits an inactive SUPERVISOR — that's the house-rendering fix, already shipped, and is unaffected by this decision.
+
+**Effort:** N/A — superseded
+**Priority:** N/A — superseded
 **Depends on:** None
 
 ### Fix pre-existing `tsc --noEmit` errors
@@ -96,16 +98,18 @@ Once fixed, consider adding `tsc --noEmit` to `npm run lint` or CI so these can'
 
 ## Backend
 
-### Scope `tree.controller.ts` node lookups to `req.user.userId` (IDOR)
+### ~~Scope `tree.controller.ts` node lookups to `req.user.userId` (IDOR)~~ — DONE
 
-**What:** `addNode`/`updateNode`/`deleteNode` in `server/src/controllers/tree.controller.ts` all trust `req.params.id` (or a node found via `findUnique({ where: { id } })`) without checking it belongs to the authenticated user. Any authenticated user can read/update/delete another user's `TreeNode` by guessing or observing its id.
+**Fixed 2026-08-30:** `addNode`, `updateNode`, and `deleteNode` in `server/src/controllers/tree.controller.ts` now scope their lookups to `findFirst({ where: { id, userId } })`, treating "found but wrong owner" the same as "not found" (404) — matching `getTree`'s existing scoping. Surfaced during `/plan-ceo-review` of the node-re-parenting feature (2026-08-30), which cross-referenced this entry and widened the fix to include `addNode` (originally scoped to just `updateNode`/`deleteNode` in that review before this TODO was found). Shipped as its own standalone fix, ahead of the move feature it was found alongside. 23/23 controller tests pass, full suite 65/65, `tsc --noEmit` clean.
 
-**Why:** JWT auth confirms *who* the caller is, but nothing here confirms the caller *owns* the node being touched — a classic IDOR gap. `getTree` is correctly scoped (`where: { userId }`), which makes the other three handlers' lack of scoping an inconsistency within the same file, not a design choice.
+**What (original):** `addNode`/`updateNode`/`deleteNode` in `server/src/controllers/tree.controller.ts` all trust `req.params.id` (or a node found via `findUnique({ where: { id } })`) without checking it belongs to the authenticated user. Any authenticated user can read/update/delete another user's `TreeNode` by guessing or observing its id.
 
-**Context:** Flagged by the security specialist during `/review` of `feat/supervisor-level-validation` (2026-08-15) — the `findUnique` added for SUPERVISOR/LEVEL_4 validation extends this exact pattern rather than introducing it, so fixing just the new call would leave `update`/`delete` still exposed. Needs a full pass across all three handlers (add `userId: req.user?.userId` to each `where` clause, treat "found but wrong owner" the same as "not found" → 404), not a one-line patch.
+**Why (original):** JWT auth confirms *who* the caller is, but nothing here confirms the caller *owns* the node being touched — a classic IDOR gap. `getTree` is correctly scoped (`where: { userId }`), which makes the other three handlers' lack of scoping an inconsistency within the same file, not a design choice.
 
-**Effort:** S
-**Priority:** P1
+**Context:** Flagged by the security specialist during `/review` of `feat/supervisor-level-validation` (2026-08-15) — the `findUnique` added for SUPERVISOR/LEVEL_4 validation extends this exact pattern rather than introducing it, so fixing just the new call would leave `update`/`delete` still exposed.
+
+**Effort:** N/A — done
+**Priority:** N/A — done
 **Depends on:** None
 
 ### Validate non-empty `name` on tree node create/update
