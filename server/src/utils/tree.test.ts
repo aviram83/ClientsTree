@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { findOwnedNode } from './tree';
+import { findOwnedNode, wouldCreateCycle } from './tree';
 import prisma from '../db';
 
 vi.mock('../db', () => ({
@@ -45,5 +45,33 @@ describe('findOwnedNode', () => {
     const result = await findOwnedNode('gone', 'user-1');
 
     expect(result).toBeNull();
+  });
+});
+
+describe('wouldCreateCycle', () => {
+  // root -> a -> b -> c
+  //      -> d
+  const nodes = [
+    { id: 'root', parentId: null },
+    { id: 'a', parentId: 'root' },
+    { id: 'b', parentId: 'a' },
+    { id: 'c', parentId: 'b' },
+    { id: 'd', parentId: 'root' },
+  ];
+
+  it('rejects moving a node under itself (self-move)', () => {
+    expect(wouldCreateCycle('a', 'a', nodes)).toBe(true);
+  });
+
+  it('rejects moving a node under its own descendant (descendant-move)', () => {
+    expect(wouldCreateCycle('a', 'c', nodes)).toBe(true);
+  });
+
+  it('allows moving a node under an unrelated, non-descendant node', () => {
+    expect(wouldCreateCycle('a', 'd', nodes)).toBe(false);
+  });
+
+  it('allows moving a node back under its current parent (no-op)', () => {
+    expect(wouldCreateCycle('b', 'a', nodes)).toBe(false);
   });
 });

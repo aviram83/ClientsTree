@@ -5,6 +5,7 @@ vi.mock('../api', () => ({
   addNode: vi.fn(),
   updateNode: vi.fn(),
   deleteNode: vi.fn(),
+  moveNode: vi.fn(),
 }));
 
 const { mockAuthState, authListeners } = vi.hoisted(() => ({
@@ -118,5 +119,53 @@ describe('treeStore', () => {
 
     expect(api.deleteNode).toHaveBeenCalledWith('1');
     expect(api.fetchTree).toHaveBeenCalledTimes(1);
+  });
+
+  it('moveNode calls the api then refetches the tree', async () => {
+    (api.moveNode as any).mockResolvedValue({ data: {} });
+
+    await useTreeStore.getState().moveNode('1', '2');
+
+    expect(api.moveNode).toHaveBeenCalledWith('1', '2');
+    expect(api.fetchTree).toHaveBeenCalledTimes(1);
+    expect(useTreeStore.getState().isLoading).toBe(false);
+  });
+
+  // Required regression test: addNode used to swallow errors (try/catch +
+  // console.error, never rethrow) instead of propagating them like the other
+  // three mutations. That silent failure is what let a failed add look like
+  // a no-op to the caller and to api.ts's error-modal interceptor.
+  it('addNode propagates a failed api call instead of swallowing it', async () => {
+    const apiError = new Error('add failed');
+    (api.addNode as any).mockRejectedValue(apiError);
+
+    await expect(useTreeStore.getState().addNode({ name: 'New' })).rejects.toBe(apiError);
+
+    expect(api.fetchTree).not.toHaveBeenCalled();
+    expect(useTreeStore.getState().isLoading).toBe(false);
+  });
+
+  it('updateNode propagates a failed api call', async () => {
+    const apiError = new Error('update failed');
+    (api.updateNode as any).mockRejectedValue(apiError);
+
+    await expect(useTreeStore.getState().updateNode('1', { name: 'x' })).rejects.toBe(apiError);
+    expect(useTreeStore.getState().isLoading).toBe(false);
+  });
+
+  it('deleteNode propagates a failed api call', async () => {
+    const apiError = new Error('delete failed');
+    (api.deleteNode as any).mockRejectedValue(apiError);
+
+    await expect(useTreeStore.getState().deleteNode('1')).rejects.toBe(apiError);
+    expect(useTreeStore.getState().isLoading).toBe(false);
+  });
+
+  it('moveNode propagates a failed api call', async () => {
+    const apiError = new Error('move failed');
+    (api.moveNode as any).mockRejectedValue(apiError);
+
+    await expect(useTreeStore.getState().moveNode('1', '2')).rejects.toBe(apiError);
+    expect(useTreeStore.getState().isLoading).toBe(false);
   });
 });

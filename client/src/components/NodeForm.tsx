@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { TreeNode } from '../api/types';
@@ -9,24 +9,35 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { MoveNodePicker } from './MoveNodePicker';
 
 interface NodeFormProps {
   onSubmit: (data: any) => void;
   onClose: () => void;
   node?: TreeNode | null;
   isLoading: boolean;
+  // Move... is only meaningful in edit mode, so `tree`/`onMove` are optional
+  // — DashboardPage passes them for edit, omits them for add.
+  tree?: TreeNode[];
+  onMove?: (nodeId: string, newParentId: string) => void;
 }
 
-export const NodeForm = ({ onSubmit, onClose, node, isLoading }: NodeFormProps) => {
+export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove }: NodeFormProps) => {
   const { t } = useTranslation();
-  const { register, handleSubmit, watch, setValue } = useForm({
-    defaultValues: {
-      name: node?.name || '',
-      status: node?.status || Object.keys(STATUS_CONFIG)[0],
-      percentageLevel: node?.percentageLevel || PercentageLevel.LEVEL_6,
-      active: node?.active ?? true,
-      description: node?.description || '',
-    },
+  // Swaps the modal's content in place to the tree-aware move picker, rather
+  // than stacking a second modal. A node can never have a valid move target
+  // that is itself, so the root (parentId === null) never gets a "Move..."
+  // button in the first place.
+  const [isMoveViewOpen, setIsMoveViewOpen] = useState(false);
+  const defaultFormValues = {
+    name: node?.name || '',
+    status: node?.status || Object.keys(STATUS_CONFIG)[0],
+    percentageLevel: node?.percentageLevel || PercentageLevel.LEVEL_6,
+    active: node?.active ?? true,
+    description: node?.description || '',
+  };
+  const { register, handleSubmit, watch, setValue, reset } = useForm({
+    defaultValues: defaultFormValues,
   });
 
   const activeValue = watch('active');
@@ -48,6 +59,30 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading }: NodeFormProps) 
     // than relying on the (disabled) field's own value.
     onSubmit(isSupervisor ? { ...data, percentageLevel: PercentageLevel.LEVEL_4 } : data);
   });
+
+  // Root can never have a valid move target (every other node is its own
+  // descendant), so the button is only shown for a non-root node in edit mode.
+  const canMove = !!node && node.parentId !== null && !!tree && !!onMove;
+
+  const handleOpenMoveView = () => {
+    // Discard any unsaved name/description edits silently — the picker view
+    // replaces the form entirely, and coming back to it should start fresh
+    // from the node's saved values rather than resurface stale edits.
+    reset(defaultFormValues);
+    setIsMoveViewOpen(true);
+  };
+
+  if (isMoveViewOpen && node && tree && onMove) {
+    return (
+      <MoveNodePicker
+        tree={tree}
+        node={node}
+        isLoading={isLoading}
+        onCancel={() => setIsMoveViewOpen(false)}
+        onConfirm={(newParentId) => onMove(node.id, newParentId)}
+      />
+    );
+  }
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-4">
@@ -100,11 +135,20 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading }: NodeFormProps) 
         />
         <Label htmlFor="active" className="cursor-pointer font-normal">{t('nodeForm.activeLabel')}</Label>
       </div>
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? t('common.saving') : t('common.save')}
-        </Button>
+      <div className="flex items-center justify-between gap-2">
+        {canMove ? (
+          <Button type="button" variant="destructive" onClick={handleOpenMoveView}>
+            {t('nodeForm.move.button')}
+          </Button>
+        ) : (
+          <span />
+        )}
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? t('common.saving') : t('common.save')}
+          </Button>
+        </div>
       </div>
     </form>
   );

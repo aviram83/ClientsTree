@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import i18n from '../i18n';
 
 let showErrorModal: (message: string) => void;
 let logout: () => void;
@@ -26,13 +27,22 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      const errorMessage = (error.response.data as { message: string })?.message || 'Unauthorized';
-      if (errorMessage === 'Token is not valid') {
+    if (error.response) {
+      const status = error.response.status;
+      const errorMessage = (error.response.data as { message: string })?.message || 'Unexpected error';
+
+      if (status === 401 && errorMessage === 'Token is not valid') {
         logout();
-      } else {
+      } else if (status >= 400) {
+        // Every other 4xx/5xx (400/403/404/409/500/...) was previously
+        // swallowed silently here — surface it the same way a 401 already
+        // was, so a failed add/update/delete/move isn't a silent no-op.
         showErrorModal(errorMessage);
       }
+    } else {
+      // No response at all: network failure, or the request never completed
+      // (e.g. a Render cold-start timeout). Previously unhandled.
+      showErrorModal(i18n.t('common.networkError'));
     }
     return Promise.reject(error);
   }

@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
 import prisma from '../db';
 import { isValidClientStatus, isValidPercentageLevel, isSupervisorLevelValid, sanitizeDescription } from '../utils/validation';
-import { findOwnedNode } from '../utils/tree';
+import { findOwnedNode, wouldCreateCycle } from '../utils/tree';
 
 interface AuthRequest extends Request {
   user?: { userId: string };
@@ -72,6 +73,14 @@ export const addNode = async (req: AuthRequest, res: Response) => {
       const parent = await findOwnedNode(parentId, userId);
       if (!parent) {
         return res.status(404).json({ message: 'Parent node not found' });
+      }
+    } else {
+      // Only one root per user is a supported shape — getTree, HouseView, and
+      // TreeVisualizer all assume a single root. Reject a second one instead
+      // of silently creating a shape nothing downstream can render.
+      const existingRoot = await prisma.treeNode.findFirst({ where: { userId, parentId: null } });
+      if (existingRoot) {
+        return res.status(400).json({ message: 'A root node already exists for this user' });
       }
     }
 
@@ -178,6 +187,73 @@ export const deleteNode = async (req: AuthRequest, res: Response) => {
     });
     res.status(204).send();
   } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+export const moveNode = async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.userId;
+  const { id } = req.params;
+  const { newParentId } = req.body;
+
+  if (!userId) {
+    return res.status(401).json({ message: 'Not authorized' });
+  }
+
+  if (!newParentId || typeof newParentId !== 'string') {
+    return res.status(400).json({ message: 'newParentId is required' });
+  }
+
+  try {
+    const node = await findOwnedNode(id, userId);
+    if (!node) {
+      console.warn('Rejected move: node not found or not owned', { userId, nodeId: id, newParentId });
+      return res.status(404).json({ message: 'Node not found' });
+    }
+
+    const targetParent = await findOwnedNode(newParentId, userId);
+    if (!targetParent) {
+      console.warn('Rejected move: target parent not found or not owned', { userId, nodeId: id, newParentId });
+      return res.status(404).json({ message: 'Target parent not found' });
+    }
+
+    if (newParentId === id) {
+      console.warn('Rejected move: self-move', { userId, nodeId: id, newParentId });
+      return res.status(400).json({ message: 'Cannot move a node under itself' });
+    }
+
+    // Cycle check needs the shape of the whole tree (parentId chain), not
+    // just the two endpoints — load the user's nodes to walk it in-memory
+    // rather than round-tripping to the DB once per ancestor level.
+    const allNodes = await prisma.treeNode.findMany({
+      where: { userId },
+      select: { id: true, parentId: true },
+    });
+
+    if (wouldCreateCycle(id, newParentId, allNodes)) {
+      console.warn('Rejected move: would create a cycle', { userId, nodeId: id, newParentId });
+      return res.status(400).json({ message: 'Cannot move a node under one of its own descendants' });
+    }
+
+    const updatedNode = await prisma.treeNode.update({
+      where: { id },
+      data: { parentId: newParentId },
+    });
+
+    console.log('Node moved', { userId, nodeId: id, fromParentId: node.parentId, toParentId: newParentId });
+    res.json(updatedNode);
+  } catch (error) {
+    // P2025: the node (or, less commonly, the target parent) was deleted by
+    // a concurrent request between our lookups above and this update.
+    // P2003: the target parent's row was deleted mid-flight, violating the
+    // parentId foreign key. Both are a benign "someone else changed the tree
+    // first" race, not a server fault — surface them as 404 instead of 500.
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      (error.code === 'P2025' || error.code === 'P2003')
+    ) {
+      return res.status(404).json({ message: 'This node or its target no longer exists — refresh and try again.' });
+    }
     res.status(500).json({ message: 'Server error', error });
   }
 };
