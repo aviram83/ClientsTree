@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
 import prisma from '../db';
-import { isValidClientStatus, isValidPercentageLevel, isSupervisorLevelValid, sanitizeDescription } from '../utils/validation';
+import { isValidClientStatus, isValidPercentageLevel, sanitizeDescription } from '../utils/validation';
 import { findOwnedNode, wouldCreateCycle } from '../utils/tree';
 
 interface AuthRequest extends Request {
@@ -56,10 +56,6 @@ export const addNode = async (req: AuthRequest, res: Response) => {
 
   if (percentageLevel !== undefined && percentageLevel !== null && !isValidPercentageLevel(percentageLevel)) {
     return res.status(400).json({ message: `Invalid percentageLevel value provided: ${percentageLevel}` });
-  }
-
-  if (!isSupervisorLevelValid(status, percentageLevel)) {
-    return res.status(400).json({ message: 'SUPERVISOR nodes must have percentageLevel LEVEL_4' });
   }
 
   if (description && description.length > 4000) {
@@ -132,19 +128,6 @@ export const updateNode = async (req: AuthRequest, res: Response) => {
     const existing = await findOwnedNode(id, userId);
     if (!existing) {
       return res.status(404).json({ message: 'Node not found' });
-    }
-
-    // Known race: two concurrent updates to the same node can each read a stale
-    // row here and individually pass validation, combining into an invalid
-    // final state (e.g. SUPERVISOR at a non-LEVEL_4 percentage). Accepted risk
-    // for this single-user app — not worth a transaction for a double-click.
-    if (status !== undefined || percentageLevel !== undefined) {
-      const effectiveStatus = status ?? existing.status;
-      const effectivePercentageLevel = percentageLevel !== undefined ? percentageLevel : existing.percentageLevel;
-
-      if (!isSupervisorLevelValid(effectiveStatus, effectivePercentageLevel)) {
-        return res.status(400).json({ message: 'SUPERVISOR nodes must have percentageLevel LEVEL_4' });
-      }
     }
 
     const updatedNode = await prisma.treeNode.update({
