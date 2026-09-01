@@ -44,9 +44,9 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove }: N
   const statusValue = watch('status');
   const isSupervisor = statusValue === ClientStatus.SUPERVISOR;
 
-  // SUPERVISOR nodes are always 50% (LEVEL_4) — lock the field the moment
-  // the status is selected, so the UI can never submit a mismatched pair
-  // (the server enforces the same rule, but this avoids a round-trip 400).
+  // SUPERVISOR nodes default to 50% (LEVEL_4) the moment the status is
+  // selected — a one-time convenience default, not a lock. The field stays
+  // freely editable afterward (the server no longer enforces this pairing).
   useEffect(() => {
     if (isSupervisor) {
       setValue('percentageLevel', PercentageLevel.LEVEL_4);
@@ -54,10 +54,7 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove }: N
   }, [isSupervisor, setValue]);
 
   const handleFormSubmit = handleSubmit((data) => {
-    // Disabled <select> fields are excluded from react-hook-form's submitted
-    // values, so the locked percentageLevel must be re-applied here rather
-    // than relying on the (disabled) field's own value.
-    onSubmit(isSupervisor ? { ...data, percentageLevel: PercentageLevel.LEVEL_4 } : data);
+    onSubmit(data);
   });
 
   // Root can never have a valid move target (every other node is its own
@@ -116,16 +113,12 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove }: N
         <select
           id="percentageLevel"
           {...register('percentageLevel')}
-          disabled={isSupervisor}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {Object.entries(PERCENTAGE_LEVEL_CONFIG).map(([levelKey, { labelKey }]) => (
             <option key={levelKey} value={levelKey}>{t(labelKey)}</option>
           ))}
         </select>
-        {isSupervisor && (
-          <p className="text-end text-xs text-muted-foreground">{t('nodeForm.supervisorLockedNote')}</p>
-        )}
       </div>
       <div className="flex items-center gap-3">
         <Switch
