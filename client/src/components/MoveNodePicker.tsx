@@ -6,7 +6,7 @@ import {
   getDescendantIds,
   isValidMoveTarget,
   findNodeById,
-  computeHasSupervisorAncestorAtParent,
+  computeParentMoveContext,
   computeHouseReclassificationPreview,
 } from '../lib/nodeMove';
 
@@ -95,9 +95,16 @@ export const MoveNodePicker = ({ tree, node, isLoading, onCancel, onConfirm }: M
 
   const reclassificationPreview = useMemo(() => {
     if (!selectedParentId || !node.parentId) return null;
-    const originalHasSupervisorAncestor = computeHasSupervisorAncestorAtParent(tree, node.parentId) ?? false;
-    const newHasSupervisorAncestor = computeHasSupervisorAncestorAtParent(tree, selectedParentId) ?? false;
-    return computeHouseReclassificationPreview(node, originalHasSupervisorAncestor, newHasSupervisorAncestor);
+    const originalContext = computeParentMoveContext(tree, node.parentId);
+    const newContext = computeParentMoveContext(tree, selectedParentId);
+    if (!originalContext || !newContext) return null;
+    return computeHouseReclassificationPreview(
+      node,
+      originalContext.hasSupervisorAncestor,
+      newContext.hasSupervisorAncestor,
+      originalContext.depth + 1,
+      newContext.depth + 1
+    );
   }, [tree, node, selectedParentId]);
 
   const handleSelect = (id: string) => {
@@ -125,10 +132,13 @@ export const MoveNodePicker = ({ tree, node, isLoading, onCancel, onConfirm }: M
           descendant count) so the card never grows or shrinks as the
           selection changes. The 2nd line is a single slot (not two stacked
           ones), so there's no dead gap when only one of its two possible
-          messages applies. The reclassification line is the one exception:
-          it's genuinely new information for a cross-boundary move, so it's
-          appended as a real 4th line only when it applies, rather than
-          reserved as blank space the rest of the time. */}
+          messages applies. The reclassification lines are the one exception:
+          they're genuinely new information for a cross-boundary move, so up
+          to two extra lines (toSupervisor / toPersonal — both can apply at
+          once when a moved subtree contains supervisors crossing the depth-1
+          boundary in opposite directions from the rest of the subtree) are
+          appended only when they apply, rather than reserved as blank space
+          the rest of the time. */}
       <div className="space-y-1 rounded-lg border-2 border-primary/30 bg-primary/5 p-4">
         <p className="text-base text-foreground">
           {t('nodeForm.move.headingPrefix')} <strong className="font-semibold">{node.name}</strong>
@@ -143,14 +153,14 @@ export const MoveNodePicker = ({ tree, node, isLoading, onCancel, onConfirm }: M
           )}
         </p>
         <p className="text-sm text-muted-foreground">{t('nodeForm.move.descendantCount', { count: descendantCount })}</p>
-        {reclassificationPreview && (
+        {reclassificationPreview && reclassificationPreview.toSupervisorCount > 0 && (
           <p className="text-sm text-muted-foreground">
-            {t(
-              reclassificationPreview.direction === 'toSupervisor'
-                ? 'nodeForm.move.toSupervisorHouse'
-                : 'nodeForm.move.toPersonalHouse',
-              { count: reclassificationPreview.count }
-            )}
+            {t('nodeForm.move.toSupervisorHouse', { count: reclassificationPreview.toSupervisorCount })}
+          </p>
+        )}
+        {reclassificationPreview && reclassificationPreview.toPersonalCount > 0 && (
+          <p className="text-sm text-muted-foreground">
+            {t('nodeForm.move.toPersonalHouse', { count: reclassificationPreview.toPersonalCount })}
           </p>
         )}
       </div>

@@ -75,58 +75,24 @@ describe('isClientsHouseMember / isSupervisorHouseMember', () => {
     expect(flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id)).toEqual([]);
   });
 
-  it('regression: a client under a SUPERVISOR moves out of the clients house into the supervisor house; the supervisor itself appears in both', () => {
+  it('regression: a client under a SUPERVISOR moves out of the clients house into the supervisor house; the (depth-1) supervisor itself appears in both', () => {
     const tree: TreeNode[] = [
       makeNode({
-        id: 'supervisor',
-        status: ClientStatus.SUPERVISOR,
-        percentageLevel: PercentageLevel.LEVEL_4,
+        id: 'root',
+        status: ClientStatus.CLIENT,
+        percentageLevel: PercentageLevel.LEVEL_0,
         children: [
           makeNode({
-            id: 'supervised-client',
-            parentId: 'supervisor',
-            status: ClientStatus.CLIENT,
-            percentageLevel: PercentageLevel.LEVEL_2,
-          }),
-        ],
-      }),
-    ];
-
-    const clientsHouse = flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id);
-    const supervisorHouse = flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id).sort();
-
-    // Supervisor stays in the original house AND appears in the supervisor house; only the client moves.
-    expect(clientsHouse).toEqual(['supervisor']);
-    expect(supervisorHouse).toEqual(['supervised-client', 'supervisor']);
-  });
-
-  it('a SUPERVISOR with zero visible descendants still appears in both houses (anchors an otherwise-empty 50% room)', () => {
-    const tree: TreeNode[] = [
-      makeNode({ id: 'lone-supervisor', status: ClientStatus.SUPERVISOR, percentageLevel: PercentageLevel.LEVEL_4 }),
-    ];
-
-    expect(flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id)).toEqual(['lone-supervisor']);
-    expect(flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id)).toEqual(['lone-supervisor']);
-  });
-
-  it('nested SUPERVISOR (under another SUPERVISOR) stays in the clients house AND appears in the supervisor house, same as any supervisor', () => {
-    const tree: TreeNode[] = [
-      makeNode({
-        id: 'top-supervisor',
-        status: ClientStatus.SUPERVISOR,
-        percentageLevel: PercentageLevel.LEVEL_4,
-        children: [
-          makeNode({
-            id: 'nested-supervisor',
-            parentId: 'top-supervisor',
+            id: 'supervisor',
+            parentId: 'root',
             status: ClientStatus.SUPERVISOR,
             percentageLevel: PercentageLevel.LEVEL_4,
             children: [
               makeNode({
-                id: 'client-of-nested',
-                parentId: 'nested-supervisor',
+                id: 'supervised-client',
+                parentId: 'supervisor',
                 status: ClientStatus.CLIENT,
-                percentageLevel: PercentageLevel.LEVEL_3,
+                percentageLevel: PercentageLevel.LEVEL_2,
               }),
             ],
           }),
@@ -137,8 +103,112 @@ describe('isClientsHouseMember / isSupervisorHouseMember', () => {
     const clientsHouse = flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id).sort();
     const supervisorHouse = flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id).sort();
 
-    expect(clientsHouse).toEqual(['nested-supervisor', 'top-supervisor']);
-    expect(supervisorHouse).toEqual(['client-of-nested', 'nested-supervisor', 'top-supervisor']);
+    // Supervisor (depth 1) stays in the clients house AND appears in the supervisor house; only the client moves.
+    expect(clientsHouse).toEqual(['root', 'supervisor']);
+    expect(supervisorHouse).toEqual(['supervised-client', 'supervisor']);
+  });
+
+  it('a depth-1 SUPERVISOR with zero visible descendants still appears in both houses (anchors an otherwise-empty 50% room)', () => {
+    const tree: TreeNode[] = [
+      makeNode({
+        id: 'root',
+        status: ClientStatus.CLIENT,
+        percentageLevel: PercentageLevel.LEVEL_0,
+        children: [
+          makeNode({ id: 'lone-supervisor', parentId: 'root', status: ClientStatus.SUPERVISOR, percentageLevel: PercentageLevel.LEVEL_4 }),
+        ],
+      }),
+    ];
+
+    expect(flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id).sort()).toEqual(['lone-supervisor', 'root']);
+    expect(flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id)).toEqual(['lone-supervisor']);
+  });
+
+  it('a SUPERVISOR that is itself the tree root (depth 0) does not qualify for the clients house — only depth 1 does', () => {
+    const tree: TreeNode[] = [
+      makeNode({ id: 'root-supervisor', status: ClientStatus.SUPERVISOR, percentageLevel: PercentageLevel.LEVEL_4 }),
+    ];
+
+    expect(flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id)).toEqual([]);
+    expect(flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id)).toEqual(['root-supervisor']);
+  });
+
+  it('a depth-1 SUPERVISOR (direct child of root) stays in the clients house AND appears in the supervisor house', () => {
+    const tree: TreeNode[] = [
+      makeNode({
+        id: 'root',
+        status: ClientStatus.CLIENT,
+        percentageLevel: PercentageLevel.LEVEL_0,
+        children: [
+          makeNode({
+            id: 'top-supervisor',
+            parentId: 'root',
+            status: ClientStatus.SUPERVISOR,
+            percentageLevel: PercentageLevel.LEVEL_4,
+          }),
+        ],
+      }),
+    ];
+
+    const clientsHouse = flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id).sort();
+    const supervisorHouse = flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id).sort();
+
+    expect(clientsHouse).toEqual(['root', 'top-supervisor']);
+    expect(supervisorHouse).toEqual(['top-supervisor']);
+  });
+
+  it('only the depth-1 SUPERVISOR qualifies for the clients house; deeper supervisors (depth 2+, under another SUPERVISOR) show ONLY in the supervisor house', () => {
+    const tree: TreeNode[] = [
+      makeNode({
+        id: 'root',
+        status: ClientStatus.CLIENT,
+        percentageLevel: PercentageLevel.LEVEL_0,
+        children: [
+          makeNode({
+            id: 'top-supervisor',
+            parentId: 'root',
+            status: ClientStatus.SUPERVISOR,
+            percentageLevel: PercentageLevel.LEVEL_4,
+            children: [
+              makeNode({
+                id: 'nested-supervisor',
+                parentId: 'top-supervisor',
+                status: ClientStatus.SUPERVISOR,
+                percentageLevel: PercentageLevel.LEVEL_4,
+                children: [
+                  makeNode({
+                    id: 'deeper-supervisor',
+                    parentId: 'nested-supervisor',
+                    status: ClientStatus.SUPERVISOR,
+                    percentageLevel: PercentageLevel.LEVEL_4,
+                  }),
+                  makeNode({
+                    id: 'client-of-nested',
+                    parentId: 'nested-supervisor',
+                    status: ClientStatus.CLIENT,
+                    percentageLevel: PercentageLevel.LEVEL_3,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+    ];
+
+    // top-supervisor is depth 1 (direct child of the single tree root), so it
+    // qualifies for the clients house. nested-supervisor (depth 2) and
+    // deeper-supervisor (depth 3) do not — only the depth-1 boundary counts.
+    const clientsHouse = flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id).sort();
+    const supervisorHouse = flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id).sort();
+
+    expect(clientsHouse).toEqual(['root', 'top-supervisor']);
+    expect(supervisorHouse).toEqual([
+      'client-of-nested',
+      'deeper-supervisor',
+      'nested-supervisor',
+      'top-supervisor',
+    ]);
   });
 
   it('an inactive SUPERVISOR does not count as an ancestor — its active children stay in the clients house', () => {

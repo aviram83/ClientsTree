@@ -40,91 +40,147 @@ export const isValidMoveTarget = (nodeId: string, targetId: string, descendantId
   return targetId !== nodeId && !descendantIds.has(targetId);
 };
 
-// Walks the tree from its roots down to `parentId`, returning the
-// "hasSupervisorAncestor" flag that would apply to a hypothetical child of
-// that node — i.e. true if parentId itself is an active SUPERVISOR, or if any
-// of its own ancestors is. Mirrors houseLayout.ts's flattenVisibleHouseNodes
-// walk (a one-way switch: once true for an ancestor, every descendant below
-// inherits true regardless of what's above that ancestor). Returns null if
-// parentId isn't found in the tree.
-export const computeHasSupervisorAncestorAtParent = (tree: TreeNode[], parentId: string): boolean | null => {
-  let result: boolean | null = null;
+export interface ParentMoveContext {
+  hasSupervisorAncestor: boolean;
+  depth: number;
+}
 
-  const visit = (node: TreeNode, hasSupervisorAncestor: boolean) => {
+// Walks the tree from its roots down to `parentId`, returning the context a
+// hypothetical child of that node would have: the "hasSupervisorAncestor"
+// flag (true if parentId itself is an active SUPERVISOR, or if any of its own
+// ancestors is) and parentId's own depth (root-level nodes = depth 0, so a
+// child placed under parentId would sit at `depth + 1`). Mirrors
+// houseLayout.ts's flattenVisibleHouseNodes walk (hasSupervisorAncestor is a
+// one-way switch: once true for an ancestor, every descendant below inherits
+// true regardless of what's above that ancestor; depth increments by exactly
+// one per level, matching the tree-root = depth 0 convention used there).
+// Returns null if parentId isn't found in the tree.
+export const computeParentMoveContext = (tree: TreeNode[], parentId: string): ParentMoveContext | null => {
+  let result: ParentMoveContext | null = null;
+
+  const visit = (node: TreeNode, hasSupervisorAncestor: boolean, depth: number) => {
     const selfFlag = hasSupervisorAncestor || (node.status === ClientStatus.SUPERVISOR && node.active);
     if (node.id === parentId) {
-      result = selfFlag;
+      result = { hasSupervisorAncestor: selfFlag, depth };
       return;
     }
-    node.children?.forEach((child) => visit(child, selfFlag));
+    node.children?.forEach((child) => visit(child, selfFlag, depth + 1));
   };
 
-  tree.forEach((node) => visit(node, false));
+  tree.forEach((node) => visit(node, false, 0));
   return result;
 };
 
-export type HouseReclassificationDirection = 'toSupervisor' | 'toPersonal';
-
 export interface HouseReclassificationPreview {
-  count: number;
-  direction: HouseReclassificationDirection;
+  toSupervisorCount: number;
+  toPersonalCount: number;
 }
 
+interface SubtreeCounts {
+  toSupervisor: number;
+  toPersonal: number;
+}
+
+const ZERO_COUNTS: SubtreeCounts = { toSupervisor: 0, toPersonal: 0 };
+
+const addCounts = (a: SubtreeCounts, b: SubtreeCounts): SubtreeCounts => ({
+  toSupervisor: a.toSupervisor + b.toSupervisor,
+  toPersonal: a.toPersonal + b.toPersonal,
+});
+
 // Counts how many nodes in the moved subtree (including the moved node
-// itself) would flip Personal-House <-> Supervisor-House membership if the
-// subtree's "incoming" hasSupervisorAncestor flag changed from false to true
-// (or vice versa) at the top. A node is excluded from the count when:
-//  - it isn't actually visible in either house — flattenVisibleHouseNodes
-//    requires active AND a percentageLevel whose showsInHouse is true, so an
-//    inactive node OR one still on the hidden default (LEVEL_6, unset) never
-//    renders in a house regardless of ancestry, and reclassifying it is
-//    meaningless;
-//  - it's a SUPERVISOR node (its own membership is ancestry-independent —
-//    status alone decides it — active or not);
-//  - it's already shielded by an active SUPERVISOR *inside* the subtree —
-//    once such a supervisor is passed, everything below it keeps its
-//    membership regardless of what's above the subtree.
+// itself) would flip Personal-House <-> Supervisor-House membership, walking
+// every node at its post-move depth (oldDepth + depthDelta, where depthDelta
+// is constant across the whole subtree since every node in it shifts by the
+// same amount). A node is excluded entirely when it isn't actually visible in
+// either house — flattenVisibleHouseNodes requires active AND a
+// percentageLevel whose showsInHouse is true, so an inactive node OR one
+// still on the hidden default (LEVEL_6, unset) never renders in a house
+// regardless of ancestry or depth, and reclassifying it is meaningless.
+//
+// Two independent rules now decide "affected", mirroring houseLayout.ts's
+// isClientsHouseMember:
+//  - a SUPERVISOR node's own clients-house membership depends only on its
+//    depth (depth === 1, i.e. a direct child of the tree's single root) — it
+//    counts as affected if the move crosses that depth-1 boundary (was a
+//    member and no longer is, or vice versa), independent of any ancestor
+//    flag;
+//  - a non-supervisor node's membership depends only on whether a SUPERVISOR
+//    ancestor shields it — it counts as affected if the subtree's incoming
+//    ancestor flag changed AND it isn't already shielded by an active
+//    SUPERVISOR *inside* the subtree (once such a supervisor is passed,
+//    everything below it keeps its membership regardless of what's above the
+//    subtree), independent of depth.
 // Supervisor nodes (active or not) still shield everything below them once
 // active, and are walked into regardless of their own active/inactive state
 // so their descendants are still evaluated.
-const countAffectedInSubtree = (node: TreeNode, internalAncestorHasSupervisor: boolean): number => {
+const countAffectedInSubtree = (
+  node: TreeNode,
+  internalAncestorHasSupervisor: boolean,
+  oldDepth: number,
+  depthDelta: number,
+  ancestorFlagChanged: boolean,
+  newHasSupervisorAncestor: boolean
+): SubtreeCounts => {
   const isSupervisorStatus = node.status === ClientStatus.SUPERVISOR;
   const isActiveSupervisor = isSupervisorStatus && node.active;
   const isVisibleInAHouse = Boolean(
     node.active && node.percentageLevel && PERCENTAGE_LEVEL_CONFIG[node.percentageLevel]?.showsInHouse
   );
-  const isAffected = isVisibleInAHouse && !isSupervisorStatus && !internalAncestorHasSupervisor;
-  let count = isAffected ? 1 : 0;
 
-  const childFlag = internalAncestorHasSupervisor || isActiveSupervisor;
+  let counts = ZERO_COUNTS;
+
+  if (isVisibleInAHouse) {
+    if (isSupervisorStatus) {
+      const newDepth = oldDepth + depthDelta;
+      const wasClientsHouseMember = oldDepth === 1;
+      const isClientsHouseMemberNow = newDepth === 1;
+      if (wasClientsHouseMember && !isClientsHouseMemberNow) {
+        counts = { toSupervisor: 1, toPersonal: 0 };
+      } else if (!wasClientsHouseMember && isClientsHouseMemberNow) {
+        counts = { toSupervisor: 0, toPersonal: 1 };
+      }
+    } else if (ancestorFlagChanged && !internalAncestorHasSupervisor) {
+      counts = newHasSupervisorAncestor ? { toSupervisor: 1, toPersonal: 0 } : { toSupervisor: 0, toPersonal: 1 };
+    }
+  }
+
+  const childInternalFlag = internalAncestorHasSupervisor || isActiveSupervisor;
   node.children?.forEach((child) => {
-    count += countAffectedInSubtree(child, childFlag);
+    counts = addCounts(
+      counts,
+      countAffectedInSubtree(child, childInternalFlag, oldDepth + 1, depthDelta, ancestorFlagChanged, newHasSupervisorAncestor)
+    );
   });
 
-  return count;
+  return counts;
 };
 
-// Builds the move preview's house-reclassification line, or null when the
-// move doesn't change anyone's house. Two cases produce null on purpose:
-//  - the moved node is itself an active SUPERVISOR: its own membership never
-//    depends on ancestry, and it already unconditionally shields every
-//    descendant below it, so moving it changes nothing for the subtree.
-//  - the "incoming" hasSupervisorAncestor flag is unchanged by the move
-//    (same value at the old parent and the new one).
+// Builds the move preview's house-reclassification counts, or null when the
+// move doesn't change anyone's house. `originalDepth`/`newDepth` are the
+// moved node's own depth before and after the move (i.e.
+// computeParentMoveContext(...).depth + 1 at the old and new parent
+// respectively) — their difference (depthDelta) is applied uniformly to
+// every node in the subtree, since a move shifts everyone in it by the same
+// amount. Unlike the pre-Fix-2 version, a SUPERVISOR moved node is no longer
+// unconditionally skipped: its own clients-house membership can change if the
+// move crosses the depth-1 boundary, even when its ancestor flag doesn't
+// change (e.g. a supervisor moved from depth 1 to depth 3 under a plain
+// client keeps hasSupervisorAncestor === false throughout, but still loses
+// its own clients-house membership).
 export const computeHouseReclassificationPreview = (
   movedNode: TreeNode,
   originalHasSupervisorAncestor: boolean,
-  newHasSupervisorAncestor: boolean
+  newHasSupervisorAncestor: boolean,
+  originalDepth: number,
+  newDepth: number
 ): HouseReclassificationPreview | null => {
-  const isActiveSupervisor = movedNode.status === ClientStatus.SUPERVISOR && movedNode.active;
-  if (isActiveSupervisor) return null;
-  if (originalHasSupervisorAncestor === newHasSupervisorAncestor) return null;
+  const ancestorFlagChanged = originalHasSupervisorAncestor !== newHasSupervisorAncestor;
+  const depthDelta = newDepth - originalDepth;
+  if (!ancestorFlagChanged && depthDelta === 0) return null;
 
-  const count = countAffectedInSubtree(movedNode, false);
-  if (count === 0) return null;
+  const counts = countAffectedInSubtree(movedNode, false, originalDepth, depthDelta, ancestorFlagChanged, newHasSupervisorAncestor);
+  if (counts.toSupervisor === 0 && counts.toPersonal === 0) return null;
 
-  return {
-    count,
-    direction: newHasSupervisorAncestor ? 'toSupervisor' : 'toPersonal',
-  };
+  return { toSupervisorCount: counts.toSupervisor, toPersonalCount: counts.toPersonal };
 };
