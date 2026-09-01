@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here.
 
+## [0.5.1.0] - 2026-09-01
+
+### Changed
+- The discount percentage on a supervisor is no longer locked to 50% — you can now set (and later edit) any discount level on a supervisor, the same as any other client. It still defaults to 50% the moment you switch a client to supervisor, since that's the common case, but you're free to change it.
+- A supervisor only counts toward the Personal House when they're a direct report of your top-level client — a supervisor nested deeper under another supervisor (or under a regular client) now shows only in the Supervisor House, matching how deeply-nested supervisors are actually organized. The Move preview's "will switch houses" count now reflects this too, including for a supervisor who is themselves being moved across that boundary.
+- The Move preview's house-switch message now describes what changes about the Personal House specifically ("will no longer/now appear in the Personal House") instead of implying an exclusive move between the two houses — the old wording was misleading for a supervisor, who always stays visible in the Supervisor House regardless of where they move.
+
 ## [0.5.0.0] - 2026-08-31
 
 ### Added
