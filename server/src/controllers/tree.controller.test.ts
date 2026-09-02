@@ -118,7 +118,8 @@ describe('tree.controller', () => {
       });
     });
 
-    it('rejects a SUPERVISOR with a non-LEVEL_4 percentageLevel without calling Prisma', async () => {
+    it('accepts a SUPERVISOR with a non-LEVEL_4 percentageLevel (no longer restricted)', async () => {
+      vi.mocked(prisma.treeNode.create).mockResolvedValue({ id: 'new-node' } as any);
       const req = {
         user: { userId: 'user-1' },
         body: { name: 'Node', status: 'SUPERVISOR', percentageLevel: 'LEVEL_2' },
@@ -127,8 +128,10 @@ describe('tree.controller', () => {
 
       await addNode(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(prisma.treeNode.create).not.toHaveBeenCalled();
+      expect(prisma.treeNode.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ status: 'SUPERVISOR', percentageLevel: 'LEVEL_2' }),
+      });
+      expect(res.status).toHaveBeenCalledWith(201);
     });
 
     it('accepts a SUPERVISOR with LEVEL_4', async () => {
@@ -262,13 +265,14 @@ describe('tree.controller', () => {
       expect(prisma.treeNode.update).not.toHaveBeenCalled();
     });
 
-    it('rejects setting status to SUPERVISOR with a non-LEVEL_4 percentageLevel', async () => {
+    it('accepts setting status to SUPERVISOR with a non-LEVEL_4 percentageLevel (no longer restricted)', async () => {
       vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({
         id: 'node-1',
         userId: 'user-1',
         status: 'CLIENT',
         percentageLevel: 'LEVEL_2',
       } as any);
+      vi.mocked(prisma.treeNode.update).mockResolvedValue({ id: 'node-1' } as any);
       const req = {
         user: { userId: 'user-1' },
         params: { id: 'node-1' },
@@ -278,17 +282,21 @@ describe('tree.controller', () => {
 
       await updateNode(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(prisma.treeNode.update).not.toHaveBeenCalled();
+      expect(prisma.treeNode.update).toHaveBeenCalledWith({
+        where: { id: 'node-1' },
+        data: expect.objectContaining({ status: 'SUPERVISOR', percentageLevel: 'LEVEL_2' }),
+      });
+      expect(res.status).not.toHaveBeenCalledWith(400);
     });
 
-    it('rejects changing percentageLevel away from LEVEL_4 on an existing SUPERVISOR node', async () => {
+    it('accepts changing percentageLevel away from LEVEL_4 on an existing SUPERVISOR node (no longer restricted)', async () => {
       vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({
         id: 'node-1',
         userId: 'user-1',
         status: 'SUPERVISOR',
         percentageLevel: 'LEVEL_4',
       } as any);
+      vi.mocked(prisma.treeNode.update).mockResolvedValue({ id: 'node-1' } as any);
       const req = {
         user: { userId: 'user-1' },
         params: { id: 'node-1' },
@@ -298,8 +306,11 @@ describe('tree.controller', () => {
 
       await updateNode(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(prisma.treeNode.update).not.toHaveBeenCalled();
+      expect(prisma.treeNode.update).toHaveBeenCalledWith({
+        where: { id: 'node-1' },
+        data: expect.objectContaining({ percentageLevel: 'LEVEL_2' }),
+      });
+      expect(res.status).not.toHaveBeenCalledWith(400);
     });
 
     it('accepts setting status to SUPERVISOR with LEVEL_4', async () => {
@@ -349,13 +360,14 @@ describe('tree.controller', () => {
       expect(res.status).not.toHaveBeenCalledWith(400);
     });
 
-    it('rejects explicitly nulling percentageLevel on an existing SUPERVISOR node', async () => {
+    it('accepts explicitly nulling percentageLevel on an existing SUPERVISOR node (no longer restricted)', async () => {
       vi.mocked(prisma.treeNode.findFirst).mockResolvedValue({
         id: 'node-1',
         userId: 'user-1',
         status: 'SUPERVISOR',
         percentageLevel: 'LEVEL_4',
       } as any);
+      vi.mocked(prisma.treeNode.update).mockResolvedValue({ id: 'node-1' } as any);
       const req = {
         user: { userId: 'user-1' },
         params: { id: 'node-1' },
@@ -365,8 +377,11 @@ describe('tree.controller', () => {
 
       await updateNode(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(prisma.treeNode.update).not.toHaveBeenCalled();
+      expect(res.status).not.toHaveBeenCalledWith(400);
+      expect(prisma.treeNode.update).toHaveBeenCalledWith({
+        where: { id: 'node-1' },
+        data: expect.objectContaining({ percentageLevel: null }),
+      });
     });
 
     it('returns 404 when updating a node that no longer exists', async () => {

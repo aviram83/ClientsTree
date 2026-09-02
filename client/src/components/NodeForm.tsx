@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { TreeNode } from '../api/types';
-import { ClientStatus, STATUS_CONFIG } from '../config/statusConfig';
+import { STATUS_CONFIG } from '../config/statusConfig';
 import { PERCENTAGE_LEVEL_CONFIG, PercentageLevel } from '../config/percentageConfig';
+import { shouldApplySupervisorLevelDefault } from '../lib/nodeForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,22 +43,27 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove }: N
 
   const activeValue = watch('active');
   const statusValue = watch('status');
-  const isSupervisor = statusValue === ClientStatus.SUPERVISOR;
 
-  // SUPERVISOR nodes are always 50% (LEVEL_4) — lock the field the moment
-  // the status is selected, so the UI can never submit a mismatched pair
-  // (the server enforces the same rule, but this avoids a round-trip 400).
+  // Seeded with the form's initial status so the first render is never seen as
+  // a transition — opening an existing SUPERVISOR's edit form must leave its
+  // stored level alone.
+  const previousStatusRef = useRef(defaultFormValues.status);
+
+  // SUPERVISOR nodes default to 50% (LEVEL_4) when the user *changes* the
+  // status to SUPERVISOR — a one-time convenience default, not a lock, and not
+  // something that fires just because the form was opened. The field stays
+  // freely editable afterward (the server no longer enforces this pairing).
   useEffect(() => {
-    if (isSupervisor) {
+    const previousStatus = previousStatusRef.current;
+    previousStatusRef.current = statusValue;
+
+    if (shouldApplySupervisorLevelDefault(previousStatus, statusValue)) {
       setValue('percentageLevel', PercentageLevel.LEVEL_4);
     }
-  }, [isSupervisor, setValue]);
+  }, [statusValue, setValue]);
 
   const handleFormSubmit = handleSubmit((data) => {
-    // Disabled <select> fields are excluded from react-hook-form's submitted
-    // values, so the locked percentageLevel must be re-applied here rather
-    // than relying on the (disabled) field's own value.
-    onSubmit(isSupervisor ? { ...data, percentageLevel: PercentageLevel.LEVEL_4 } : data);
+    onSubmit(data);
   });
 
   // Root can never have a valid move target (every other node is its own
@@ -116,16 +122,12 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove }: N
         <select
           id="percentageLevel"
           {...register('percentageLevel')}
-          disabled={isSupervisor}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {Object.entries(PERCENTAGE_LEVEL_CONFIG).map(([levelKey, { labelKey }]) => (
             <option key={levelKey} value={levelKey}>{t(labelKey)}</option>
           ))}
         </select>
-        {isSupervisor && (
-          <p className="text-end text-xs text-muted-foreground">{t('nodeForm.supervisorLockedNote')}</p>
-        )}
       </div>
       <div className="flex items-center gap-3">
         <Switch

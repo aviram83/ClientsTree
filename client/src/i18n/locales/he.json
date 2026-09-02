@@ -53,7 +53,6 @@
     "statusLabel": "סטטוס",
     "discountLabel": "אחוז הנחה",
     "activeLabel": "פעיל",
-    "supervisorLockedNote": "מפקח מוגדר תמיד ב-50% הנחה",
     "move": {
       "button": "העברה",
       "headingPrefix": "מעבירים את",
@@ -62,10 +61,10 @@
       "currentParentNote": "זהו ההורה הנוכחי — בחרו יעד אחר כדי להעביר.",
       "descendantCount": "{{count}} צומת יעבור יחד איתו.",
       "descendantCount_other": "{{count}} צמתים יעברו יחד איתו.",
-      "toSupervisorHouse": "{{count}} לקוח יעבור מניקוד אישי לניקוד מפקחים.",
-      "toSupervisorHouse_other": "{{count}} לקוחות יעברו מניקוד אישי לניקוד מפקחים.",
-      "toPersonalHouse": "{{count}} לקוח יעבור מניקוד מפקחים לניקוד אישי.",
-      "toPersonalHouse_other": "{{count}} לקוחות יעברו מניקוד מפקחים לניקוד אישי.",
+      "toSupervisorHouse": "{{count}} צומת יעבור מניקוד אישי לניקוד מפקחים.",
+      "toSupervisorHouse_other": "{{count}} צמתים יעברו מניקוד אישי לניקוד מפקחים.",
+      "toPersonalHouse": "{{count}} צומת יעבור מניקוד מפקחים לניקוד אישי.",
+      "toPersonalHouse_other": "{{count}} צמתים יעברו מניקוד מפקחים לניקוד אישי.",
       "confirm": "העבר לכאן",
       "confirmPrompt": "להעביר את {{name}} אל {{target}}? הפעולה תשנה את מבנה העץ.",
       "confirmYes": "כן, העבר"

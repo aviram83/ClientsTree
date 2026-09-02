@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ClientStatus, PercentageLevel } from '@prisma/client';
-import { isValidClientStatus, isValidPercentageLevel, isSupervisorLevelValid, sanitizeDescription, isValidLanguage, SUPPORTED_LANGUAGES } from './validation';
+import { isValidClientStatus, isValidPercentageLevel, sanitizeDescription, isValidLanguage, SUPPORTED_LANGUAGES } from './validation';
 
 describe('isValidClientStatus', () => {
   it('accepts every ClientStatus enum value', () => {
@@ -28,28 +28,6 @@ describe('isValidPercentageLevel', () => {
     expect(isValidPercentageLevel('NOT_A_LEVEL')).toBe(false);
     expect(isValidPercentageLevel(undefined)).toBe(false);
     expect(isValidPercentageLevel(null)).toBe(false);
-  });
-});
-
-describe('isSupervisorLevelValid', () => {
-  it('accepts SUPERVISOR with LEVEL_4', () => {
-    expect(isSupervisorLevelValid(ClientStatus.SUPERVISOR, PercentageLevel.LEVEL_4)).toBe(true);
-  });
-
-  it('rejects SUPERVISOR with any other level', () => {
-    expect(isSupervisorLevelValid(ClientStatus.SUPERVISOR, PercentageLevel.LEVEL_2)).toBe(false);
-    expect(isSupervisorLevelValid(ClientStatus.SUPERVISOR, PercentageLevel.LEVEL_6)).toBe(false);
-  });
-
-  it('rejects SUPERVISOR with a null/undefined level', () => {
-    expect(isSupervisorLevelValid(ClientStatus.SUPERVISOR, null)).toBe(false);
-    expect(isSupervisorLevelValid(ClientStatus.SUPERVISOR, undefined)).toBe(false);
-  });
-
-  it('accepts any level for non-SUPERVISOR statuses', () => {
-    expect(isSupervisorLevelValid(ClientStatus.CLIENT, PercentageLevel.LEVEL_1)).toBe(true);
-    expect(isSupervisorLevelValid(ClientStatus.CLIENT_VIP, null)).toBe(true);
-    expect(isSupervisorLevelValid(ClientStatus.DISTRIBUTOR, undefined)).toBe(true);
   });
 });
 

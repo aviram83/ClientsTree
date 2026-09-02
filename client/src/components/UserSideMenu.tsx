@@ -69,7 +69,10 @@ export const UserSideMenu = ({ isOpen, onClose, onLogout }: UserSideMenuProps) =
                       <entry.icon className="h-4 w-4 shrink-0" />
                       {t(entry.labelKey)}
                     </div>
-                    <ul className="flex flex-col gap-1 pe-4">
+                    {/* ps-* (padding-inline-start) indents the children on the
+                        reading-start side, so the nesting reads correctly in
+                        both Hebrew RTL and English LTR. */}
+                    <ul className="flex flex-col gap-1 ps-4">
                       {entry.children.map((item) => (
                         <li key={item.path}>{renderNavButton(item)}</li>
                       ))}
