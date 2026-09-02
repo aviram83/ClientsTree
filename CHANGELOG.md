@@ -9,6 +9,7 @@ All notable changes to this project are documented here.
 - Every supervisor now appears in exactly one house instead of being listed twice. A supervisor who is a direct report of your top-level client shows only in the Personal House; a supervisor nested deeper under another supervisor (or under a regular client) shows only in the Supervisor House. Previously every supervisor appeared in both houses regardless of depth. The Move preview's "will switch houses" count reflects this too, including for a supervisor who is themselves being moved across that boundary.
 
 ### Fixed
+- The two entries under "Houses" in the side menu are now indented under the group heading so they read as nested. They were previously padded on the wrong side, which left them flush with the top-level entries in Hebrew.
 - Opening the edit form on a supervisor no longer silently changes their discount level to 50%. The 50% default now only applies when you actually switch a client's status to supervisor — previously just opening the form was enough to overwrite a supervisor's saved level, including a deliberately unset one ("hidden"), and saving would persist that unintended change.
 
 ## [0.5.0.0] - 2026-08-31
