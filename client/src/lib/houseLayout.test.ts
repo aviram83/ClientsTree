@@ -75,7 +75,7 @@ describe('isClientsHouseMember / isSupervisorHouseMember', () => {
     expect(flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id)).toEqual([]);
   });
 
-  it('regression: a client under a SUPERVISOR moves out of the clients house into the supervisor house; the (depth-1) supervisor itself appears in both', () => {
+  it('regression: a client under a SUPERVISOR moves out of the clients house into the supervisor house; the (depth-1) supervisor itself stays in the clients house only', () => {
     const tree: TreeNode[] = [
       makeNode({
         id: 'root',
@@ -103,12 +103,12 @@ describe('isClientsHouseMember / isSupervisorHouseMember', () => {
     const clientsHouse = flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id).sort();
     const supervisorHouse = flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id).sort();
 
-    // Supervisor (depth 1) stays in the clients house AND appears in the supervisor house; only the client moves.
+    // Supervisor (depth 1) belongs to the clients house exclusively; only the client moves.
     expect(clientsHouse).toEqual(['root', 'supervisor']);
-    expect(supervisorHouse).toEqual(['supervised-client', 'supervisor']);
+    expect(supervisorHouse).toEqual(['supervised-client']);
   });
 
-  it('a depth-1 SUPERVISOR with zero visible descendants still appears in both houses (anchors an otherwise-empty 50% room)', () => {
+  it('a depth-1 SUPERVISOR with zero visible descendants appears in the clients house only', () => {
     const tree: TreeNode[] = [
       makeNode({
         id: 'root',
@@ -121,7 +121,7 @@ describe('isClientsHouseMember / isSupervisorHouseMember', () => {
     ];
 
     expect(flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id).sort()).toEqual(['lone-supervisor', 'root']);
-    expect(flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id)).toEqual(['lone-supervisor']);
+    expect(flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id)).toEqual([]);
   });
 
   it('a SUPERVISOR that is itself the tree root (depth 0) does not qualify for the clients house — only depth 1 does', () => {
@@ -133,7 +133,7 @@ describe('isClientsHouseMember / isSupervisorHouseMember', () => {
     expect(flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id)).toEqual(['root-supervisor']);
   });
 
-  it('a depth-1 SUPERVISOR (direct child of root) stays in the clients house AND appears in the supervisor house', () => {
+  it('a depth-1 SUPERVISOR (direct child of root) appears in the clients house and is excluded from the supervisor house', () => {
     const tree: TreeNode[] = [
       makeNode({
         id: 'root',
@@ -154,7 +154,7 @@ describe('isClientsHouseMember / isSupervisorHouseMember', () => {
     const supervisorHouse = flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id).sort();
 
     expect(clientsHouse).toEqual(['root', 'top-supervisor']);
-    expect(supervisorHouse).toEqual(['top-supervisor']);
+    expect(supervisorHouse).toEqual([]);
   });
 
   it('only the depth-1 SUPERVISOR qualifies for the clients house; deeper supervisors (depth 2+, under another SUPERVISOR) show ONLY in the supervisor house', () => {
@@ -197,8 +197,10 @@ describe('isClientsHouseMember / isSupervisorHouseMember', () => {
     ];
 
     // top-supervisor is depth 1 (direct child of the single tree root), so it
-    // qualifies for the clients house. nested-supervisor (depth 2) and
-    // deeper-supervisor (depth 3) do not — only the depth-1 boundary counts.
+    // qualifies for the clients house — and only for that house.
+    // nested-supervisor (depth 2) and deeper-supervisor (depth 3) do not, so
+    // they land in the supervisor house instead. Every supervisor appears in
+    // exactly one house; the two sets never overlap.
     const clientsHouse = flattenVisibleHouseNodes(tree, isClientsHouseMember).map((n) => n.id).sort();
     const supervisorHouse = flattenVisibleHouseNodes(tree, isSupervisorHouseMember).map((n) => n.id).sort();
 
@@ -207,7 +209,6 @@ describe('isClientsHouseMember / isSupervisorHouseMember', () => {
       'client-of-nested',
       'deeper-supervisor',
       'nested-supervisor',
-      'top-supervisor',
     ]);
   });
 

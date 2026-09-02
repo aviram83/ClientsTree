@@ -81,15 +81,18 @@ export const flattenVisibleHouseNodes = (
 // the tree's single root (depth === 1, root itself is depth 0) — plus every
 // non-supervisor client with no SUPERVISOR ancestor. A supervisor nested
 // deeper (under another supervisor, or under a plain client) shows only in
-// the supervisor house, never here.
+// the supervisor house, never here — and conversely a depth-1 supervisor
+// never shows in the supervisor house, so every supervisor lives in exactly
+// one of the two houses.
 export const isClientsHouseMember: HouseMembershipFilter = (node, hasSupervisorAncestor, depth) =>
   node.status === ClientStatus.SUPERVISOR ? depth === 1 : !hasSupervisorAncestor;
 
-// Supervisor house: every SUPERVISOR node (any depth — they anchor their
-// group's 50% room, same as in the clients house) + every non-supervisor
-// client that has a SUPERVISOR ancestor.
-export const isSupervisorHouseMember: HouseMembershipFilter = (node, hasSupervisorAncestor) =>
-  node.status === ClientStatus.SUPERVISOR || hasSupervisorAncestor;
+// Supervisor house: every SUPERVISOR *except* the direct children of the root
+// (depth === 1), which belong exclusively to the clients house — the two
+// houses partition supervisors cleanly, never showing the same one twice.
+// Plus every non-supervisor client that has a SUPERVISOR ancestor.
+export const isSupervisorHouseMember: HouseMembershipFilter = (node, hasSupervisorAncestor, depth) =>
+  node.status === ClientStatus.SUPERVISOR ? depth !== 1 : hasSupervisorAncestor;
 
 export const groupNodesByPercentageLevel = (
   nodes: TreeNode[]

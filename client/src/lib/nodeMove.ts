@@ -99,12 +99,12 @@ const addCounts = (a: SubtreeCounts, b: SubtreeCounts): SubtreeCounts => ({
 // regardless of ancestry or depth, and reclassifying it is meaningless.
 //
 // Two independent rules now decide "affected", mirroring houseLayout.ts's
-// isClientsHouseMember:
-//  - a SUPERVISOR node's own clients-house membership depends only on its
-//    depth (depth === 1, i.e. a direct child of the tree's single root) — it
-//    counts as affected if the move crosses that depth-1 boundary (was a
-//    member and no longer is, or vice versa), independent of any ancestor
-//    flag;
+// isClientsHouseMember/isSupervisorHouseMember pair:
+//  - a SUPERVISOR node sits in exactly one house, decided purely by its depth
+//    (depth === 1, a direct child of the tree's single root, means clients
+//    house; anything else means supervisor house) — it counts as affected if
+//    the move crosses that depth-1 boundary in either direction, independent
+//    of any ancestor flag;
 //  - a non-supervisor node's membership depends only on whether a SUPERVISOR
 //    ancestor shields it — it counts as affected if the subtree's incoming
 //    ancestor flag changed AND it isn't already shielded by an active

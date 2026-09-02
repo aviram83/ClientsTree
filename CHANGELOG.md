@@ -6,8 +6,10 @@ All notable changes to this project are documented here.
 
 ### Changed
 - The discount percentage on a supervisor is no longer locked to 50% — you can now set (and later edit) any discount level on a supervisor, the same as any other client. It still defaults to 50% the moment you switch a client to supervisor, since that's the common case, but you're free to change it.
-- A supervisor only counts toward the Personal House when they're a direct report of your top-level client — a supervisor nested deeper under another supervisor (or under a regular client) now shows only in the Supervisor House, matching how deeply-nested supervisors are actually organized. The Move preview's "will switch houses" count now reflects this too, including for a supervisor who is themselves being moved across that boundary.
-- The Move preview's house-switch message now describes what changes about the Personal House specifically ("will no longer/now appear in the Personal House") instead of implying an exclusive move between the two houses — the old wording was misleading for a supervisor, who always stays visible in the Supervisor House regardless of where they move.
+- Every supervisor now appears in exactly one house instead of being listed twice. A supervisor who is a direct report of your top-level client shows only in the Personal House; a supervisor nested deeper under another supervisor (or under a regular client) shows only in the Supervisor House. Previously every supervisor appeared in both houses regardless of depth. The Move preview's "will switch houses" count reflects this too, including for a supervisor who is themselves being moved across that boundary.
+
+### Fixed
+- Opening the edit form on a supervisor no longer silently changes their discount level to 50%. The 50% default now only applies when you actually switch a client's status to supervisor — previously just opening the form was enough to overwrite a supervisor's saved level, including a deliberately unset one ("hidden"), and saving would persist that unintended change.
 
 ## [0.5.0.0] - 2026-08-31
 
