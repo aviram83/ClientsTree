@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { TreeNode } from '../api/types';
-import { ClientStatus, STATUS_CONFIG } from '../config/statusConfig';
+import { STATUS_CONFIG } from '../config/statusConfig';
 import { PERCENTAGE_LEVEL_CONFIG, PercentageLevel } from '../config/percentageConfig';
+import { shouldApplySupervisorLevelDefault } from '../lib/nodeForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,16 +43,24 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove }: N
 
   const activeValue = watch('active');
   const statusValue = watch('status');
-  const isSupervisor = statusValue === ClientStatus.SUPERVISOR;
 
-  // SUPERVISOR nodes default to 50% (LEVEL_4) the moment the status is
-  // selected — a one-time convenience default, not a lock. The field stays
+  // Seeded with the form's initial status so the first render is never seen as
+  // a transition — opening an existing SUPERVISOR's edit form must leave its
+  // stored level alone.
+  const previousStatusRef = useRef(defaultFormValues.status);
+
+  // SUPERVISOR nodes default to 50% (LEVEL_4) when the user *changes* the
+  // status to SUPERVISOR — a one-time convenience default, not a lock, and not
+  // something that fires just because the form was opened. The field stays
   // freely editable afterward (the server no longer enforces this pairing).
   useEffect(() => {
-    if (isSupervisor) {
+    const previousStatus = previousStatusRef.current;
+    previousStatusRef.current = statusValue;
+
+    if (shouldApplySupervisorLevelDefault(previousStatus, statusValue)) {
       setValue('percentageLevel', PercentageLevel.LEVEL_4);
     }
-  }, [isSupervisor, setValue]);
+  }, [statusValue, setValue]);
 
   const handleFormSubmit = handleSubmit((data) => {
     onSubmit(data);
