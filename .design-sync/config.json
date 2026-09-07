@@ -1,0 +1,155 @@
+{
+  "pkg": "client",
+  "globalName": "ClientsTree",
+  "shape": "package",
+  "srcDir": "src",
+  "tsconfig": "tsconfig.json",
+  "buildCmd": "node .ds-sync/node_modules/@tailwindcss/cli/dist/index.mjs -i .design-sync/tailwind-entry.css -o client/.ds-styles.css",
+  "cssEntry": ".ds-styles.css",
+  "docsDir": "../.design-sync/docs",
+  "readmeHeader": ".design-sync/conventions.md",
+  "provider": {
+    "component": "DesignSyncProvider"
+  },
+  "componentSrcMap": {
+    "Avatar": "src/components/ui/avatar.tsx",
+    "AvatarFallback": "src/components/ui/avatar.tsx",
+    "AvatarImage": "src/components/ui/avatar.tsx",
+    "Button": "src/components/ui/button.tsx",
+    "Card": "src/components/ui/card.tsx",
+    "CardContent": "src/components/ui/card.tsx",
+    "CardDescription": "src/components/ui/card.tsx",
+    "CardFooter": "src/components/ui/card.tsx",
+    "CardHeader": "src/components/ui/card.tsx",
+    "CardTitle": "src/components/ui/card.tsx",
+    "Checkbox": "src/components/ui/checkbox.tsx",
+    "ClientsHouseView": "src/components/ClientsHouse/ClientsHouseView.tsx",
+    "CustomNode": "src/components/CustomNode.tsx",
+    "FloatingToolbar": "src/components/FloatingToolbar.tsx",
+    "HouseBackground": "src/components/ClientsHouse/HouseBackground.tsx",
+    "HouseNode": "src/components/ClientsHouse/HouseNode.tsx",
+    "HouseView": "src/components/ClientsHouse/HouseView.tsx",
+    "Input": "src/components/ui/input.tsx",
+    "Label": "src/components/ui/label.tsx",
+    "LegendContent": "src/components/LegendContent.tsx",
+    "Logo": "src/components/Logo.tsx",
+    "Modal": "src/components/Modal.tsx",
+    "MoveNodePicker": "src/components/MoveNodePicker.tsx",
+    "NodeForm": "src/components/NodeForm.tsx",
+    "PasswordInput": "src/components/ui/password-input.tsx",
+    "Popover": "src/components/ui/popover.tsx",
+    "PopoverContent": "src/components/ui/popover.tsx",
+    "PopoverTrigger": "src/components/ui/popover.tsx",
+    "ProtectedRoute": "src/components/ProtectedRoute.tsx",
+    "SearchBar": "src/components/SearchBar.tsx",
+    "Select": "src/components/ui/select.tsx",
+    "SelectContent": "src/components/ui/select.tsx",
+    "SelectGroup": "src/components/ui/select.tsx",
+    "SelectItem": "src/components/ui/select.tsx",
+    "SelectLabel": "src/components/ui/select.tsx",
+    "SelectScrollDownButton": "src/components/ui/select.tsx",
+    "SelectScrollUpButton": "src/components/ui/select.tsx",
+    "SelectSeparator": "src/components/ui/select.tsx",
+    "SelectTrigger": "src/components/ui/select.tsx",
+    "SelectValue": "src/components/ui/select.tsx",
+    "Separator": "src/components/ui/separator.tsx",
+    "SupervisorHouseView": "src/components/ClientsHouse/SupervisorHouseView.tsx",
+    "Switch": "src/components/ui/switch.tsx",
+    "Textarea": "src/components/ui/textarea.tsx",
+    "TreeNode": "src/components/TreeNode.tsx",
+    "TreeVisualizer": "src/components/TreeVisualizer.tsx",
+    "UserSideMenu": "src/components/UserSideMenu.tsx",
+    "WakeGate": "src/components/WakeGate.tsx"
+  },
+  "overrides": {
+    "TreeVisualizer": {
+      "cardMode": "single",
+      "viewport": "1100x760"
+    },
+    "HouseView": {
+      "cardMode": "single",
+      "viewport": "900x760"
+    },
+    "ClientsHouseView": {
+      "cardMode": "single",
+      "viewport": "900x760"
+    },
+    "SupervisorHouseView": {
+      "cardMode": "single",
+      "viewport": "900x760"
+    },
+    "HouseBackground": {
+      "cardMode": "single",
+      "viewport": "760x760"
+    },
+    "Modal": {
+      "cardMode": "single",
+      "viewport": "820x620"
+    },
+    "NodeForm": {
+      "cardMode": "single",
+      "viewport": "760x820"
+    },
+    "MoveNodePicker": {
+      "cardMode": "single",
+      "viewport": "760x760"
+    },
+    "UserSideMenu": {
+      "cardMode": "single",
+      "viewport": "900x700"
+    },
+    "FloatingToolbar": {
+      "cardMode": "column"
+    },
+    "SelectContent": {
+      "cardMode": "single",
+      "viewport": "600x520",
+      "primaryStory": "Open"
+    },
+    "PopoverContent": {
+      "cardMode": "single",
+      "viewport": "600x480",
+      "primaryStory": "Open"
+    },
+    "Popover": {
+      "cardMode": "single",
+      "primaryStory": "LegendPopover"
+    },
+    "PopoverTrigger": {
+      "cardMode": "single",
+      "primaryStory": "AsButton"
+    },
+    "Select": {
+      "cardMode": "single",
+      "primaryStory": "StatusOpen"
+    },
+    "SelectGroup": {
+      "cardMode": "single",
+      "primaryStory": "InSelect"
+    },
+    "SelectItem": {
+      "cardMode": "single",
+      "primaryStory": "Options"
+    },
+    "SelectLabel": {
+      "cardMode": "single",
+      "primaryStory": "InSelect"
+    },
+    "SelectSeparator": {
+      "cardMode": "single",
+      "primaryStory": "InSelect"
+    },
+    "SelectScrollUpButton": {
+      "cardMode": "single",
+      "primaryStory": "LongList"
+    },
+    "SelectScrollDownButton": {
+      "cardMode": "single",
+      "primaryStory": "LongList"
+    },
+    "WakeGate": {
+      "cardMode": "single",
+      "primaryStory": "ColdStartSplash"
+    }
+  }
+}
