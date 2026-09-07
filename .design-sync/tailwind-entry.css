@@ -1,0 +1,8 @@
+/* design-sync stylesheet entry.
+   Wraps the app's own Tailwind v4 entry so the compiled sheet carries the same
+   tokens/base layer the real app uses, while also scanning the authored preview
+   files so utility classes used only in previews are emitted. */
+@import "../client/src/index.css";
+
+@source "../client/src/**/*.{ts,tsx}";
+@source "./previews/**/*.tsx";

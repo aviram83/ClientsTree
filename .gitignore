@@ -13,3 +13,11 @@ coverage
 
 thought_process.md
 .gstack/
+
+# design-sync (claude.ai/design) — generated, not committed
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
+client/.ds-styles.css
