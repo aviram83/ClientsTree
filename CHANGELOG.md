@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here.
 
+## [0.6.0.0] - 2026-10-09
+
+### Added
+- You can now mark any client as "My client" (לקוח שלי) with a new switch in the edit window, right under "Active". New clients added directly under your top-level node start switched on; clients added deeper in the tree start switched off. You can change it at any time, and moving a client keeps its setting. The switch is hidden on your own top-level node.
+- Existing data gets the same starting point: every client directly under your top-level node is marked "My client" once, and everyone deeper is not.
+
+### Changed
+- The count at the top of the tree diagram now shows only clients that are both active and marked "My client". Previously it counted every active client in the whole tree. The label is unchanged.
+- The Active and My client switches now have larger tap targets, so they're easier to hit on a phone.
+- The server now rejects a request whose "active" or "my client" value isn't a true/false value, with a clear error, instead of trying to save it.
+
 ## [0.5.1.0] - 2026-09-01
 
 ### Changed
