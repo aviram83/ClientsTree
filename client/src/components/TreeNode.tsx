@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TreeNode as TreeNodeType } from '../api/types';
 import { useTreeStore } from '../store/treeStore';
 import { Plus, Edit, Trash } from 'lucide-react';
@@ -10,6 +11,7 @@ interface TreeNodeProps {
 }
 
 export const TreeNode = ({ node }: TreeNodeProps) => {
+  const { t } = useTranslation();
   const addNode = useTreeStore((s) => s.addNode);
   const updateNode = useTreeStore((s) => s.updateNode);
   const deleteNode = useTreeStore((s) => s.deleteNode);
@@ -52,7 +54,11 @@ export const TreeNode = ({ node }: TreeNodeProps) => {
         </ul>
       )}
 
-      <Modal isOpen={isAddModalOpen} onClose={() => setAddModalOpen(false)} title="Add Node">
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        title={t('dashboard.addClientTitle')}
+      >
         <NodeForm
           onSubmit={handleAddNode}
           onClose={() => setAddModalOpen(false)}
@@ -60,7 +66,11 @@ export const TreeNode = ({ node }: TreeNodeProps) => {
         />
       </Modal>
 
-      <Modal isOpen={isEditModalOpen} onClose={() => setEditModalOpen(false)} title="Edit Node">
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        title={t('dashboard.editClientTitle')}
+      >
         <NodeForm
           onSubmit={handleUpdateNode}
           onClose={() => setEditModalOpen(false)}
