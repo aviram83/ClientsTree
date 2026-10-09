@@ -53,6 +53,7 @@
     "statusLabel": "סטטוס",
     "discountLabel": "אחוז הנחה",
     "activeLabel": "פעיל",
+    "myClientLabel": "לקוח שלי",
     "move": {
       "button": "העברה",
       "headingPrefix": "מעבירים את",

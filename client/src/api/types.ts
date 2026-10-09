@@ -19,6 +19,7 @@ export interface TreeNode {
   userId: string;
   parentId: string | null;
   active: boolean;
+  myClient: boolean;
   description?: string;
   createdAt: string;
   children: TreeNode[];

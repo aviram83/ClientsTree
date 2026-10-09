@@ -19,6 +19,7 @@ const node = (overrides: Partial<TreeNode> & { id: string }): TreeNode => ({
   userId: 'user-1',
   parentId: null,
   active: true,
+  myClient: false,
   percentageLevel: PercentageLevel.LEVEL_1,
   createdAt: '2024-01-01T00:00:00.000Z',
   children: [],

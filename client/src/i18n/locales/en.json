@@ -53,6 +53,7 @@
     "statusLabel": "Status",
     "discountLabel": "Discount percentage",
     "activeLabel": "Active",
+    "myClientLabel": "My client",
     "move": {
       "button": "Move",
       "headingPrefix": "Moving",
