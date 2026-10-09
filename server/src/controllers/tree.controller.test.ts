@@ -53,6 +53,53 @@ describe('tree.controller', () => {
   });
 
   describe('addNode', () => {
+    it('passes myClient through to Prisma', async () => {
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValueOnce({ id: 'root', userId: 'user-1', parentId: null } as any);
+      vi.mocked(prisma.treeNode.create).mockResolvedValueOnce({ id: 'new-node' } as any);
+      const req = {
+        user: { userId: 'user-1' },
+        body: { name: 'Node', status: 'CLIENT', parentId: 'root', active: true, myClient: true },
+      } as any;
+      const res = buildRes();
+
+      await addNode(req, res);
+
+      expect(prisma.treeNode.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ myClient: true, active: true }),
+      });
+      expect(res.status).toHaveBeenCalledWith(201);
+    });
+
+    it('rejects a non-boolean myClient without calling Prisma', async () => {
+      const req = {
+        user: { userId: 'user-1' },
+        body: { name: 'Node', status: 'CLIENT', myClient: 'yes' },
+      } as any;
+      const res = buildRes();
+
+      await addNode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid myClient value' });
+      expect(prisma.treeNode.findFirst).not.toHaveBeenCalled();
+      expect(prisma.treeNode.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects a non-boolean active without calling Prisma', async () => {
+      const req = {
+        user: { userId: 'user-1' },
+        body: { name: 'Node', status: 'CLIENT', active: 'yes' },
+      } as any;
+      const res = buildRes();
+
+      await addNode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid active value' });
+      expect(prisma.treeNode.findFirst).not.toHaveBeenCalled();
+      expect(prisma.treeNode.create).not.toHaveBeenCalled();
+    });
+
     it('returns 401 when the request has no authenticated user', async () => {
       const req = { body: { name: 'Node', status: 'CLIENT' } } as any;
       const res = buildRes();
@@ -212,6 +259,56 @@ describe('tree.controller', () => {
   });
 
   describe('updateNode', () => {
+    it('passes myClient through to Prisma', async () => {
+      vi.mocked(prisma.treeNode.findFirst).mockResolvedValueOnce({ id: 'node-1', userId: 'user-1', status: 'CLIENT' } as any);
+      vi.mocked(prisma.treeNode.update).mockResolvedValueOnce({ id: 'node-1' } as any);
+      const req = {
+        user: { userId: 'user-1' },
+        params: { id: 'node-1' },
+        body: { myClient: false },
+      } as any;
+      const res = buildRes();
+
+      await updateNode(req, res);
+
+      expect(prisma.treeNode.update).toHaveBeenCalledWith({
+        where: { id: 'node-1' },
+        data: expect.objectContaining({ myClient: false }),
+      });
+    });
+
+    it('rejects a non-boolean myClient without calling Prisma', async () => {
+      const req = {
+        user: { userId: 'user-1' },
+        params: { id: 'node-1' },
+        body: { myClient: 'yes' },
+      } as any;
+      const res = buildRes();
+
+      await updateNode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid myClient value' });
+      expect(prisma.treeNode.findFirst).not.toHaveBeenCalled();
+      expect(prisma.treeNode.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects a non-boolean active without calling Prisma', async () => {
+      const req = {
+        user: { userId: 'user-1' },
+        params: { id: 'node-1' },
+        body: { active: 'yes' },
+      } as any;
+      const res = buildRes();
+
+      await updateNode(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid active value' });
+      expect(prisma.treeNode.findFirst).not.toHaveBeenCalled();
+      expect(prisma.treeNode.update).not.toHaveBeenCalled();
+    });
+
     it('returns 401 when the request has no authenticated user', async () => {
       const req = { params: { id: 'node-1' }, body: { name: 'Renamed' } } as any;
       const res = buildRes();

@@ -44,7 +44,7 @@ export const getTree = async (req: AuthRequest, res: Response) => {
 
 export const addNode = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
-  const { parentId, name, status, active, description, percentageLevel } = req.body;
+  const { parentId, name, status, active, myClient, description, percentageLevel } = req.body;
 
   if (!userId) {
     return res.status(401).json({ message: 'Not authorized' });
@@ -56,6 +56,14 @@ export const addNode = async (req: AuthRequest, res: Response) => {
 
   if (percentageLevel !== undefined && percentageLevel !== null && !isValidPercentageLevel(percentageLevel)) {
     return res.status(400).json({ message: `Invalid percentageLevel value provided: ${percentageLevel}` });
+  }
+
+  if (active !== undefined && typeof active !== 'boolean') {
+    return res.status(400).json({ message: 'Invalid active value' });
+  }
+
+  if (myClient !== undefined && typeof myClient !== 'boolean') {
+    return res.status(400).json({ message: 'Invalid myClient value' });
   }
 
   if (description && description.length > 4000) {
@@ -87,6 +95,7 @@ export const addNode = async (req: AuthRequest, res: Response) => {
         userId,
         parentId,
         active,
+        myClient,
         description: cleanDescription,
         percentageLevel,
       },
@@ -100,7 +109,7 @@ export const addNode = async (req: AuthRequest, res: Response) => {
 export const updateNode = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
   const { id } = req.params;
-  const { name, status, active, description, percentageLevel } = req.body;
+  const { name, status, active, myClient, description, percentageLevel } = req.body;
 
   if (!userId) {
     return res.status(401).json({ message: 'Not authorized' });
@@ -113,6 +122,14 @@ export const updateNode = async (req: AuthRequest, res: Response) => {
 
   if (percentageLevel !== undefined && percentageLevel !== null && !isValidPercentageLevel(percentageLevel)) {
     return res.status(400).json({ message: `Invalid percentageLevel value provided: ${percentageLevel}` });
+  }
+
+  if (active !== undefined && typeof active !== 'boolean') {
+    return res.status(400).json({ message: 'Invalid active value' });
+  }
+
+  if (myClient !== undefined && typeof myClient !== 'boolean') {
+    return res.status(400).json({ message: 'Invalid myClient value' });
   }
 
   if (description && description.length > 4000) {
@@ -136,6 +153,7 @@ export const updateNode = async (req: AuthRequest, res: Response) => {
         name,
         status,
         active,
+        myClient,
         description: cleanDescription,
         percentageLevel,
       },
