@@ -54,7 +54,7 @@ This project uses `prisma db push`, not versioned migrations — there is no `pr
 
 Destructive changes (dropped/renamed columns) can lose data — back up first; Prisma will warn if a change looks destructive.
 
-**One-time data backfills** live in `server/scripts/` as plain SQL and are run with `prisma db execute`. `server/scripts/backfill-my-client.sql` sets `myClient = true` on every direct child of a root (no re-run guard — run it exactly once per environment). Required prod order for the `myClient` column: `/db-push prod` → run the backfill on prod (`npm run prisma:prod -- db execute --file scripts/backfill-my-client.sql`) → only THEN merge/deploy the code. The new code reads the column, so deploying before the push breaks `GET /api/tree`. Dev equivalent: `npm run prisma -- db push`, then `npm run prisma -- db execute --file scripts/backfill-my-client.sql`.
+**One-time data backfills** live in `server/scripts/` as plain SQL and are run with `prisma db execute`. `server/scripts/backfill-my-client.sql` sets `myClient = true` on every direct child of a root (no re-run guard — run it exactly once per environment). Required prod order for the `myClient` column: `/db-push prod` → run the backfill on prod (`npm run prisma:prod -- db execute --file scripts/backfill-my-client.sql`) → only THEN merge/deploy the code. The new code reads the column, so deploying before the push breaks `GET /api/tree`. Dev equivalent: `npm run prisma -- db push`, then `npm run prisma:dev -- db execute --file scripts/backfill-my-client.sql` (call `prisma:dev` directly: `npm run prisma` re-invokes npm, which swallows the `--file` flag).
 
 ## Environment Variables
 

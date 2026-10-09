@@ -6,7 +6,7 @@
 -- deploying the code that reads it. There is no re-run guard: running it again
 -- re-flags direct clients that a user has since toggled off.
 --
---   dev:  npm run prisma -- db execute --file scripts/backfill-my-client.sql
+--   dev:  npm run prisma:dev -- db execute --file scripts/backfill-my-client.sql
 --   prod: npm run prisma:prod -- db execute --file scripts/backfill-my-client.sql
 UPDATE "TreeNode" c SET "myClient" = true
 FROM "TreeNode" p
