@@ -21,9 +21,13 @@ interface NodeFormProps {
   // — DashboardPage passes them for edit, omits them for add.
   tree?: TreeNode[];
   onMove?: (nodeId: string, newParentId: string) => void;
+  // Initial "My client" value for a brand-new node (add mode): true for a
+  // direct child of the root, false deeper. Ignored when editing — the
+  // node's saved value wins.
+  defaultMyClient?: boolean;
 }
 
-export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove }: NodeFormProps) => {
+export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove, defaultMyClient }: NodeFormProps) => {
   const { t } = useTranslation();
   // Swaps the modal's content in place to the tree-aware move picker, rather
   // than stacking a second modal. A node can never have a valid move target
@@ -35,6 +39,7 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove }: N
     status: node?.status || Object.keys(STATUS_CONFIG)[0],
     percentageLevel: node?.percentageLevel || PercentageLevel.LEVEL_6,
     active: node?.active ?? true,
+    myClient: node?.myClient ?? defaultMyClient ?? false,
     description: node?.description || '',
   };
   const { register, handleSubmit, watch, setValue, reset } = useForm({
@@ -42,6 +47,10 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove }: N
   });
 
   const activeValue = watch('active');
+  const myClientValue = watch('myClient');
+  // The root is the user themselves, so "My client" is meaningless for it —
+  // hidden for the root in edit mode and for a brand-new root (no parent).
+  const showMyClient = !!node?.parentId;
   const statusValue = watch('status');
 
   // Seeded with the form's initial status so the first render is never seen as
@@ -129,14 +138,24 @@ export const NodeForm = ({ onSubmit, onClose, node, isLoading, tree, onMove }: N
           ))}
         </select>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex min-h-11 items-center gap-3">
         <Switch
           id="active"
           checked={activeValue}
           onCheckedChange={(checked) => setValue('active', checked)}
         />
-        <Label htmlFor="active" className="cursor-pointer font-normal">{t('nodeForm.activeLabel')}</Label>
+        <Label htmlFor="active" className="cursor-pointer py-2 font-normal">{t('nodeForm.activeLabel')}</Label>
       </div>
+      {showMyClient && (
+        <div className="flex min-h-11 items-center gap-3">
+          <Switch
+            id="myClient"
+            checked={myClientValue}
+            onCheckedChange={(checked) => setValue('myClient', checked)}
+          />
+          <Label htmlFor="myClient" className="cursor-pointer py-2 font-normal">{t('nodeForm.myClientLabel')}</Label>
+        </div>
+      )}
       <div className="flex items-center justify-between gap-2">
         {canMove ? (
           <Button type="button" variant="destructive" onClick={handleOpenMoveView}>

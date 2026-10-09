@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTreeStore } from '../store/treeStore';
 import { useTreeUIStore } from '../store/treeUIStore';
 import TreeVisualizer from '../components/TreeVisualizer';
 import { Modal } from '../components/Modal';
 import { NodeForm } from '../components/NodeForm';
-import { TreeNode } from '../api/types';
+import { countActiveMyClients, isDirectChildOfRoot } from '../lib/treeUtils';
 import { AppLayout } from './AppLayout';
 
 export const DashboardPage = () => {
@@ -31,18 +31,7 @@ export const DashboardPage = () => {
     }
   }, [fetchTree]);
 
-  const countActiveNodes = (nodes: TreeNode[]): number => {
-    let count = 0;
-    for (const node of nodes) {
-      if (node.active) {
-        count++;
-      }
-      if (node.children) {
-        count += countActiveNodes(node.children);
-      }
-    }
-    return count;
-  };
+  const activeMyClientCount = useMemo(() => countActiveMyClients(tree), [tree]);
 
   const handleSaveNode = async (data: any) => {
     if (modalAction === 'add' && currentNode) {
@@ -66,7 +55,7 @@ export const DashboardPage = () => {
           <div className="h-full">
               <TreeVisualizer
                   treeData={tree}
-                  activeCount={countActiveNodes(tree) - 1}
+                  activeCount={activeMyClientCount}
               />
           </div>
       )}
@@ -83,6 +72,11 @@ export const DashboardPage = () => {
           isLoading={isLoading}
           tree={modalAction === 'edit' ? tree : undefined}
           onMove={modalAction === 'edit' ? handleMoveNode : undefined}
+          defaultMyClient={
+            modalAction === 'add' && currentNode
+              ? isDirectChildOfRoot(tree, currentNode.parentId)
+              : undefined
+          }
         />
       </Modal>
     </AppLayout>

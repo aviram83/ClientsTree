@@ -10,6 +10,7 @@ const makeNode = (overrides: Partial<TreeNode>): TreeNode => ({
   userId: 'user-1',
   parentId: null,
   active: true,
+  myClient: false,
   createdAt: '2024-01-01T00:00:00.000Z',
   children: [],
   ...overrides,

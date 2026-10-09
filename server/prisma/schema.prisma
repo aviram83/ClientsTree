@@ -27,6 +27,7 @@ model TreeNode {
   percentageLevel PercentageLevel? @default(LEVEL_6)
   description     String?
   active          Boolean          @default(true)
+  myClient        Boolean          @default(false)
   createdAt       DateTime         @default(now())
   user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   String
